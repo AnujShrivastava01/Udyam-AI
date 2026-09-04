@@ -69,7 +69,7 @@ export default function FeasibilityReportPage() {
               Calculate Funding <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </Link>
-          <Button variant="outline" size="lg" className="w-full rounded-full">
+          <Button variant="outline" size="lg" className="w-full rounded-full no-print" onClick={() => window.print()}>
             Download PDF
           </Button>
         </div>

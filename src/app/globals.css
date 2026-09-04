@@ -128,3 +128,35 @@
     @apply font-sans;
   }
 }
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  /* Hide Navbar and Nav Elements */
+  header, nav, .no-print {
+    display: none !important;
+  }
+  /* Ensure charts and cards print cleanly without breaking across pages */
+  .border, .shadow-sm, .bg-card {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    background-color: white !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Page break rules */
+  .grid > div, .card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  /* Remove layout padding for print */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

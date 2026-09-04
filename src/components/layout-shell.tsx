@@ -1,26 +1,50 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
+import { useTranslation } from "@/lib/i18n";
 import { JourneyStepper } from "./journey-stepper";
 import { Leaf, Menu, User, Bell, Settings } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
   const { userRole, language, setLanguage } = useAppStore();
+  const { t } = useTranslation();
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isLandingPage = pathname === "/";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-md">
-        <div className="flex h-16 items-center justify-between px-4 md:px-8">
+      <header 
+        className={cn(
+          "fixed top-0 z-50 w-full transition-all duration-300",
+          scrolled 
+            ? "border-b bg-card/80 backdrop-blur-md shadow-sm py-0" 
+            : "bg-transparent border-transparent py-2"
+        )}
+      >
+        <div className="flex h-14 items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <div className="bg-primary text-primary-foreground p-1.5 rounded-md">
                 <Leaf className="w-5 h-5" />
               </div>
               <span className="font-bold text-xl tracking-tight hidden sm:inline-block text-foreground">
-                Udyam<span className="text-accent">AI</span>
+                {t("app.title")}<span className="text-accent">{t("app.titleSuffix")}</span>
               </span>
             </Link>
           </div>
@@ -32,7 +56,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               className="hidden sm:flex text-xs font-medium"
               onClick={() => setLanguage(language === 'hi' ? 'en' : 'hi')}
             >
-              {language === 'hi' ? 'English' : 'हिंदी'}
+              {t("lang.toggle")}
             </Button>
             
             <Button variant="ghost" size="icon" className="text-muted-foreground relative">
@@ -46,7 +70,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
 
             <div className="hidden md:flex items-center gap-2 border-l pl-4 ml-2">
               <div className="flex flex-col items-end">
-                <span className="text-sm font-medium">Rajesh Kumar</span>
+                <span className="text-sm font-medium">{t("user.name")}</span>
                 <span className="text-xs text-muted-foreground capitalize">{userRole.replace('-', ' ')}</span>
               </div>
               <div className="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold">
@@ -55,12 +79,12 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-        {/* Stepper only shown globally below header */}
-        <JourneyStepper />
+        {/* Stepper only shown globally below header, but hidden on Landing Page for a cleaner look */}
+        {!isLandingPage && <JourneyStepper />}
       </header>
 
       {/* Main Content area */}
-      <main className="flex-1 flex flex-col relative w-full overflow-hidden">
+      <main className={cn("flex-1 flex flex-col relative w-full overflow-hidden", !isLandingPage && "pt-[8rem]")}>
         {children}
       </main>
       
@@ -71,15 +95,15 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t flex items-center justify-around z-50">
         <Link href="/discover" className="flex flex-col items-center text-muted-foreground hover:text-primary">
           <Leaf className="w-5 h-5" />
-          <span className="text-[10px] mt-1">Discover</span>
+          <span className="text-[10px] mt-1">{t("nav.discover")}</span>
         </Link>
         <Link href="/community" className="flex flex-col items-center text-muted-foreground hover:text-primary">
           <User className="w-5 h-5" />
-          <span className="text-[10px] mt-1">Community</span>
+          <span className="text-[10px] mt-1">{t("nav.community")}</span>
         </Link>
         <Link href="/profile/me" className="flex flex-col items-center text-muted-foreground hover:text-primary">
           <Settings className="w-5 h-5" />
-          <span className="text-[10px] mt-1">Profile</span>
+          <span className="text-[10px] mt-1">{t("nav.profile")}</span>
         </Link>
       </nav>
     </div>
