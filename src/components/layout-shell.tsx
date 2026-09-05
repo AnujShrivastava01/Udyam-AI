@@ -108,14 +108,22 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
         {/* Stepper only shown globally below header, but hidden on Landing Page for a cleaner look */}
         {!isLandingPage && <JourneyStepper />}
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Backdrop */}
         {mobileMenuOpen && (
-          <div className="absolute top-14 left-0 w-full bg-background border-b shadow-lg md:hidden flex flex-col p-4 gap-6 animate-in slide-in-from-top-2 duration-200 z-40">
-            <div className="flex flex-col gap-3">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <div 
+            className="fixed inset-0 z-40 md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Mobile Menu Compact Dropdown */}
+        {mobileMenuOpen && (
+          <div className="absolute top-14 right-4 w-[220px] bg-card border rounded-lg shadow-xl z-50 md:hidden flex flex-col p-3 gap-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
                 Language / भाषा
               </span>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="flex flex-col gap-1">
                 {([
                   { id: "en", label: "English" },
                   { id: "hi", label: "हिन्दी (Hindi)" },
@@ -128,10 +136,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
                       setMobileMenuOpen(false);
                     }}
                     className={cn(
-                      "text-left px-4 py-3 rounded-lg text-sm transition-colors border",
+                      "text-left px-3 py-2 rounded-md text-sm transition-colors",
                       language === l.id 
-                        ? "bg-primary/10 border-primary/30 text-primary font-medium" 
-                        : "bg-muted/30 border-transparent hover:bg-muted text-foreground"
+                        ? "bg-primary/10 text-primary font-medium" 
+                        : "hover:bg-muted text-foreground"
                     )}
                   >
                     {l.label}
@@ -140,12 +148,12 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             
-            <div className="border-t pt-4 flex items-center justify-between">
+            <div className="border-t pt-3 flex items-center justify-between px-1">
                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{t("user.name")}</span>
-                  <span className="text-xs text-muted-foreground capitalize">{userRole.replace('-', ' ')}</span>
+                  <span className="text-sm font-medium leading-none mb-1">{t("user.name")}</span>
+                  <span className="text-[10px] text-muted-foreground capitalize">{userRole.replace('-', ' ')}</span>
                </div>
-               <div className="w-10 h-10 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-lg">
+               <div className="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-sm">
                  R
                </div>
             </div>

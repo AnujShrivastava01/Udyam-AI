@@ -27,8 +27,8 @@ export function JourneyStepper() {
   const currentStep = activeIndex === -1 ? 0 : activeIndex;
 
   return (
-    <div className="w-full bg-card border-b px-4 py-2 md:px-8 shadow-sm overflow-x-auto no-scrollbar">
-      <div className="flex items-center justify-between min-w-[600px] max-w-5xl mx-auto">
+    <div className="w-full bg-card border-b shadow-sm flex flex-col">
+      <div className="flex items-start justify-between w-full max-w-5xl mx-auto px-2 py-3 md:px-8">
         {STEPS.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
@@ -36,11 +36,11 @@ export function JourneyStepper() {
 
           return (
             <Link href={step.paths[0]} key={step.id} className="flex flex-col items-center relative z-10 flex-1 group">
-              {/* Connecting Line (except for the first item) */}
+              {/* Connecting Line */}
               {index !== 0 && (
                 <div
                   className={cn(
-                    "absolute top-5 -left-1/2 w-full h-[2px] -z-10 transition-colors",
+                    "absolute top-4 md:top-5 -left-1/2 w-full h-[2px] -z-10 transition-colors",
                     isCompleted || isActive ? "bg-primary" : "bg-muted group-hover:bg-primary/30"
                   )}
                 />
@@ -48,7 +48,7 @@ export function JourneyStepper() {
               
               <div
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300",
+                  "flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-all duration-300 relative",
                   isActive
                     ? "border-primary bg-primary text-primary-foreground shadow-md scale-110"
                     : isCompleted
@@ -56,12 +56,20 @@ export function JourneyStepper() {
                     : "border-muted bg-card text-muted-foreground group-hover:border-primary/50 group-hover:text-primary/70"
                 )}
               >
-                {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                {/* Small completed badge */}
+                {isCompleted && (
+                  <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5 border border-background">
+                    <Check className="w-2.5 h-2.5" />
+                  </div>
+                )}
               </div>
               <span
                 className={cn(
-                  "mt-2 text-xs font-medium tracking-wide transition-colors",
-                  isActive ? "text-foreground font-semibold" : "text-muted-foreground group-hover:text-foreground"
+                  "mt-2 text-[9px] md:text-xs font-medium tracking-wide transition-colors text-center leading-tight px-0.5",
+                  isActive 
+                    ? "text-foreground font-bold" 
+                    : "text-muted-foreground group-hover:text-foreground"
                 )}
               >
                 {t(`step.${step.id}` as any)}
@@ -69,6 +77,29 @@ export function JourneyStepper() {
             </Link>
           );
         })}
+      </div>
+
+      {/* Prev / Next Navigation Bar for high-level journey */}
+      <div className="bg-muted/30 border-t px-4 py-2 flex items-center justify-between text-sm md:hidden">
+        {currentStep > 0 ? (
+          <Link href={STEPS[currentStep - 1].paths[0]} className="text-primary font-medium flex items-center gap-1">
+            <span className="text-lg leading-none">&laquo;</span> Prev
+          </Link>
+        ) : (
+          <div /> /* Empty placeholder to push Next to right */
+        )}
+        
+        <span className="text-xs text-muted-foreground font-medium">
+          {STEPS[currentStep].label}
+        </span>
+
+        {currentStep < STEPS.length - 1 ? (
+          <Link href={STEPS[currentStep + 1].paths[0]} className="text-primary font-medium flex items-center gap-1">
+            Next <span className="text-lg leading-none">&raquo;</span>
+          </Link>
+        ) : (
+          <div />
+        )}
       </div>
     </div>
   );
