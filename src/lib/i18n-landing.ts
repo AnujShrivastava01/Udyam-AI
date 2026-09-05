@@ -87,7 +87,10 @@ export function useTranslation() {
   const { language } = useAppStore();
 
   const t = (key: DictionaryKeys): string => {
-    return dictionary[language]?.[key] || dictionary.en[key] || key;
+    // Landing-page copy exists in en/hi only. Hinglish readers get English here rather than a
+    // raw key; the product dictionary in ./i18n/ carries the full three-language set.
+    const table = language === "hi" ? dictionary.hi : dictionary.en;
+    return table[key] || dictionary.en[key] || key;
   };
 
   return { t, language };

@@ -1,169 +1,276 @@
 "use client";
 
-import { useState } from "react";
-import { useAppStore } from "@/lib/store";
-import { GoogleMap, useJsApiLoader, Marker, Circle } from "@react-google-maps/api";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Ban,
+  CheckCircle2,
+  Compass,
+  IndianRupee,
+  MapPin,
+  TrendingDown,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search, SlidersHorizontal, Store, Navigation } from "lucide-react";
-import { mockFeasibilityReport } from "@/lib/mock-data";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { VERDICT_META } from "@/lib/finance/solvency";
+import { recommendActivities, type Recommendation } from "@/lib/market/recommend";
+import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
+import { useT, type MessageKey } from "@/lib/i18n";
 
-const mapContainerStyle = {
-  width: "100%",
-  height: "100%",
-};
-
-const defaultCenter = {
-  lat: 25.4358,
-  lng: 78.5678, // Jhansi/Bundelkhand area
-};
-
-// Brand colored map style
-const mapOptions = {
-  styles: [
-    { featureType: "all", elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-    { featureType: "water", elementType: "geometry", stylers: [{ color: "#0F4C5C" }] }, // Deep Teal
-    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
-    { featureType: "poi", elementType: "geometry", stylers: [{ color: "#eeeeee" }] },
-    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e5e5e5" }] },
-  ],
-  disableDefaultUI: true,
-  zoomControl: true,
-};
+const inr = (n: number) =>
+  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
 export default function DiscoverPage() {
-  const { onboardingInput } = useAppStore();
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-  
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: apiKey,
-  });
+  const { t } = useT();
+  const [villageId, setVillageId] = useState(VILLAGES[0].id);
+  const [margin, setMargin] = useState(100_000);
+  const [income, setIncome] = useState(86_119);
 
-  const [activeFilter, setActiveFilter] = useState("all");
+  const village = VILLAGE_BY_ID.get(villageId)!;
+  const result = useMemo(
+    () => recommendActivities(village, margin, income > 0 ? income : undefined),
+    [village, margin, income],
+  );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Top Search & Filter Bar */}
-      <div className="bg-card border-b p-4 shadow-sm z-10 flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search locations, business types..." className="pl-9 w-full bg-muted/50" />
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-          <Button variant="outline" size="sm" className="shrink-0"><SlidersHorizontal className="w-4 h-4 mr-2" /> Filters</Button>
-          <Badge 
-            variant={activeFilter === 'all' ? 'default' : 'secondary'} 
-            className="cursor-pointer shrink-0"
-            onClick={() => setActiveFilter('all')}
-          >All</Badge>
-          <Badge 
-            variant={activeFilter === 'competitors' ? 'default' : 'secondary'} 
-            className="cursor-pointer shrink-0"
-            onClick={() => setActiveFilter('competitors')}
-          >Competitors</Badge>
-          <Badge 
-            variant={activeFilter === 'suppliers' ? 'default' : 'secondary'} 
-            className="cursor-pointer shrink-0"
-            onClick={() => setActiveFilter('suppliers')}
-          >Suppliers</Badge>
-        </div>
-      </div>
+    <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6 pb-24">
+      <header className="space-y-2">
+        <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
+          <Compass className="w-8 h-8 text-primary" /> {t("discover.title")}
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-3xl">
+          {t("discover.subtitle")}
+        </p>
+      </header>
 
-      {/* Main Content Area */}
-      <div className="flex-1 relative flex">
-        
-        {/* Map Container */}
-        <div className="flex-1 relative bg-muted/20">
-          {isLoaded && apiKey ? (
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={defaultCenter}
-              zoom={13}
-              options={mapOptions}
-            >
-              {mockFeasibilityReport.competitors.map((comp, i) => (
-                <Marker 
-                  key={i} 
-                  position={{ lat: comp.lat, lng: comp.lng }}
-                  icon={{
-                    path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
-                    fillColor: "#E88D14", // Accent color
-                    fillOpacity: 1,
-                    strokeWeight: 1,
-                    strokeColor: "#ffffff",
-                    scale: 1.5,
-                  }}
-                />
+      {/* inputs */}
+      <Card>
+        <CardContent className="pt-6 grid gap-5 md:grid-cols-3">
+          <div className="md:col-span-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              {t("discover.yourVillage")}
+            </p>
+            <div className="grid gap-1.5">
+              {VILLAGES.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setVillageId(v.id)}
+                  className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                    villageId === v.id ? "border-primary bg-primary/10 font-medium" : "hover:bg-muted/50"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    {v.name}
+                  </span>
+                  <span className="block text-[10px] text-muted-foreground pl-5">
+                    {v.block} block · mandi {v.distanceToMandiKm} km
+                  </span>
+                </button>
               ))}
-              <Circle
-                center={defaultCenter}
-                radius={3000} // 3km radius
-                options={{
-                  fillColor: "#0F4C5C",
-                  fillOpacity: 0.1,
-                  strokeColor: "#0F4C5C",
-                  strokeOpacity: 0.8,
-                  strokeWeight: 2,
-                }}
-              />
-            </GoogleMap>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-card flex-col">
-              <div className="absolute inset-0 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=25.4358,78.5678&zoom=13&size=800x600&maptype=roadmap&style=feature:all|element:labels.text.fill|color:0x333333&style=feature:water|element:geometry|color:0x004c5c|lightness:70')] bg-cover bg-center opacity-40"></div>
-              <div className="z-10 bg-background/90 p-6 rounded-xl border shadow-lg text-center max-w-sm backdrop-blur-sm">
-                <MapPin className="w-10 h-10 text-primary mx-auto mb-4" />
-                <h3 className="font-bold text-lg mb-2">Mock Map View</h3>
-                <p className="text-sm text-muted-foreground mb-4">Google Maps API key is not configured. This is a static representation of the hyper-local discovery feature.</p>
-                <div className="flex gap-2 justify-center">
-                  <div className="flex items-center gap-1 text-xs font-medium text-accent"><div className="w-3 h-3 rounded-full bg-accent" /> Competitor</div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-primary"><div className="w-3 h-3 rounded-full bg-primary/20 border-2 border-primary" /> Potential Zone</div>
-                </div>
-              </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Desktop Sidebar (List view) */}
-        <div className="hidden lg:block w-96 bg-card border-l overflow-y-auto z-10 shadow-xl">
-          <div className="p-4 border-b bg-muted/10 sticky top-0">
-            <h3 className="font-heading font-semibold text-lg flex items-center gap-2">
-              <Store className="w-5 h-5 text-primary" /> Local Businesses
-            </h3>
-            <p className="text-xs text-muted-foreground mt-1">Showing results within 5km radius</p>
+          <div className="md:col-span-2 space-y-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                {t("discover.marginLabel")}
+              </p>
+              <div className="relative">
+                <IndianRupee className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  value={margin}
+                  onChange={(e) => setMargin(Math.max(0, Number(e.target.value) || 0))}
+                  className="pl-9 h-11 text-lg font-bold"
+                />
+              </div>
+              <Slider
+                className="mt-3"
+                value={[margin]}
+                min={5_000}
+                max={300_000}
+                step={1_000}
+                onValueChange={(v) => setMargin((v as number[])[0])}
+              />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                {t("calc.income.label")}
+              </p>
+              <Input
+                type="number"
+                value={income}
+                onChange={(e) => setIncome(Math.max(0, Number(e.target.value) || 0))}
+                className="h-10"
+              />
+            </div>
           </div>
-          <div className="p-4 flex flex-col gap-3">
-            {mockFeasibilityReport.competitors.map((comp, i) => (
-              <Card key={i} className="hover:border-primary/50 cursor-pointer transition-colors shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-sm">{comp.name}</h4>
-                      <p className="text-xs text-muted-foreground">{onboardingInput.businessCategory || 'Dairy'}</p>
-                    </div>
-                    <Badge variant="outline" className="text-[10px] bg-accent/10 text-accent border-accent/20">Running</Badge>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between text-xs font-medium text-muted-foreground">
-                    <span className="flex items-center gap-1"><Navigation className="w-3 h-3" /> {comp.distanceKm} km away</span>
-                    <Button variant="ghost" size="sm" className="h-6 text-primary p-0">View Profile</Button>
-                  </div>
-                </CardContent>
-              </Card>
+        </CardContent>
+      </Card>
+
+      {/* refusal, when nothing clears */}
+      {result.refusal && (
+        <Card className="border-2 border-amber-500/40 bg-amber-500/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-amber-900 dark:text-amber-300">
+<Ban className="w-5 h-5" /> {t("discover.refusalTitle")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed">{result.refusal}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* the one recommendation */}
+      {result.top && (
+        <motion.div
+          key={`${villageId}-${result.top.activity.id}`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="border-2 border-emerald-500/40 overflow-hidden">
+            <CardHeader className="bg-emerald-500/10">
+              <Badge
+                variant="outline"
+                className="w-fit border-emerald-500/40 text-emerald-800 dark:text-emerald-300 mb-1"
+              >
+                {t("discover.ourRecommendation")}
+              </Badge>
+              <CardTitle className="text-2xl font-heading">
+                {t(`activity.${result.top.activity.id}.name` as MessageKey)}
+              </CardTitle>
+              <CardDescription className="text-base">
+                {t(result.top.bindingConstraint.key, result.top.bindingConstraint.params)}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Stat label={t("calc.projectCost")} value={`₹${inr(result.top.projectCost)}`} />
+                <Stat label={t("calc.yourShare")} value={`₹${inr(result.top.requiredMargin)}`} />
+                <Stat label={t("discover.perQuarter")} value={`₹${inr(result.top.quarterlyInstalment)}`} />
+                <Stat
+                  label={t("discover.earnsFromMonth")}
+                  value={
+                    result.top.activity.gestationMonths === 0
+                      ? "1"
+                      : String(result.top.activity.gestationMonths)
+                  }
+                />
+              </div>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/calculator">
+                  <Button className="rounded-full">
+                    {t("discover.seeSchedule")} <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href={`/report/${villageId}`}>
+                  <Button variant="outline" className="rounded-full">
+                    {t("discover.fullReport")}
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* the rest, including what we advise against */}
+      <div>
+        <h2 className="text-lg font-bold font-heading mb-3">
+          {t("discover.othersTitle")}
+        </h2>
+        <div className="space-y-2">
+          {result.ranked
+            .filter((r) => r.activity.id !== result.top?.activity.id)
+            .map((r) => (
+              <RankedRow key={r.activity.id} rec={r} />
             ))}
-            
-            <Card className="border-dashed bg-primary/5 border-primary/30">
-              <CardContent className="p-4 flex flex-col items-center justify-center text-center py-8">
-                <MapPin className="w-8 h-8 text-primary/50 mb-2" />
-                <h4 className="font-medium text-sm text-primary">Unserved Zone Detected</h4>
-                <p className="text-xs text-muted-foreground mt-1 mb-3">High demand density in North sector with 0 competitors.</p>
-                <Button size="sm" className="rounded-full">Select as Location</Button>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
+
+      <p className="text-[11px] text-muted-foreground leading-relaxed max-w-3xl">
+        Ranking combines market saturation, distance to market, and the activity&apos;s own cash
+        flow against the scheme&apos;s repayment terms. Rows marked &ldquo;advised against&rdquo;
+        are ones where the borrower would be asked to pay before the unit earns, or to find more
+        margin than they have. We show them so the reasoning is visible — not as alternatives to
+        pick from.
+      </p>
+    </div>
+  );
+}
+
+function RankedRow({ rec }: { rec: Recommendation }) {
+  const { t } = useT();
+  const meta = VERDICT_META[rec.solvency];
+  return (
+    <div
+      className={`rounded-xl border p-4 flex flex-wrap items-center gap-4 ${
+        rec.advisedAgainst ? "border-rose-500/30 bg-rose-500/5" : "bg-card"
+      }`}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold flex items-center gap-2">
+          {rec.advisedAgainst ? (
+            <Ban className="w-4 h-4 text-rose-600 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          )}
+          {t(`activity.${rec.activity.id}.name` as MessageKey)}
+        </p>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          {t(rec.bindingConstraint.key, rec.bindingConstraint.params)}
+        </p>
+      </div>
+
+      {rec.preIncomeObligation > 0 && (
+        <div className="text-right">
+          <p className="text-sm font-bold text-rose-600 flex items-center gap-1 justify-end">
+            <TrendingDown className="w-3.5 h-3.5" />₹{inr(rec.preIncomeObligation)}
+          </p>
+<p className="text-[10px] text-muted-foreground">{t("discover.dueBeforeIncome")}</p>
+        </div>
+      )}
+
+      <Badge
+        variant="outline"
+        className={
+          meta.tone === "good"
+            ? "border-emerald-500/40 text-emerald-700"
+            : meta.tone === "bad"
+              ? "border-rose-500/40 text-rose-700"
+              : "border-border text-muted-foreground"
+        }
+      >
+        {t(`solvency.${rec.solvency}.label` as MessageKey)}
+      </Badge>
+
+      <span className="text-sm font-bold tabular-nums w-10 text-right">{rec.score}</span>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+        {label}
+      </p>
+      <p className="font-bold text-lg leading-tight">{value}</p>
     </div>
   );
 }

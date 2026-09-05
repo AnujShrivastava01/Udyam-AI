@@ -1,141 +1,281 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarCheck,
+  CheckCircle2,
+  Clock,
+  Download,
+  Wallet,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { AlertTriangle, CalendarCheck, CreditCard, Download, IndianRupee, BellRing, CheckCircle2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ACTIVITIES, ACTIVITY_BY_ID } from "@/lib/finance/activities";
+import { plan } from "@/lib/finance";
+import { useT } from "@/lib/i18n";
 
-export default function EMITrackingDashboard() {
+const inr = (n: number) =>
+  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
+
+/**
+ * The borrower's own view of a live loan.
+ *
+ * Driven by the same kernel as the calculator and the officer console — a borrower and an
+ * officer must never be able to see contradictory figures for the same loan.
+ */
+export default function LoanTrackerPage() {
+  const { t } = useT();
+  const [activityId] = useState("goat-20-1");
+  // Months elapsed since disbursement. In production this comes from the SCA's ledger.
+  const [monthsElapsed, setMonthsElapsed] = useState(9);
+
+  const activity = ACTIVITY_BY_ID.get(activityId) ?? ACTIVITIES[0];
+  const result = useMemo(
+    () => plan({ marginCapital: 10_000, activityId, useNeedBasedCosting: true }),
+    [activityId],
+  );
+
+  const { schedule, structure: s, solvency } = result;
+  const rows = schedule.schedule;
+
+  const paid = rows.filter((r) => r.month <= monthsElapsed);
+  const upcoming = rows.filter((r) => r.month > monthsElapsed);
+  const next = upcoming[0] ?? null;
+
+  const paidAmount = paid.reduce((sum, r) => sum + r.payment, 0);
+  const outstanding = paid.length ? paid[paid.length - 1].closingBalance : s.sanctionedLoan;
+  const progress = (paid.length / rows.length) * 100;
+
+  const inMoratorium = monthsElapsed < s.moratoriumMonths;
+  const monthsToIncome = Math.max(0, activity.gestationMonths - monthsElapsed);
+  const stillPreIncome = monthsElapsed < activity.gestationMonths;
+
+  // What is still owed before the enterprise earns its first rupee.
+  const remainingPreIncome = rows
+    .filter((r) => r.month > monthsElapsed && r.month <= activity.gestationMonths)
+    .reduce((sum, r) => sum + r.payment, 0);
+
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
-      <div className="flex justify-between items-end">
+    <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6 pb-24">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold font-heading">My Finance Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Track your active loans, EMI schedule, and moratorium period.</p>
+          <h1 className="text-3xl md:text-4xl font-bold font-heading">My loan</h1>
+          <p className="text-muted-foreground mt-1.5">
+            {activity.name} · {s.scheme.corporation} {s.scheme.name}
+          </p>
         </div>
-      </div>
+        <Button variant="outline" className="rounded-full">
+          <Download className="w-4 h-4 mr-2" /> Repayment certificate
+        </Button>
+      </header>
 
-      {/* Hero Status Card */}
-      <Card className="bg-primary text-primary-foreground overflow-hidden border-none shadow-lg">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-          <CalendarCheck className="w-32 h-32 transform rotate-12" />
-        </div>
-        <CardContent className="p-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <Badge className="bg-white/20 text-white hover:bg-white/30 border-none mb-3">Status: Moratorium Active</Badge>
-              <h2 className="text-4xl font-extrabold font-heading mb-1">2 Months Left</h2>
-              <p className="text-white/80 text-lg">Before your first principal EMI starts.</p>
-            </div>
-            
-            <div className="bg-black/20 p-5 rounded-2xl border border-white/10 w-full md:w-auto">
-              <p className="text-white/70 text-sm uppercase font-semibold mb-1">Next Payment Due</p>
-              <p className="text-2xl font-bold flex items-center gap-2">
-                ₹ 3,450 <span className="text-sm font-normal text-white/80">(Interest Only)</span>
-              </p>
-              <p className="text-sm text-accent mt-2 flex items-center gap-1">
-                <AlertTriangle className="w-4 h-4" /> Due on 5th Nov
-              </p>
-              <Button size="sm" className="w-full mt-4 bg-white text-primary hover:bg-white/90">Pay Now</Button>
+      {/* hero */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        <Card
+          className={`overflow-hidden border-2 ${
+            stillPreIncome ? "border-rose-500/40" : "border-emerald-500/40"
+          }`}
+        >
+          <div
+            className={`p-6 md:p-8 text-white ${
+              stillPreIncome
+                ? "bg-gradient-to-br from-rose-800 via-rose-700 to-rose-900"
+                : "bg-gradient-to-br from-teal-700 via-teal-600 to-emerald-800"
+            }`}
+          >
+            <div className="flex flex-col md:flex-row justify-between gap-6">
+              <div>
+                <Badge className="bg-white/20 text-white border-none hover:bg-white/30 mb-3">
+                  {inMoratorium
+                    ? "Moratorium active"
+                    : stillPreIncome
+                      ? "Repaying before income"
+                      : "Repaying from earnings"}
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-extrabold font-heading">
+                  {stillPreIncome
+                    ? `${monthsToIncome} months until this unit earns`
+                    : "Your unit is earning"}
+                </h2>
+                <p className="text-white/85 mt-2 max-w-md leading-relaxed">
+                  {stillPreIncome
+                    ? `You still owe ₹${inr(remainingPreIncome)} before the first sale. This is the gap — plan for it now, not in month nine.`
+                    : "Instalments from here are met by the enterprise itself."}
+                </p>
+              </div>
+
+              {next && (
+                <div className="bg-black/25 p-5 rounded-2xl border border-white/15 min-w-[240px]">
+                  <p className="text-white/70 text-xs uppercase font-semibold tracking-wider mb-1">
+                    Next payment
+                  </p>
+                  <p className="text-3xl font-bold tabular-nums">₹{inr(next.payment)}</p>
+                  <p className="text-sm text-white/80 mt-1">
+                    due in month {next.month}
+                    {next.inMoratorium ? " · interest only" : ""}
+                  </p>
+                  <Button size="sm" className="w-full mt-4 bg-white text-slate-900 hover:bg-white/90">
+                    Pay now
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Loan Details</CardTitle>
-            <CardDescription>Term Loan under Mudra Scheme (SBI)</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="pt-6 space-y-5">
             <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">Total Disbursed</span>
-                <span className="font-bold">₹ 4,50,000</span>
+              <div className="flex justify-between text-sm mb-1.5">
+                <span className="text-muted-foreground">
+                  {paid.length} of {rows.length} payments made
+                </span>
+                <span className="font-semibold tabular-nums">₹{inr(outstanding)} outstanding</span>
               </div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">Principal Paid</span>
-                <span className="font-bold text-green-600">₹ 0 (Moratorium)</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Remaining Balance</span>
-                <span className="font-bold">₹ 4,50,000</span>
-              </div>
-              <Progress value={0} className="h-2 mt-4" />
+              <Progress value={progress} />
             </div>
-            
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Interest Rate</p>
-                <p className="font-medium">8.0% p.a.</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Tile label="Sanctioned" value={`₹${inr(s.sanctionedLoan)}`} icon={<Wallet className="w-3.5 h-3.5" />} />
+              <Tile label="Repaid so far" value={`₹${inr(paidAmount)}`} icon={<CheckCircle2 className="w-3.5 h-3.5" />} />
+              <Tile label="Per quarter" value={`₹${inr(schedule.instalment)}`} icon={<CalendarCheck className="w-3.5 h-3.5" />} />
+              <Tile label="Moratorium" value={`${s.moratoriumMonths} months`} icon={<Clock className="w-3.5 h-3.5" />} />
+            </div>
+
+            {/* month scrubber — demo control, labelled as one */}
+            <div className="rounded-lg border bg-muted/20 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Month {monthsElapsed} since disbursement
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  demo control — production reads the SCA ledger
+                </span>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Tenure</p>
-                <p className="font-medium">7 Years</p>
-              </div>
+              <input
+                type="range"
+                min={0}
+                max={rows[rows.length - 1].month}
+                step={3}
+                value={monthsElapsed}
+                onChange={(e) => setMonthsElapsed(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
             </div>
           </CardContent>
         </Card>
+      </motion.div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Reminders & Alerts</CardTitle>
+      {/* the warning that matters */}
+      {solvency.verdict === "GESTATION_GAP" && (
+        <Card className="border-2 border-rose-500/30 bg-rose-500/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+              This loan was structured to collect before it earns
+            </CardTitle>
+            <CardDescription className="leading-relaxed">
+              {t(solvency.detailMsg.key, solvency.detailMsg.params)}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-4 p-3 bg-accent/10 border border-accent/20 rounded-lg">
-              <BellRing className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-bold text-accent">Upcoming Interest Payment</h4>
-                <p className="text-xs text-muted-foreground mt-1">Please ensure your linked SBI account has sufficient balance before 5th Nov.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 p-3 bg-muted/30 border rounded-lg">
-              <IndianRupee className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-bold">Subsidy Credited</h4>
-                <p className="text-xs text-muted-foreground mt-1">₹ 25,000 margin money subsidy has been credited to your loan account.</p>
-              </div>
-            </div>
+          <CardContent>
+            <Link href="/calculator">
+              <Button variant="outline" className="rounded-full">
+                See the Solvency Clock <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
-      </div>
+      )}
 
+      {/* schedule */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Repayment History</CardTitle>
-            <CardDescription>Your past transactions and receipts.</CardDescription>
-          </div>
-          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" /> Statement</Button>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Repayment schedule</CardTitle>
+          <CardDescription>
+            Rows before month {activity.gestationMonths} fall due before this unit earns anything.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              { date: "5 Oct 2023", amount: "₹ 3,450", type: "Interest Only", status: "Paid via Auto-Debit" },
-              { date: "5 Sep 2023", amount: "₹ 3,450", type: "Interest Only", status: "Paid via UPI" },
-              { date: "5 Aug 2023", amount: "₹ 3,450", type: "Interest Only", status: "Paid via Auto-Debit" },
-            ].map((t, i) => (
-              <div key={i} className="flex justify-between items-center p-3 border-b last:border-0 pb-4 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-green-500/10 text-green-600 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">{t.amount}</p>
-                    <p className="text-xs text-muted-foreground">{t.type}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{t.date}</p>
-                  <p className="text-xs text-green-600">{t.status}</p>
-                </div>
-              </div>
-            ))}
+          <div className="border rounded-xl overflow-hidden">
+            <div className="max-h-[380px] overflow-y-auto">
+              <Table>
+                <TableHeader className="bg-muted/50 sticky top-0">
+                  <TableRow>
+                    <TableHead className="w-[90px]">Month</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Interest</TableHead>
+                    <TableHead className="text-right">Principal</TableHead>
+                    <TableHead className="text-right">Payment</TableHead>
+                    <TableHead className="text-right">Balance</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((r) => {
+                    const done = r.month <= monthsElapsed;
+                    const preIncome = r.month <= activity.gestationMonths;
+                    return (
+                      <TableRow key={r.period} className={preIncome && !done ? "bg-rose-500/5" : ""}>
+                        <TableCell className="font-medium">{r.month}</TableCell>
+                        <TableCell>
+                          {done ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+                              <CheckCircle2 className="w-3 h-3" /> paid
+                            </span>
+                          ) : r.inMoratorium ? (
+                            <span className="text-[11px] text-amber-700 dark:text-amber-400">
+                              moratorium
+                            </span>
+                          ) : preIncome ? (
+                            <span className="text-[11px] text-rose-700 dark:text-rose-400">
+                              before income
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground">upcoming</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">₹{inr(r.interest)}</TableCell>
+                        <TableCell className="text-right tabular-nums">₹{inr(r.principal)}</TableCell>
+                        <TableCell className="text-right tabular-nums font-semibold">
+                          ₹{inr(r.payment)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-muted-foreground">
+                          ₹{inr(r.closingBalance)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function Tile({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+        {icon}
+        {label}
+      </p>
+      <p className="font-bold text-lg leading-tight tabular-nums">{value}</p>
     </div>
   );
 }

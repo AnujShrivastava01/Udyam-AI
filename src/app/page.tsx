@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, MapPin, BarChart2, IndianRupee, ShieldCheck, Zap, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n-landing";
 
 export default function LandingPage() {
   const { t } = useTranslation();

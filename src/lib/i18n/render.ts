@@ -1,0 +1,65 @@
+/**
+ * The pure rendering layer.
+ *
+ * Deliberately NOT a client module: the WhatsApp worker, the webhook route and any server render
+ * need the same dictionary the UI uses. If this carried "use client", a borrower on WhatsApp and
+ * a borrower on the web could drift into different wording for the same verdict.
+ */
+
+import { EN } from "./keys";
+import { HI } from "./dict.hi";
+import { HINGLISH } from "./dict.hinglish";
+import type { Dictionary, Locale, MessageKey } from "./keys";
+
+export const DICTS: Record<Locale, Dictionary> = {
+  en: EN as unknown as Dictionary,
+  hi: HI,
+  hinglish: HINGLISH,
+};
+
+/**
+ * Format a rupee amount.
+ *
+ * Always `en-IN` grouping regardless of interface language — a lakh groups the same way whether
+ * the label around it is Hindi or English, and a borrower reading the figure aloud needs it to
+ * look like every other rupee figure they have seen. Devanagari numerals would be a regression in
+ * legibility, not a localisation win.
+ */
+export function money(n: number): string {
+  return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n))}`;
+}
+
+export function num(n: number, dp = 0): string {
+  return new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: dp,
+    maximumFractionDigits: dp,
+  }).format(n);
+}
+
+export function pct(fraction: number, dp = 1): string {
+  return `${(fraction * 100).toFixed(dp)}%`;
+}
+
+/**
+ * Render a message.
+ *
+ * Parameters are substituted verbatim — they arrive already formatted, and this function never
+ * parses, rounds or re-formats them. That is the whole guarantee: templates get translated,
+ * numbers do not.
+ */
+export function renderMessage(
+  locale: Locale,
+  key: MessageKey,
+  params?: Record<string, string | number>,
+): string {
+  const dict = DICTS[locale] ?? DICTS.en;
+  const template = dict[key] ?? DICTS.en[key] ?? key;
+  if (!params) return template;
+  return template.replace(/\{(\w+)\}/g, (whole, name: string) =>
+    name in params ? String(params[name]) : whole,
+  );
+}
+
+export function normaliseLocale(value: unknown): Locale {
+  return value === "hi" || value === "hinglish" || value === "en" ? value : "en";
+}

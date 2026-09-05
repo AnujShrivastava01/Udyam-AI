@@ -1,256 +1,541 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAppStore } from "@/lib/store";
-import { calculateSchemeEligibility } from "@/lib/mock-data";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, ReferenceLine } from "recharts";
-import { IndianRupee, Landmark, Calculator, ArrowRight, ShieldCheck, Clock, TrendingDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Calculator,
+  Clock,
+  IndianRupee,
+  Landmark,
+  ShieldCheck,
+  TrendingDown,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+import { CliffExplorer } from "@/components/cliff-explorer";
+import { SolvencyClock } from "@/components/solvency-clock";
+import { SourceChip } from "@/components/source-chip";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ACTIVITIES, ACTIVITY_COVERAGE, GESTATION_RANGE_NOTE } from "@/lib/finance/activities";
+import { plan, type MoratoriumConvention } from "@/lib/finance";
+import { useAppStore } from "@/lib/store";
+import { useT, type MessageKey } from "@/lib/i18n";
+
+const inr = (n: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(n);
+
+const inrPlain = (n: number) =>
+  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(n);
+
+const FLAG_STYLE: Record<string, string> = {
+  critical: "border-rose-500/40 bg-rose-500/10 text-rose-800 dark:text-rose-300",
+  warning: "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-300",
+  info: "border-border bg-muted/40 text-muted-foreground",
+};
 
 export default function CalculatorPage() {
   const { onboardingInput, setOnboardingInput } = useAppStore();
-  const [margin, setMargin] = useState(onboardingInput.marginCapital || 50000);
+  const { t } = useT();
+  const [margin, setMargin] = useState(onboardingInput.marginCapital || 100_000);
+  const [activityId, setActivityId] = useState<string | undefined>("goat-20-1");
+  const [needBased, setNeedBased] = useState(true);
+  const [convention, setConvention] = useState<MoratoriumConvention>("serviced");
+  const [householdIncome, setHouseholdIncome] = useState(86_119);
 
-  // Sync back to store on unmount or debounce if needed, simple sync here
   useEffect(() => {
     setOnboardingInput({ marginCapital: margin });
   }, [margin, setOnboardingInput]);
 
-  const result = calculateSchemeEligibility(margin);
+  const result = useMemo(
+    () =>
+      plan({
+        marginCapital: margin,
+        activityId,
+        useNeedBasedCosting: needBased,
+        annualHouseholdIncome: householdIncome > 0 ? householdIncome : undefined,
+        convention,
+      }),
+    [margin, activityId, needBased, householdIncome, convention],
+  );
 
-  // Prepare Pie Chart Data
-  const pieData = [
-    { name: "Equipment / Setup", value: result.projectCost * 0.65 },
-    { name: "Working Capital", value: result.projectCost * 0.25 },
-    { name: "Marketing & Ops", value: result.projectCost * 0.10 },
-  ];
-  const COLORS = ['var(--color-primary)', 'var(--color-chart-2)', 'var(--color-chart-1)'];
+  const { structure: s, schedule, solvency, activity } = result;
 
-  // Formatting helper
-  const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+  const chartData = schedule.schedule.map((row) => ({
+    label: `M${row.month}`,
+    month: row.month,
+    Principal: row.principal,
+    Interest: row.interest,
+  }));
+
+  const moratoriumEndMonth = s.moratoriumMonths;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 pb-24">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
-            <Calculator className="w-8 h-8 text-primary" /> Smart Financial Planner
-          </h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            Adjust your margin capital to auto-select the best government scheme for you.
-          </p>
-        </div>
-      </div>
+    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-24">
+      <header className="space-y-2">
+        <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
+          <Calculator className="w-8 h-8 text-primary" /> {t("calc.title")}
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-3xl">
+          {t("calc.subtitle")}
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Inputs & Eligibility Card */}
-        <div className="lg:col-span-5 space-y-6">
-          <Card className="border-2 border-primary/20 shadow-md">
-            <CardHeader className="bg-primary/5 pb-6 border-b border-primary/10">
-              <CardTitle className="text-lg">Your Investment (Margin Money)</CardTitle>
-              <CardDescription>How much capital do you have right now?</CardDescription>
-              <div className="pt-4 flex items-center gap-4">
-                <div className="relative flex-1">
-                  <IndianRupee className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                  <Input 
-                    type="number" 
-                    value={margin} 
-                    onChange={(e) => setMargin(Number(e.target.value) || 0)}
-                    className="pl-10 text-xl font-bold h-12"
-                  />
-                </div>
-              </div>
-              <div className="pt-6">
-                <Slider 
-                  value={[margin]} 
-                  min={10000} 
-                  max={500000} 
-                  step={5000}
-                  onValueChange={(vals) => setMargin((vals as number[])[0])}
-                  className="py-4"
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* ───────────────────────── inputs ───────────────────────── */}
+        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
+          <Card className="border-2 border-primary/20">
+            <CardHeader className="bg-primary/5 border-b border-primary/10">
+              <CardTitle className="text-lg">{t("calc.margin.title")}</CardTitle>
+              <CardDescription>{t("calc.margin.hint")}</CardDescription>
+              <div className="pt-4 relative">
+                <IndianRupee className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="number"
+                  value={margin}
+                  onChange={(e) => setMargin(Math.max(0, Number(e.target.value) || 0))}
+                  className="pl-10 text-xl font-bold h-12"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground font-medium">
-                  <span>₹10,000</span>
-                  <span>₹5,00,000+</span>
+              </div>
+              <div className="pt-4">
+                <Slider
+                  value={[margin]}
+                  min={5_000}
+                  max={500_000}
+                  step={1_000}
+                  onValueChange={(v) => setMargin((v as number[])[0])}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>₹5,000</span>
+                  <span>₹5,00,000</span>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-8">
-              <h3 className="font-heading font-semibold text-lg mb-4 text-center">Project Funding Breakdown</h3>
-              
-              {/* The Hero Eligibility Visual */}
-              <div className="space-y-3">
-                <div className="flex h-12 rounded-full overflow-hidden shadow-inner border border-border/50">
-                  <div className="bg-chart-2 flex items-center justify-center text-white font-bold text-sm w-[10%] relative overflow-hidden group">
-                    <span className="relative z-10">10%</span>
-                  </div>
-                  <div className="bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm w-[90%] relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                    90%
-                  </div>
+
+            <CardContent className="pt-6 space-y-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  {t("activity.pickPrompt")}
+                </p>
+                <div className="grid gap-1.5">
+                  {ACTIVITIES.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => setActivityId(a.id)}
+                      className={`text-left rounded-lg border px-3 py-2 transition-colors ${
+                        activityId === a.id
+                          ? "border-primary bg-primary/10"
+                          : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <span className="block text-sm font-medium">
+                        {t(`activity.${a.id}.name` as MessageKey)}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {inr(a.unitCost)} ·{" "}
+                        {a.gestationMonths === 0
+                          ? t("activity.earnsImmediately")
+                          : t("activity.earnsFrom", { month: a.gestationMonths })}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                <div className="flex justify-between text-sm">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-chart-2 flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-chart-2" /> Margin Money</span>
-                    <span className="font-bold">{formatCurrency(margin)}</span>
-                  </div>
-                  <div className="flex flex-col text-right">
-                    <span className="font-medium text-primary flex items-center justify-end gap-1"><div className="w-2 h-2 rounded-full bg-primary" /> Max Bank Loan</span>
-                    <span className="font-bold">{formatCurrency(result.maxLoanAmount)}</span>
-                  </div>
-                </div>
+                <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+                  {ACTIVITY_COVERAGE.note}
+                </p>
               </div>
 
-              <div className="mt-8 p-4 bg-muted/30 rounded-xl border flex flex-col items-center justify-center text-center">
-                <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold mb-1">Total Project Cost</span>
-                <span className="text-4xl font-extrabold font-heading text-foreground">{formatCurrency(result.projectCost)}</span>
-              </div>
-            </CardContent>
-          </Card>
+              <Toggle
+                label={t("calc.needBased.label")}
+                hint={t("calc.needBased.hint")}
+                checked={needBased}
+                onChange={setNeedBased}
+              />
+              <Toggle
+                label={t("calc.serviced.label")}
+                hint={t("calc.serviced.hint")}
+                checked={convention === "serviced"}
+                onChange={(v) => setConvention(v ? "serviced" : "capitalised")}
+              />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Estimated Cost Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[250px] flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  {t("calc.income.label")}
+                </p>
+                <Input
+                  type="number"
+                  value={householdIncome}
+                  onChange={(e) => setHouseholdIncome(Math.max(0, Number(e.target.value) || 0))}
+                  className="h-10"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Default is ₹86,119 — the average pre-loan household income measured in MoSJE&apos;s
+                  own 2020 evaluation of NSFDC.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column: Scheme Details & EMI */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          <motion.div 
-            key={result.scheme}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-2xl border-2 shadow-sm overflow-hidden"
+        {/* ───────────────────────── results ───────────────────────── */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* flags first — the refusals matter more than the offer */}
+          {s.flags.length > 0 && (
+            <div className="space-y-2">
+              {s.flags.map((f) => (
+                <div
+                  key={f.code}
+                  className={`rounded-xl border-2 p-4 ${FLAG_STYLE[f.level]}`}
+                >
+                  <p className="font-bold flex items-center gap-2 text-sm">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    {f.title}
+                  </p>
+                  <p className="text-sm mt-1.5 leading-relaxed opacity-90">{f.detail}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <SolvencyClock schedule={schedule.schedule} solvency={solvency} activity={activity} />
+
+          {/* the structure */}
+          <motion.div
+            key={s.scheme.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border-2 bg-card overflow-hidden"
           >
-            <div className={`p-6 text-white ${result.scheme === 'micro-finance' ? 'bg-gradient-to-r from-teal-600 to-teal-800' : 'bg-gradient-to-r from-blue-600 to-indigo-800'}`}>
-              <div className="flex justify-between items-start">
+            <div
+              className={`p-6 text-white ${
+                s.scheme.id === "nsfdc-micro-finance"
+                  ? "bg-gradient-to-r from-teal-600 to-teal-800"
+                  : "bg-gradient-to-r from-blue-700 to-indigo-800"
+              }`}
+            >
+              <div className="flex justify-between items-start gap-4">
                 <div>
-                  <Badge variant="secondary" className="mb-2 bg-white/20 text-white hover:bg-white/30 border-none">Auto-Selected Scheme</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="mb-2 bg-white/20 text-white border-none hover:bg-white/30"
+                  >
+                    {s.basis === "need-based" ? "Sized to the activity" : "Specification formula"}
+                  </Badge>
                   <h2 className="text-2xl font-bold font-heading">
-                    {result.scheme === 'micro-finance' ? 'Micro Finance Scheme' : 'Term Loan Scheme'}
+                    {s.scheme.corporation} {s.scheme.name}
                   </h2>
-                  <p className="text-white/80 mt-1 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" /> Government Backed
+                  <p className="text-white/80 mt-1 flex items-center gap-2 text-sm">
+                    <ShieldCheck className="w-4 h-4" /> Government backed
                   </p>
                 </div>
-                <Landmark className="w-12 h-12 opacity-50" />
+                <Landmark className="w-10 h-10 opacity-40 shrink-0" />
               </div>
-              
-              <div className="grid grid-cols-3 gap-4 mt-8">
-                <div className="bg-black/20 rounded-lg p-3">
-                  <p className="text-white/70 text-xs font-medium uppercase mb-1">Interest Rate</p>
-                  <p className="font-bold text-xl">{result.interestRate}% <span className="text-sm font-normal">p.a.</span></p>
-                </div>
-                <div className="bg-black/20 rounded-lg p-3">
-                  <p className="text-white/70 text-xs font-medium uppercase mb-1">Tenure</p>
-                  <p className="font-bold text-xl">{result.tenureYears} <span className="text-sm font-normal">Years</span></p>
-                </div>
-                <div className="bg-black/20 rounded-lg p-3 border border-accent">
-                  <p className="text-accent/90 text-xs font-medium uppercase mb-1 flex items-center gap-1"><Clock className="w-3 h-3"/> Moratorium</p>
-                  <p className="font-bold text-xl text-accent">{result.moratoriumMonths} <span className="text-sm font-normal text-accent">Months</span></p>
-                </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+                <Metric label={t("calc.projectCost")} value={inr(s.projectCost)} />
+                <Metric label={t("calc.sanctionedLoan")} value={inr(s.sanctionedLoan)} />
+                <Metric
+                  label={t("calc.yourShare")}
+                  value={`${(s.effectiveMarginPct * 100).toFixed(2)}%`}
+                  accent={s.effectiveMarginPct > 0.1001}
+                />
+                <Metric
+                  label={t("calc.moratorium")}
+                  value={`${s.moratoriumMonths} mo`}
+                  icon={<Clock className="w-3 h-3" />}
+                />
               </div>
             </div>
-            
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-lg font-heading flex items-center gap-2">
-                  <TrendingDown className="w-5 h-5 text-primary"/> Repayment Schedule (Quarterly)
-                </h3>
-              </div>
-              
-              <div className="h-[250px] mb-8">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={result.emiSchedule} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
-                    <XAxis dataKey="quarter" tickFormatter={(tick) => `Q${tick}`} stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(tick) => `₹${tick/1000}k`} />
-                    <Tooltip 
-                      formatter={(value: any) => formatCurrency(value)} 
-                      labelFormatter={(label) => `Quarter ${label}`}
-                      contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Line type="monotone" dataKey="principal" name="Principal" stroke="var(--color-primary)" strokeWidth={3} dot={false} />
-                    <Line type="monotone" dataKey="interest" name="Interest" stroke="var(--color-chart-2)" strokeWidth={3} dot={false} />
-                    {result.moratoriumMonths > 0 && (
-                      <ReferenceLine x={result.moratoriumMonths / 3} stroke="var(--color-accent)" strokeDasharray="3 3" label={{ position: 'top', value: 'Moratorium Ends', fill: 'var(--color-accent)', fontSize: 12 }} />
-                    )}
-                  </LineChart>
-                </ResponsiveContainer>
+
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Figure label={t("calc.quarterly")} value={inr(schedule.instalment)} strong />
+                <Figure label={t("calc.instalments")} value={String(schedule.instalmentCount)} />
+                <Figure label={t("calc.totalInterest")} value={inr(schedule.totalInterest)} />
+                <Figure label={t("calc.totalOutflow")} value={inr(schedule.totalOutflow)} />
               </div>
 
-              <div className="border rounded-xl overflow-hidden">
-                <Table>
-                  <TableHeader className="bg-muted/50">
-                    <TableRow>
-                      <TableHead className="w-[100px]">Quarter</TableHead>
-                      <TableHead>Principal Repayment</TableHead>
-                      <TableHead>Interest Payment</TableHead>
-                      <TableHead className="text-right">Total Installment</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {result.emiSchedule.slice(0, 5).map((row, i) => (
-                      <TableRow key={row.quarter} className={i < result.moratoriumMonths / 3 ? "bg-accent/5" : ""}>
-                        <TableCell className="font-medium">Q{row.quarter}</TableCell>
-                        <TableCell>{formatCurrency(row.principal)}</TableCell>
-                        <TableCell>{formatCurrency(row.interest)}</TableCell>
-                        <TableCell className="text-right font-bold">{formatCurrency(row.principal + row.interest)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className="p-3 bg-muted/20 text-center text-sm text-muted-foreground border-t">
-                  Showing first 5 quarters. The first {result.moratoriumMonths / 3} quarter(s) are under moratorium (interest accrues, no principal).
+              <div className="rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed">
+                Under the{" "}
+                <strong>
+                  {convention === "serviced" ? "capitalised" : "serviced"}
+                </strong>{" "}
+                convention the same loan would cost{" "}
+                <strong>₹{inrPlain(result.alternateConvention.instalment)}</strong> per quarter and{" "}
+                <strong>₹{inrPlain(result.alternateConvention.totalInterest)}</strong> in total
+                interest. We compute both so neither is a silent assumption.
+              </div>
+
+              {s.moratoriumNote && (
+                <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs leading-relaxed">
+                  {s.moratoriumNote}
+                </div>
+              )}
+
+              {/* schedule chart */}
+              <div>
+                <h3 className="font-bold font-heading flex items-center gap-2 mb-3">
+                  <TrendingDown className="w-5 h-5 text-primary" /> {t("calc.schedule")}
+                </h3>
+                <div className="h-[240px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 5, right: 12, bottom: 0, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                      <XAxis
+                        dataKey="label"
+                        stroke="var(--color-muted-foreground)"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        interval={1}
+                      />
+                      <YAxis
+                        stroke="var(--color-muted-foreground)"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(t) => `₹${Math.round(t / 1000)}k`}
+                      />
+                      <Tooltip
+                        formatter={(v) => inr(Number(v ?? 0))}
+                        contentStyle={{
+                          borderRadius: 8,
+                          border: "1px solid var(--color-border)",
+                          background: "var(--color-card)",
+                        }}
+                      />
+                      <Legend iconType="circle" />
+                      <Bar dataKey="Principal" stackId="a" fill="var(--color-primary)" />
+                      <Bar dataKey="Interest" stackId="a" fill="var(--color-chart-2)" />
+                      {activity && activity.gestationMonths > 0 && (
+                        <ReferenceLine
+                          x={`M${activity.gestationMonths}`}
+                          stroke="#e11d48"
+                          strokeDasharray="4 3"
+                          label={{
+                            value: "first income",
+                            position: "top",
+                            fill: "#e11d48",
+                            fontSize: 11,
+                          }}
+                        />
+                      )}
+                      {moratoriumEndMonth > 0 && (
+                        <ReferenceLine
+                          x={`M${moratoriumEndMonth}`}
+                          stroke="var(--color-muted-foreground)"
+                          strokeDasharray="3 3"
+                        />
+                      )}
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end">
-                <Link href="/community">
-                  <Button size="lg" className="rounded-full px-8 text-lg shadow-md shadow-primary/20 hover:-translate-y-1 transition-transform">
-                    Apply for Loan <ArrowRight className="ml-2 w-5 h-5" />
+              {/* amortisation table */}
+              <div className="border rounded-xl overflow-hidden">
+                <div className="max-h-[300px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="bg-muted/50 sticky top-0">
+                      <TableRow>
+                        <TableHead className="w-[70px]">Month</TableHead>
+                        <TableHead className="text-right">Opening</TableHead>
+                        <TableHead className="text-right">Interest</TableHead>
+                        <TableHead className="text-right">Principal</TableHead>
+                        <TableHead className="text-right">Payment</TableHead>
+                        <TableHead className="text-right">Closing</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {schedule.schedule.map((row) => {
+                        const preIncome =
+                          activity != null && row.month <= activity.gestationMonths && row.payment > 0;
+                        return (
+                          <TableRow
+                            key={row.period}
+                            className={
+                              preIncome ? "bg-rose-500/5" : row.inMoratorium ? "bg-amber-500/5" : ""
+                            }
+                          >
+                            <TableCell className="font-medium">
+                              {row.month}
+                              {row.inMoratorium && (
+                                <span className="ml-1 text-[10px] text-amber-600">mor</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-muted-foreground">
+                              {inr(row.openingBalance)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums">{inr(row.interest)}</TableCell>
+                            <TableCell className="text-right tabular-nums">{inr(row.principal)}</TableCell>
+                            <TableCell className="text-right tabular-nums font-semibold">
+                              {inr(row.payment)}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-muted-foreground">
+                              {inr(row.closingBalance)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="p-3 bg-muted/20 border-t text-xs text-muted-foreground">
+                  Rows shaded red fall due before the activity earns anything. Rows marked
+                  &ldquo;mor&rdquo; are inside the moratorium.
+                </div>
+              </div>
+
+              {/* the trace */}
+              <div>
+                <h3 className="font-bold font-heading mb-3">{t("calc.howDecided")}</h3>
+                <ol className="space-y-2">
+                  {s.trace.map((t, i) => (
+                    <li key={i} className="flex gap-3 text-sm">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+                        {i + 1}
+                      </span>
+                      <span>
+                        <span className="font-medium">{t.rule}</span>
+                        <span className="text-muted-foreground"> → {t.outcome}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <SourceChip
+                  label={`${s.scheme.name} — ${s.scheme.annualRatePct}% · ${s.scheme.tenureMonths / 12}y · cap ${inr(s.scheme.maxLoan)}`}
+                  provenance={s.scheme.provenance}
+                />
+                {activity && GESTATION_RANGE_NOTE[activity.id] && (
+                  <span className="text-[11px] text-muted-foreground self-center">
+                    {GESTATION_RANGE_NOTE[activity.id]}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Link href={`/report/${activityId ?? "general"}`}>
+                  <Button size="lg" className="rounded-full px-8">
+                    {t("calc.seeReport")} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
               </div>
-
             </div>
           </motion.div>
-          
         </div>
       </div>
+
+      {/* the cliff — full width, because it is the point */}
+      <CliffExplorer />
     </div>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  accent,
+  icon,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className={`rounded-lg p-3 ${accent ? "bg-amber-400/25 ring-1 ring-amber-300/60" : "bg-black/20"}`}>
+      <p className="text-white/70 text-[10px] font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+        {icon}
+        {label}
+      </p>
+      <p className="font-bold text-lg leading-tight">{value}</p>
+    </div>
+  );
+}
+
+function Figure({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+        {label}
+      </p>
+      <p className={`font-bold leading-tight ${strong ? "text-xl text-primary" : "text-base"}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function Toggle({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/40"
+    >
+      <span
+        className={`mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+          checked ? "bg-primary" : "bg-muted-foreground/30"
+        }`}
+      >
+        <span
+          className={`h-4 w-4 rounded-full bg-white transition-transform ${
+            checked ? "translate-x-4" : "translate-x-0.5"
+          }`}
+        />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-medium leading-tight">{label}</span>
+        <span className="block text-[11px] text-muted-foreground mt-0.5">{hint}</span>
+      </span>
+    </button>
   );
 }

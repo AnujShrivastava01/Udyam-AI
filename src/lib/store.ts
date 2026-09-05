@@ -10,16 +10,16 @@ interface OnboardingInput {
 
 interface AppState {
   userRole: UserRole;
-  language: 'hi' | 'en';
+  language: 'hi' | 'en' | 'hinglish';
   onboardingInput: OnboardingInput;
   setRole: (role: UserRole) => void;
-  setLanguage: (lang: 'hi' | 'en') => void;
+  setLanguage: (lang: 'hi' | 'en' | 'hinglish') => void;
   setOnboardingInput: (input: Partial<OnboardingInput>) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
   userRole: 'entrepreneur',
-  language: 'hi', // default to Hindi per requirements
+  language: 'hinglish', // rural users read Roman-script Hinglish faster than either pure language
   onboardingInput: {
     location: null,
     marginCapital: 100000,
