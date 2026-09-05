@@ -375,4 +375,12 @@ export const HINGLISH: Dictionary = {
     "{scheme} ke aadhar par. Source: {source}. Scheme ki sharten badalti rehti hain; is par karrvai se pehle sambandhit agency se pushti kar lein. Abhi koi application nahi hua hai.",
   "share.print": "Print ya PDF mein sahejein",
   "share.back": "Profile par wapas",
+  "swot.title": "Taaqat, kamzori, avsar, khatre",
+  "swot.subtitle":
+    "Upar ke figures se nikala gaya, kisi model ne likha nahi. Har baat ke neeche wo figure hai jisse wo bani.",
+  "swot.strengths": "Taaqat",
+  "swot.weaknesses": "Kamzori",
+  "swot.opportunities": "Avsar",
+  "swot.threats": "Khatre",
+  "swot.none": "Yahan kuch nahi mila — yeh bhi ek nateeja hai.",
 };

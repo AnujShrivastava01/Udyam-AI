@@ -26,6 +26,9 @@ import {
 
 import { SourceChip } from "@/components/source-chip";
 import { VillageMap } from "@/components/village-map";
+import { SwotGrid } from "@/components/swot-grid";
+import { buildSwot } from "@/lib/market/swot";
+import { plan as buildPlan } from "@/lib/finance";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,6 +81,7 @@ export default function FeasibilityReportPage() {
   const { t } = useT();
   const params = useParams<{ id: string }>();
   const onboardingDistrict = useAppStore((st) => st.onboardingInput.location?.district);
+  const onboardingMargin = useAppStore((st) => st.onboardingInput.marginCapital);
 
   const fromRoute = readRouteId(params?.id);
   // Failing the route id, fall back to whatever district onboarding collected before dropping to
@@ -93,6 +97,22 @@ export default function FeasibilityReportPage() {
   const activity = ACTIVITY_BY_ID.get(activityId) ?? null;
 
   const report = useMemo(() => buildFeasibilityReport(village, activity), [village, activity]);
+
+  // The SWOT needs the money side too. Uses the margin the user actually gave; without one it
+  // still produces the market and Census findings and simply omits the kernel ones.
+  const swot = useMemo(() => {
+    let p = null;
+    const margin = onboardingMargin;
+    if (margin != null && margin > 0) {
+      try {
+        p = buildPlan({ marginCapital: margin, activityId, useNeedBasedCosting: true });
+        if (p.structure.sanctionedLoan <= 0) p = null;
+      } catch {
+        p = null;
+      }
+    }
+    return buildSwot(village, activity, p, report);
+  }, [village, activity, report, activityId, onboardingMargin]);
   const { saturation: sat } = report;
 
   const satData = [
@@ -300,6 +320,8 @@ export default function FeasibilityReportPage() {
           </CardContent>
         </Card>
       </motion.div>
+
+      <SwotGrid items={swot} />
 
       {/* saturation chart */}
       <Card>

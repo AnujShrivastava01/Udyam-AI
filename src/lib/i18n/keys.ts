@@ -472,6 +472,15 @@ export const EN = {
     "Structured against {scheme}. Source: {source}. Scheme terms change; confirm against the administering agency before acting on this. No application has been filed and no lender has seen this document.",
   "share.print": "Print or save as PDF",
   "share.back": "Back to profile",
+  // ── SWOT ──────────────────────────────────────────────────────────────────
+  "swot.title": "Strengths, weaknesses, opportunities, threats",
+  "swot.subtitle":
+    "Derived from the figures above, not written by a model. Each claim shows the number that triggered it.",
+  "swot.strengths": "Strengths",
+  "swot.weaknesses": "Weaknesses",
+  "swot.opportunities": "Opportunities",
+  "swot.threats": "Threats",
+  "swot.none": "Nothing found here — which is itself a finding, not a gap.",
 } as const;
 
 export type MessageKey = keyof typeof EN;

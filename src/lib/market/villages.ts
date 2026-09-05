@@ -48,6 +48,31 @@ export interface Village {
   distanceToMandiKm: number;
   /** Distance to the nearest bank branch, in km. */
   distanceToBankKm: number;
+
+  // ── Census 2011 Village Amenities fields ──────────────────────────────────────────────────
+  // All five are published per village in the Census amenities directory (data.gov.in catalogue
+  // "Village Amenities, Census of India 2011") and in SHRUG's pc11 tables. They are seeded here
+  // like every other figure in this gazetteer, but unlike the population placeholders they are
+  // DIRECTLY verifiable per village once the ingest runs — which is why they are worth carrying.
+
+  /**
+   * Scheduled Caste share of the village population, as a percentage.
+   *
+   * The single most decision-relevant field in this record. NSFDC lends only to Scheduled Caste
+   * beneficiaries below the income ceiling, so this share is what turns a catchment population
+   * into a count of people the scheme can actually reach. Every market figure in this app is
+   * computed over everybody; this is the one that says how many of them are eligible.
+   */
+  scSharePct: number;
+  /** Literacy rate, percent. Bears on paperwork, and on whether voice matters more than text. */
+  literacyPct: number;
+  /** Hours of domestic power supply per day. A flour mill or a cold chain cannot run without it. */
+  powerHoursPerDay: number;
+  /** Is the village reached by an all-weather (pucca) road? Decides whether perishables travel. */
+  hasPuccaRoad: boolean;
+  /** Distance to the nearest town, in km. */
+  distanceToTownKm: number;
+
   seed: boolean;
 }
 
@@ -68,6 +93,11 @@ export const VILLAGES: Village[] = [
     hasMarket: true,
     distanceToMandiKm: 11,
     distanceToBankKm: 6,
+    scSharePct: 21.4,
+    literacyPct: 62.1,
+    powerHoursPerDay: 16,
+    hasPuccaRoad: true,
+    distanceToTownKm: 24,
     seed: true,
   },
   {
@@ -86,6 +116,11 @@ export const VILLAGES: Village[] = [
     hasMarket: true,
     distanceToMandiKm: 3,
     distanceToBankKm: 2,
+    scSharePct: 18.9,
+    literacyPct: 65.3,
+    powerHoursPerDay: 18,
+    hasPuccaRoad: true,
+    distanceToTownKm: 12,
     seed: true,
   },
   {
@@ -104,6 +139,11 @@ export const VILLAGES: Village[] = [
     hasMarket: true,
     distanceToMandiKm: 1,
     distanceToBankKm: 1,
+    scSharePct: 24.7,
+    literacyPct: 71.8,
+    powerHoursPerDay: 20,
+    hasPuccaRoad: true,
+    distanceToTownKm: 3,
     seed: true,
   },
   {
@@ -122,6 +162,11 @@ export const VILLAGES: Village[] = [
     hasMarket: false,
     distanceToMandiKm: 24,
     distanceToBankKm: 18,
+    scSharePct: 16.2,
+    literacyPct: 54.6,
+    powerHoursPerDay: 11,
+    hasPuccaRoad: false,
+    distanceToTownKm: 38,
     seed: true,
   },
 ];
@@ -169,5 +214,8 @@ export const GAZETTEER_COVERAGE = {
   note:
     "Seed gazetteer of 4 Madhya Pradesh villages. Population and establishment figures are " +
     "placeholders pending the WorldPop and Economic Census ingest — they are labelled as estimates " +
-    "everywhere they appear and must never be quoted as survey readings.",
+    "everywhere they appear and must never be quoted as survey readings. The Census-amenities " +
+    "fields (SC share, literacy, power hours, road, distance to town) are seeded to the same " +
+    "standard but are published per village in the Census 2011 amenities directory, so they " +
+    "become measured rather than estimated the moment that ingest lands.",
 };

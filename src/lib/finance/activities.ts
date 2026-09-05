@@ -56,6 +56,13 @@ export interface Activity {
   repaymentYears?: number;
   /** Indicative annual net surplus once the unit is running, in rupees. Used for DSCR only. */
   annualSurplus?: number;
+  /**
+   * Hours of daily power the unit needs to operate at all. A flour mill is the clear case: it is
+   * a motor. Omitted means the trade does not depend on supply.
+   */
+  needsPowerHours?: number;
+  /** Output spoils. Decides whether an all-weather road and a nearby market are load-bearing. */
+  perishable?: boolean;
   tier: SourceTier;
   provenance: Provenance;
 }
@@ -103,6 +110,7 @@ export const ACTIVITIES: Activity[] = [
     activityClass: "dairy",
     unitCost: 97_500,
     gestationMonths: 27,
+    perishable: true,
     tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
@@ -114,6 +122,7 @@ export const ACTIVITIES: Activity[] = [
     unitCost: 152_000,
     // NABARD records a 6–12 month band; we hold the conservative end and say so in the UI.
     gestationMonths: 12,
+    perishable: true,
     tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
@@ -124,6 +133,7 @@ export const ACTIVITIES: Activity[] = [
     activityClass: "dairy",
     unitCost: 230_000,
     gestationMonths: 0, // NABARD records gestation as NIL — the animal is already in milk.
+    perishable: true,
     tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
@@ -164,6 +174,7 @@ export const ACTIVITIES: Activity[] = [
     unitCost: 140_000,
     gestationMonths: 2,
     annualSurplus: 150_000,
+    needsPowerHours: 4,
     tier: "indicative",
     provenance: INDICATIVE,
   },
@@ -175,6 +186,8 @@ export const ACTIVITIES: Activity[] = [
     unitCost: 95_000,
     gestationMonths: 3,
     annualSurplus: 108_000,
+    needsPowerHours: 6,
+    perishable: true,
     tier: "indicative",
     provenance: INDICATIVE,
   },
@@ -197,6 +210,7 @@ export const ACTIVITIES: Activity[] = [
     unitCost: 185_000,
     gestationMonths: 0,
     annualSurplus: 168_000,
+    needsPowerHours: 8,
     tier: "indicative",
     provenance: INDICATIVE,
   },
