@@ -243,7 +243,7 @@ export default function FeasibilityReportPage() {
       </Card>
 
       {/* The catchment the numbers below are computed over. */}
-      <VillageMap village={village} onSelect={setVillageId} />
+      <VillageMap village={village} onSelect={setVillageId} activityClass={activity?.activityClass} />
 
       {/* data quality — stated before any finding, not after */}
       <div className="rounded-xl border-2 border-amber-500/40 bg-amber-500/10 p-4">
