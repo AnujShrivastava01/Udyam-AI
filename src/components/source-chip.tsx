@@ -36,10 +36,13 @@ export function SourceChip({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className={`inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${className}`}
+        // min-w-0 is what lets this shrink below its own min-content width: the label is nowrap,
+        // so a long one (MUDRA — Kishore · 10.5% · Scheduled banks / SIDBI) pushed the flex line wider
+        // than the card and the 22rem truncate cap never engaged.
+        className={`inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${className}`}
       >
         <FileText className="h-3 w-3 shrink-0" />
-        <span className="truncate max-w-[22rem]">{label}</span>
+        <span className="truncate min-w-0 max-w-full">{label}</span>
         {provenance.needsVerification && (
           <AlertCircle className="h-3 w-3 shrink-0 text-amber-600" />
         )}

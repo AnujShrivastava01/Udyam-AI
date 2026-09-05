@@ -1,13 +1,28 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Noto_Sans_Devanagari, Outfit } from "next/font/google";
 import "./globals.css";
 import { LayoutShell } from "@/components/layout-shell";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { StoreHydration } from "@/components/store-hydration";
 
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
+});
+
+/**
+ * Inter carries no Devanagari glyphs.
+ *
+ * The app defaults to Hinglish and offers Hindi, so a large share of what it renders was falling
+ * through to whatever the browser happened to pick — typically a system face with different
+ * metrics, which is why Hindi headings sat at a visibly different weight and height from their
+ * English equivalents. This is listed second in the stack, so Latin text still uses Inter and only
+ * Devanagari codepoints reach here.
+ */
+const devanagari = Noto_Sans_Devanagari({
+  variable: "--font-devanagari",
+  subsets: ["devanagari", "latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 // The variable used to be called --font-heading, which collided with the Tailwind theme token of
@@ -44,7 +59,10 @@ export default function RootLayout({
   // here: the store is not read on the server, so the server does not know which language this
   // visitor last chose.
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${devanagari.variable} ${outfit.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col font-sans">
         <StoreHydration />
         <SmoothScroll>

@@ -57,16 +57,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "unauthorised" }, { status: 401 });
   }
 
-  let payload: { messages?: WhapiMessage[] };
+  let payload: unknown;
   try {
     payload = await req.json();
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
 
-  const incoming = (payload.messages ?? []).filter(
-    (m) => !m.from_me && m.type === "text" && m.text?.body,
+  // `{"messages": "hi"}` is valid JSON and used to reach `.filter`, throwing a 500 from a request
+  // the gateway considered well-formed. Shape is checked, not assumed.
+  const raw = (payload as { messages?: unknown } | null)?.messages;
+  const list: WhapiMessage[] = Array.isArray(raw) ? (raw as WhapiMessage[]) : [];
+
+  const incoming = list.filter(
+    (m) => m && typeof m === "object" && !m.from_me && m.type === "text" && m.text?.body,
   );
+
+  // One callback fans out one outbound send per message, sequentially, inside the request. A
+  // gateway replaying a large batch would hold the invocation open for as long as it took and
+  // spend the WhatsApp quota doing it. Anything past the cap is dropped, loudly.
+  const MAX_PER_CALLBACK = 10;
+  const overflow = Math.max(0, incoming.length - MAX_PER_CALLBACK);
+  if (overflow > 0) {
+    console.warn(`[whatsapp] dropped ${overflow} message(s) over the ${MAX_PER_CALLBACK} cap`);
+  }
+  incoming.length = Math.min(incoming.length, MAX_PER_CALLBACK);
 
   // Acknowledge fast. WhatsApp gateways retry aggressively on a slow 200.
   const results: { to: string; sent: number; failed: number }[] = [];
@@ -92,5 +107,5 @@ export async function POST(req: NextRequest) {
     results.push({ to: from, sent, failed });
   }
 
-  return NextResponse.json({ ok: true, handled: results.length, results });
+  return NextResponse.json({ ok: true, handled: results.length, dropped: overflow, results });
 }

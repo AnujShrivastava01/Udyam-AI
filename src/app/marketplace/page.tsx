@@ -5,12 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Store, MapPin, Tag, ArrowRight, CheckCircle2 } from "lucide-react";
+import { SampleDataBanner } from "@/components/sample-data-banner";
 
+/**
+ * Illustrative listings.
+ *
+ * These were written by hand and rendered with no marker of any kind, next to a live-looking
+ * "Submit Offer" button — named counterparties, rupee budgets and "12 hours left" countdowns that
+ * a visitor had no way to tell apart from a real board. The buyers are now obviously fictional,
+ * the banner says so above the grid, and the two action buttons are disabled until there is a
+ * marketplace behind them.
+ */
 const MOCK_BIDS = [
   {
     id: "B-101",
     title: "Need 50L A2 Milk Daily (6 Month Contract)",
-    postedBy: "FreshFoods Inc.",
+    postedBy: "Sample Buyer A",
     location: "Jhansi City",
     category: "Dairy & Livestock",
     deadline: "2 days left",
@@ -21,7 +31,7 @@ const MOCK_BIDS = [
   {
     id: "B-102",
     title: "Bulk order: 500 hand-woven baskets for Diwali",
-    postedBy: "CraftsVilla Exports",
+    postedBy: "Sample Buyer B",
     location: "Lalitpur",
     category: "Handicrafts",
     deadline: "12 hours left",
@@ -32,7 +42,7 @@ const MOCK_BIDS = [
   {
     id: "B-103",
     title: "Seeking organic jaggery supplier (100kg/week)",
-    postedBy: "Local Cooperative",
+    postedBy: "Sample Buyer C",
     location: "Jalaun",
     category: "Food Processing",
     deadline: "5 days left",
@@ -47,12 +57,20 @@ export default function MarketplacePage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
+      <SampleDataBanner
+        className="mb-6"
+        what="This board"
+        detail="Every listing, buyer, budget and deadline below is written by hand to show the shape of the feature. No requirement here was posted by a real business, and offers cannot be submitted."
+      />
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold font-heading">B2B Marketplace</h1>
           <p className="text-muted-foreground mt-2">Find bulk buyers and suppliers in your region.</p>
         </div>
-        <Button size="lg" className="rounded-full shadow-md">Post a Requirement</Button>
+        <Button size="lg" className="rounded-full shadow-md" disabled>
+          Post a Requirement
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -87,9 +105,12 @@ export default function MarketplacePage() {
               </div>
             </CardContent>
             <CardFooter className="border-t pt-4">
-              <Button variant="outline" className="w-full justify-between group">
-                Submit Offer 
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <Button variant="outline" className="w-full justify-between group" disabled>
+                Submit Offer
+                <ArrowRight
+                  className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all"
+                  aria-hidden="true"
+                />
               </Button>
             </CardFooter>
           </Card>

@@ -16,6 +16,7 @@ import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
 import type { Locale } from "@/lib/i18n/keys";
 import { renderMessage } from "@/lib/i18n/render";
 import { wa } from "./client";
+import { money } from "@/lib/i18n/render";
 
 export type Step = "LANG" | "VILLAGE" | "MARGIN" | "ACTIVITY" | "DONE";
 
@@ -37,8 +38,33 @@ export interface Session {
  */
 const sessions = new Map<string, Session>();
 const SESSION_TTL_MS = 1000 * 60 * 60 * 6;
+/** Hard ceiling, so a flood of distinct senders cannot grow the map without bound. */
+const MAX_SESSIONS = 5_000;
+
+/**
+ * Drop everything past its TTL.
+ *
+ * A TTL was already honoured on READ, but nothing ever deleted the entry — a stale session was
+ * only replaced if that same number messaged again. So the map held every phone number that had
+ * ever written in, along with the capital each one declared, for the life of the process. That is
+ * unbounded memory and, more to the point, indefinite retention of personal financial data nobody
+ * asked us to keep.
+ */
+function sweep() {
+  const now = Date.now();
+  for (const [phone, s] of sessions) {
+    if (now - s.updatedAt >= SESSION_TTL_MS) sessions.delete(phone);
+  }
+  if (sessions.size > MAX_SESSIONS) {
+    const oldestFirst = [...sessions.entries()].sort((a, b) => a[1].updatedAt - b[1].updatedAt);
+    for (const [phone] of oldestFirst.slice(0, sessions.size - MAX_SESSIONS)) {
+      sessions.delete(phone);
+    }
+  }
+}
 
 export function getSession(phone: string): Session {
+  sweep();
   const existing = sessions.get(phone);
   if (existing && Date.now() - existing.updatedAt < SESSION_TTL_MS) return existing;
   const fresh: Session = { phone, step: "LANG", locale: "hinglish", updatedAt: Date.now() };
@@ -59,8 +85,9 @@ export function resetSession(phone: string) {
 // Numbers are formatted ONCE, here, with the Indian locale. Nothing downstream reformats them
 // and no template contains a digit of its own.
 
-const money = (n: number) =>
-  `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n))}`;
+// Was a local constant with this exact name and body, sitting beside the exported one in
+// lib/i18n/render.ts and separately editable — two formatters carrying the same guarantee comment
+// is how the guarantee stops being true.
 
 const fill = (template: string, params: Record<string, string | number>) =>
   template.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? `{${k}}`));

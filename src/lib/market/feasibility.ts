@@ -49,7 +49,16 @@ export const NSS_PROVENANCE: Provenance = {
  * establishment density against the national rural average*. That is a weaker claim than
  * "we counted the dairies", and it is the one the data actually supports. The UI says so.
  */
-export const DEFAULT_SECTOR_SHARE = 0.12; // retained only for callers that ask for the nominal figure
+/**
+ * The nominal share that USED to be asserted for every sector.
+ *
+ * The engine now derives the share from the establishment-density table
+ * (`nationalSectorShare`), which is why the saturation index stopped contradicting the density
+ * benchmark. This constant survives only for the unknown-activity branch below, where no share was
+ * applied at all — reporting it as `sectorShareAssumed` there stated a derivation that never
+ * happened, so that branch now reports 0.
+ */
+export const DEFAULT_SECTOR_SHARE = 0.12;
 
 export type Confidence = "measured" | "estimated" | "seeded" | "unavailable";
 
@@ -57,6 +66,15 @@ export interface Figure {
   value: number;
   /** Plus/minus band, in the same unit. */
   band?: number;
+  /**
+   * How many decimals this quantity is meaningful to. Omitted means whole units.
+   *
+   * The renderer used to round every figure to zero decimals, so the saturation index — 0.82,
+   * 0.92, 1.13, 0.66 across the four villages — printed as "1× the national rural norm" on all
+   * four, while the chart caption 200px above printed sat.index.toFixed(2). Precision belongs to
+   * the figure, not to a magnitude test in the component.
+   */
+  decimals?: number;
   unit: string;
   confidence: Confidence;
   provenance?: Provenance;
@@ -178,7 +196,9 @@ export function saturation(village: Village, activityClass: string): SaturationR
       supportableFromDemand: null,
       headroom: 0,
       estimatesAgree: null,
-      sectorShareAssumed: DEFAULT_SECTOR_SHARE,
+      // No density row means no share was applied. Reporting 0.12 here claimed an assumption the
+      // code did not make.
+      sectorShareAssumed: 0,
       label: "unknown",
     };
   }
@@ -196,8 +216,16 @@ export function saturation(village: Village, activityClass: string): SaturationR
       ? null
       : round((figure.value * CAPTURE_SHARE) / RURAL_OAE_GVA_PER_YEAR);
 
+  // expectedSector 0 forces index 0, which read as "underserved" — the most encouraging label in
+  // the set — on the basis that we could not compute an expectation at all.
   const label: SaturationResult["label"] =
-    index < 0.8 ? "underserved" : index <= 1.2 ? "balanced" : "crowded";
+    expectedSector <= 0
+      ? "unknown"
+      : index < 0.8
+        ? "underserved"
+        : index <= 1.2
+          ? "balanced"
+          : "crowded";
 
   const estimatesAgree =
     supportableFromDemand == null
@@ -309,6 +337,7 @@ export function buildFeasibilityReport(
       figures: [
         {
           value: sat.index,
+          decimals: 2,
           unit: "× the national rural norm",
           confidence: village.seed ? "seeded" : "estimated",
           provenance: ECONOMIC_CENSUS,

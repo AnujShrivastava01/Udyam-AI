@@ -38,7 +38,7 @@ npm run bench          # regenerates every artifact in this directory
 BENCH_COUNT=2000 npm run bench
 ```
 
-`cases.json` and `labels.json` are the benchmark. `results.json` carries every solver's per-case
+`cases.json` and `labels.json` are the benchmark. `results.json` carries each solver's SCORES — exact-match totals, per-field and per-region breakdowns, and a handful of sample failures — not a row per case. Regenerate and re-score from the cases and labels; the per-case
 result. `LEADERBOARD.md` is the table.
 
 ## Results

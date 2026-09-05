@@ -74,7 +74,11 @@ async function post(path: string, payload: unknown): Promise<GatewayResult> {
 
 /**
  * Normalise a WhatsApp identifier to the bare digits the gateway expects.
- * Accepts "919244524591", "+91 92445 24591", "919244524591@s.whatsapp.net".
+ * Accepts "919000000001", "+91 90000 00001", "919000000001@s.whatsapp.net".
+ *
+ * The examples used to be a real-looking number. It is not ours, we never verified it is unassigned,
+ * and it sat in a public repo next to WhatsApp send code — the reserved 9000000001 pattern costs
+ * nothing and cannot ring anybody.
  */
 export function normaliseRecipient(raw: string): string {
   return raw.replace(/@.*$/, "").replace(/\D/g, "");

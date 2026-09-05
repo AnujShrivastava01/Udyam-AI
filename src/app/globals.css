@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-inter), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-outfit), var(--font-sans);
+  --font-heading: var(--font-outfit), var(--font-devanagari), var(--font-inter), ui-sans-serif, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -190,4 +190,18 @@
 .skip-link:focus-visible {
   top: 0.5rem;
   opacity: 1;
+}
+
+/*
+ * `no-scrollbar` was used on the journey stepper and never defined anywhere — not in globals.css,
+ * not in tw-animate-css, and there is no tailwind.config. The stepper's inner row is min-w-[600px]
+ * inside overflow-x-auto, and it lives in the FIXED header, so on a narrow Windows viewport a
+ * horizontal scrollbar sat under the six steps and added height to the header on every page.
+ */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

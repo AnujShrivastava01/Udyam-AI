@@ -42,7 +42,7 @@ Open <http://localhost:3000>. No API keys are required to see the core product �
 feasibility engines are pure and run locally.
 
 ```bash
-npm test          # 95 tests
+npm test          # 127 tests
 npm run bench     # regenerate SIDDHI-Bench
 npx tsc --noEmit  # typecheck
 npm run build     # production build
@@ -158,7 +158,10 @@ and refuses to rank, which is a designed behaviour rather than an unhandled case
 
 **Not built yet**
 
-- Voice in and out (Bhashini ASR/TTS)
+- Voice is *wired but not switched on*: `src/lib/voice/` carries the provider abstraction
+  (Sarvam, Bhashini), the per-locale number-to-words renderer and its tests, but no screen calls
+  it and no provider key is configured. Adding `SARVAM_API_KEY` and a mic control is the
+  remaining work, not the module.
 - Real WorldPop / SHRUG / LGD ingest — the gazetteer is 4 seeded villages
 - Grounded retrieval over scheme PDFs with citation enforcement
 
@@ -172,7 +175,7 @@ and refuses to rank, which is a designed behaviour rather than an unhandled case
   block's total establishment density against the national average. The UI says so.
 - WhatsApp runs through Whapi, which drives a real WhatsApp session. Fast to demo, carries a ban
   risk on the number, and is **not** a government deployment path — that is Meta's Cloud API.
-- Vertex AI narration is live on `gemini-2.5-flash` at location `global`. If it is ever
+- Vertex AI narration is live on `gemini-2.5-pro` at location `global`. If it is ever
   unreachable the product falls back to the deterministic template — the designed behaviour, and
   it changes no figure a borrower sees. See AIAGENT.md for the two 404 traps (wrong location,
   wrong model family) that make this look like a permissions problem when it is not.

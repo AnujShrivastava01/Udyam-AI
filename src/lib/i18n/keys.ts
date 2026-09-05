@@ -380,6 +380,11 @@ export const EN = {
   "emi.col.balance": "Balance",
   "emi.row.paid": "paid",
   "emi.row.upcoming": "upcoming",
+  "calc.firstIncome": "first income",
+  "discover.rankingNote":
+    "Ranking combines market saturation, distance to market, and the activity’s own cash flow against the scheme’s repayment terms. Rows marked “advised against” are ones where the borrower would be asked to pay before the unit earns, or to find more margin than they have. We show them so the reasoning is visible — not as alternatives to pick from.",
+  "discover.marginSlider": "Margin money",
+  "calc.marginWarning": "Above 10% — the cap is binding here",
 } as const;
 
 export type MessageKey = keyof typeof EN;

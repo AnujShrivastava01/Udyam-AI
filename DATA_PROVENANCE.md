@@ -42,9 +42,14 @@ ceilings change.
 
 These are assumptions, not measurements, and the UI surfaces each one:
 
-1. **Sector establishment share (12%).** The Economic Census publishes employment share by
-   industry at village level, not establishment counts by industry — so "how many dairies in this
-   block" cannot be read off and must be modelled.
+1. **Sector establishment share — derived, no longer a flat 12%.** The Economic Census publishes
+   employment share by industry at village level, not establishment counts by industry — so "how
+   many dairies in this block" cannot be read off and must be modelled. A flat 12% was asserted
+   for every sector until it was found to contradict the density table on the same page: at
+   12.63 dairies per 1,000 people against a total establishment density of 48.75 per 1,000, the
+   dairy share is 25.9%, not 12%. `nationalSectorShare()` now derives each sector's share from
+   those two published densities. The 12% constant survives in the code only as a name for the
+   old assumption and is applied to nothing.
 2. **Capture share (35%)** of catchment category spend reachable by enterprises of one kind.
 3. **State scaling of national item-group spend** by the ratio of state to national rural MPCE.
 

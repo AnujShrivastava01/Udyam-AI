@@ -359,6 +359,11 @@ export interface StackResult {
  * the modelled space, and it is explainable line by line.
  */
 export function optimiseStack(opts: StackOptions): StackResult {
+  // A NaN project cost produced NaN component amounts, a NaN balanceCheck, and
+  // `Math.abs(NaN) > 1 === false` — so the stack was marked FEASIBLE and rendered.
+  if (!Number.isFinite(opts.projectCost) || !Number.isFinite(opts.marginAvailable)) {
+    throw new Error("optimiseStack: projectCost and marginAvailable must be finite numbers");
+  }
   const ineligible = new Set(opts.ineligible ?? []);
   const pool = RAILS.filter((r) => !ineligible.has(r.id));
 

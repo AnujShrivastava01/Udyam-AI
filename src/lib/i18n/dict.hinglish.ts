@@ -291,4 +291,9 @@ export const HINGLISH: Dictionary = {
   "emi.col.balance": "Baaki balance",
   "emi.row.paid": "chukaya",
   "emi.row.upcoming": "aane wali",
+  "calc.firstIncome": "pehli kamai",
+  "discover.rankingNote":
+    "Ranking market saturation, market se doori aur kaam ki apni kamai ko scheme ki repayment sharton ke saamne rakh kar banta hai. “salah nahi” wali rows mein kamai se pehle kist deni padti hai, ya maujooda poonji se zyada chahiye. Hum unhein isliye dikhate hain taaki wajah saaf rahe — chunne ke option ke roop mein nahi.",
+  "discover.marginSlider": "Apni poonji",
+  "calc.marginWarning": "10% se zyada — yahan cap lag rahi hai",
 };

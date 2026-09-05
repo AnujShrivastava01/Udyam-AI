@@ -39,6 +39,15 @@ export interface TriagedApplication {
   /** The single reason this row needs attention, in an officer's language. */
   reason: string;
   issues: string[];
+  /**
+   * Structure flag codes, carried alongside the human-readable issues.
+   *
+   * The summary counted cap-bound files with `issues.some(i => i.includes("cap"))`, which also
+   * matches "Breaches the RBI repayment cap" — an affordability refusal, not a cap on the loan.
+   * A count that depends on the wording of a sentence breaks the first time the sentence is
+   * edited, and this one was already wrong.
+   */
+  flagCodes: string[];
   solvency: SolvencyVerdict;
   projectCost: number;
   sanctionedLoan: number;
@@ -70,7 +79,11 @@ export function triage(application: Application): TriagedApplication {
   });
 
   const issues: string[] = [];
-  for (const f of p.structure.flags) issues.push(f.title);
+  const flagCodes: string[] = [];
+  for (const f of p.structure.flags) {
+    issues.push(f.title);
+    flagCodes.push(f.code);
+  }
 
   const routingMismatch =
     application.routedTo != null && application.routedTo !== p.structure.scheme.id;
@@ -96,6 +109,7 @@ export function triage(application: Application): TriagedApplication {
     status,
     reason: primaryReason(status, p.solvency.verdict, routingMismatch, affordable, activity?.gestationMonths),
     issues,
+    flagCodes,
     solvency: p.solvency.verdict,
     projectCost: p.structure.projectCost,
     sanctionedLoan: p.structure.sanctionedLoan,
@@ -140,8 +154,8 @@ export function triageQueue(applications: Application[]): {
       review: rows.filter((r) => r.status === "REVIEW").length,
       block: rows.filter((r) => r.status === "BLOCK").length,
       gestationGapped: rows.filter((r) => r.solvency === "GESTATION_GAP").length,
-      capBound: rows.filter((r) => r.issues.some((i) => i.includes("cap"))).length,
-      deadZone: rows.filter((r) => r.issues.some((i) => i.toLowerCase().includes("dead zone"))).length,
+      capBound: rows.filter((r) => r.flagCodes.includes("CAP_BINDING")).length,
+      deadZone: rows.filter((r) => r.flagCodes.includes("DEAD_ZONE")).length,
       routingMismatches: rows.filter((r) => r.routingMismatch).length,
       exposedBeforeIncome: Math.round(
         rows.reduce((sum, r) => sum + r.preIncomeObligation, 0),

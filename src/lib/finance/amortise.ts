@@ -52,9 +52,17 @@ export interface AmortiseResult {
   amortisedPrincipal: number;
   /** Interest over the amortising periods, excluding any moratorium interest. */
   amortisationInterest: number;
-  /** moratoriumInterest + amortisationInterest. */
+  /**
+   * Every rupee of interest the borrower pays, derived from the payment stream:
+   * `totalOutflow - principal`.
+   *
+   * This is NOT `moratoriumInterest + amortisationInterest`, which is what the comment used to
+   * claim. Under the capitalised convention moratorium interest is folded into principal and then
+   * repaid WITH interest, so it appears in neither field — summing the two columns made the
+   * capitalised convention look cheaper than the serviced one, which is backwards.
+   */
   totalInterest: number;
-  /** principal + totalInterest. */
+  /** Every rupee the borrower actually pays: the sum of the payment column. */
   totalOutflow: number;
   schedule: ScheduleRow[];
 }
@@ -78,6 +86,18 @@ export function levelInstalment(principal: number, periodicRate: number, periods
 export function amortise(input: AmortiseInput): AmortiseResult {
   const { principal, annualRatePct, tenureMonths, moratoriumMonths, restMonths, convention } = input;
 
+  // `NaN <= 0` is false, so every one of these guards used to pass a NaN straight through and the
+  // whole schedule came back as NaN with no error anywhere — a plan that looks structured and is
+  // arithmetic garbage. Finiteness is checked first, before any comparison.
+  for (const [name, v] of [
+    ["principal", principal],
+    ["annualRatePct", annualRatePct],
+    ["tenureMonths", tenureMonths],
+    ["moratoriumMonths", moratoriumMonths],
+    ["restMonths", restMonths],
+  ] as const) {
+    if (!Number.isFinite(v)) throw new Error(`amortise: ${name} must be a finite number`);
+  }
   if (principal <= 0) throw new Error("amortise: principal must be positive");
   if (restMonths <= 0) throw new Error("amortise: restMonths must be positive");
   if (tenureMonths <= moratoriumMonths) {

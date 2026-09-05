@@ -97,8 +97,11 @@ export default function OfficerConsolePage() {
         </div>
       </header>
 
-      {/* summary strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* summary strip — capBound and deadZone were computed on every render and shown nowhere,
+          which is a shame: they are the two counts that name a defect in the SPECIFICATION rather
+          than in an application, and an officer seeing "14 files sit in the dead zone" is the
+          moment the argument lands. */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <SummaryTile
           label="In the queue"
           value={String(summary.total)}
@@ -120,6 +123,18 @@ export default function OfficerConsolePage() {
           label="Exposed before income"
           value={`₹${inr(summary.exposedBeforeIncome)}`}
           sub="across the whole queue"
+          tone="rose"
+        />
+        <SummaryTile
+          label="Loan cap binding"
+          value={String(summary.capBound)}
+          sub="the ceiling, not the percentage, sets the loan"
+          tone="amber"
+        />
+        <SummaryTile
+          label="In the dead zone"
+          value={String(summary.deadZone)}
+          sub="the 10% margin rule does not hold here"
           tone="rose"
         />
       </div>
@@ -221,7 +236,13 @@ function SummaryTile({
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
-        <p className={`text-3xl font-bold font-heading mt-1 tabular-nums ${accent}`}>{value}</p>
+        {/* text-3xl on a two-column phone grid clipped ₹1,04,32,118. Scaled down until there is
+            room for it, and allowed to break. */}
+        <p
+          className={`text-2xl sm:text-3xl font-bold font-heading mt-1 tabular-nums break-words ${accent}`}
+        >
+          {value}
+        </p>
         <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{sub}</p>
       </CardContent>
     </Card>

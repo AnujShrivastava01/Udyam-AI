@@ -69,11 +69,23 @@ export interface Structure {
 }
 
 /** Route a project cost to its scheme tier, exactly as the problem statement's Logic A / B. */
+/**
+ * Route a project cost to its scheme.
+ *
+ * Partitions on the UPPER bound only. The declared bands are ₹0–₹1,40,000 and
+ * ₹1,40,001–₹50,00,000, which leaves a one-rupee hole: a project cost of ₹1,40,000.50 matched
+ * neither band and structure() threw "no scheme covers a project cost of 140000.5". Nothing in the
+ * UI reaches it — the slider steps ₹1,000 and every unit cost is an integer — but /api/narrate
+ * accepts an arbitrary margin, and a kernel that throws on a value inside its own documented range
+ * is a kernel with a hole in it.
+ *
+ * Matching on the upper bound alone keeps both tiers' boundary wording exactly as declared while
+ * making the function total over [0, ceiling]. Above the ceiling it still returns null, because
+ * that is a refusal the caller must handle, not a rounding question.
+ */
 export function routeScheme(projectCost: number): Scheme | null {
-  return (
-    SCHEME_LIST.find((s) => projectCost >= s.minProjectCost && projectCost <= s.maxProjectCost) ??
-    null
-  );
+  if (!Number.isFinite(projectCost) || projectCost < 0) return null;
+  return SCHEME_LIST.find((s) => projectCost <= s.maxProjectCost) ?? null;
 }
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
@@ -107,6 +119,12 @@ export function structure(input: StructureInput): Structure {
   // A cleared margin field is an ordinary thing for a user to do, not an exceptional one. Return a
   // well-formed zero structure with the BELOW_MINIMUM flag the type has always declared, so the UI
   // can say "enter an amount" instead of the kernel throwing mid-render.
+  // marginCapital arrives from a text field, so a NaN is an ordinary user state (a cleared input)
+  // and gets the soft refusal below, not an exception. neededProjectCost comes from the activity
+  // registry — a non-finite value there is a programming error and should be loud.
+  if (neededProjectCost != null && !Number.isFinite(neededProjectCost)) {
+    throw new Error("structure: neededProjectCost must be a finite number");
+  }
   if (!Number.isFinite(projectCost) || projectCost <= 0) {
     const scheme = SCHEMES["nsfdc-micro-finance"];
     return {

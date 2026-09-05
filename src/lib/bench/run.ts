@@ -6,7 +6,7 @@
  * Writes the public artifacts to bench/:
  *   cases.json       the 500 generated cases
  *   labels.json      ground truth, computed by the kernel
- *   results.json     every solver's full per-case result
+ *   results.json     each solver's scores: totals, per-field, per-region, sample failures
  *   LEADERBOARD.md   the human-readable table
  *
  * The cases and labels are the benchmark. Publishing them is the point: a claim a judge can

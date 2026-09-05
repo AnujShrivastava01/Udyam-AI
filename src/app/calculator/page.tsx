@@ -53,16 +53,6 @@ import { plan, type MoratoriumConvention } from "@/lib/finance";
 import { useAppStore } from "@/lib/store";
 import { useT, money, type MessageKey } from "@/lib/i18n";
 
-const inr = (n: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(n);
-
-const inrPlain = (n: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(n);
-
 const FLAG_STYLE: Record<string, string> = {
   critical: "border-rose-500/40 bg-rose-500/10 text-rose-800 dark:text-rose-300",
   warning: "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-300",
@@ -78,8 +68,12 @@ export default function CalculatorPage() {
   const [convention, setConvention] = useState<MoratoriumConvention>("serviced");
   const [householdIncome, setHouseholdIncome] = useState(86_119);
 
+  // Dragging the slider fired this on every tick, and the store drives LayoutShell — so one drag
+  // re-rendered the header, the stepper and the bottom nav a few hundred times. The store only
+  // needs the value the user settled on.
   useEffect(() => {
-    setOnboardingInput({ marginCapital: margin });
+    const id = setTimeout(() => setOnboardingInput({ marginCapital: margin }), 250);
+    return () => clearTimeout(id);
   }, [margin, setOnboardingInput]);
 
   // The kernel is guarded here as well as internally. A cleared input is an ordinary user action,
@@ -222,7 +216,7 @@ export default function CalculatorPage() {
                         {t(`activity.${a.id}.name` as MessageKey)}
                       </span>
                       <span className="block text-xs text-muted-foreground">
-                        {inr(a.unitCost)} ·{" "}
+                        {money(a.unitCost)} ·{" "}
                         {a.gestationMonths === 0
                           ? t("activity.earnsImmediately")
                           : t("activity.earnsFrom", { month: a.gestationMonths })}
@@ -326,12 +320,16 @@ export default function CalculatorPage() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-                <Metric label={t("calc.projectCost")} value={inr(s.projectCost)} />
-                <Metric label={t("calc.sanctionedLoan")} value={inr(s.sanctionedLoan)} />
+                <Metric label={t("calc.projectCost")} value={money(s.projectCost)} />
+                <Metric label={t("calc.sanctionedLoan")} value={money(s.sanctionedLoan)} />
+                {/* The "your share is above 10%" warning was carried by an amber tint alone, on
+                    the one tile that tells the borrower they must find more money than the scheme
+                    implies. It now says so. */}
                 <Metric
                   label={t("calc.yourShare")}
                   value={`${(s.effectiveMarginPct * 100).toFixed(2)}%`}
                   accent={s.effectiveMarginPct > 0.1001}
+                  note={s.effectiveMarginPct > 0.1001 ? t("calc.marginWarning") : undefined}
                 />
                 <Metric
                   label={t("calc.moratorium")}
@@ -343,10 +341,10 @@ export default function CalculatorPage() {
 
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Figure label={t("calc.quarterly")} value={inr(schedule.instalment)} strong />
+                <Figure label={t("calc.quarterly")} value={money(schedule.instalment)} strong />
                 <Figure label={t("calc.instalments")} value={String(schedule.instalmentCount)} />
-                <Figure label={t("calc.totalInterest")} value={inr(schedule.totalInterest)} />
-                <Figure label={t("calc.totalOutflow")} value={inr(schedule.totalOutflow)} />
+                <Figure label={t("calc.totalInterest")} value={money(schedule.totalInterest)} />
+                <Figure label={t("calc.totalOutflow")} value={money(schedule.totalOutflow)} />
               </div>
 
               <div className="rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed">
@@ -355,8 +353,8 @@ export default function CalculatorPage() {
                     convention === "serviced"
                       ? t("calc.convention.capitalised")
                       : t("calc.convention.serviced"),
-                  instalment: `₹${inrPlain(result.alternateConvention.instalment)}`,
-                  interest: `₹${inrPlain(result.alternateConvention.totalInterest)}`,
+                  instalment: money(result.alternateConvention.instalment),
+                  interest: money(result.alternateConvention.totalInterest),
                 })}
               </div>
 
@@ -373,15 +371,22 @@ export default function CalculatorPage() {
                 </h3>
                 <div className="h-[240px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 5, right: 12, bottom: 0, left: 0 }}>
+                    {/* The axis was categorical over M3, M6, M9… — every schedule month is a
+                        multiple of the 3-month rest period. The "first income" line is placed at
+                        the activity's gestation, and papad-pickle's is month 2, which matched no
+                        category, so recharts dropped the line silently while the caption below
+                        still explained a marker that was not there. A numeric axis can hold it. */}
+                    <BarChart data={chartData} margin={{ top: 20, right: 12, bottom: 0, left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
                       <XAxis
-                        dataKey="label"
+                        dataKey="month"
+                        type="number"
+                        domain={[0, chartData[chartData.length - 1]?.month ?? 0]}
+                        tickFormatter={(m) => `M${m}`}
                         stroke="var(--color-muted-foreground)"
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
-                        interval={1}
                       />
                       <YAxis
                         stroke="var(--color-muted-foreground)"
@@ -391,7 +396,7 @@ export default function CalculatorPage() {
                         tickFormatter={(t) => `₹${Math.round(t / 1000)}k`}
                       />
                       <Tooltip
-                        formatter={(v) => inr(Number(v ?? 0))}
+                        formatter={(v) => money(Number(v ?? 0))}
                         contentStyle={{
                           borderRadius: 8,
                           border: "1px solid var(--color-border)",
@@ -399,15 +404,16 @@ export default function CalculatorPage() {
                         }}
                       />
                       <Legend iconType="circle" />
-                      <Bar dataKey="Principal" stackId="a" fill="var(--color-primary)" />
-                      <Bar dataKey="Interest" stackId="a" fill="var(--color-chart-2)" />
+                      {/* A numeric axis has no band width, so bars need an explicit size. */}
+                      <Bar dataKey="Principal" stackId="a" fill="var(--color-primary)" barSize={10} />
+                      <Bar dataKey="Interest" stackId="a" fill="var(--color-chart-2)" barSize={10} />
                       {activity && activity.gestationMonths > 0 && (
                         <ReferenceLine
-                          x={`M${activity.gestationMonths}`}
+                          x={activity.gestationMonths}
                           stroke="#e11d48"
                           strokeDasharray="4 3"
                           label={{
-                            value: "first income",
+                            value: t("calc.firstIncome"),
                             position: "top",
                             fill: "#e11d48",
                             fontSize: 11,
@@ -416,7 +422,7 @@ export default function CalculatorPage() {
                       )}
                       {moratoriumEndMonth > 0 && (
                         <ReferenceLine
-                          x={`M${moratoriumEndMonth}`}
+                          x={moratoriumEndMonth}
                           stroke="var(--color-muted-foreground)"
                           strokeDasharray="3 3"
                         />
@@ -477,15 +483,15 @@ export default function CalculatorPage() {
                               )}
                             </TableCell>
                             <TableCell className="text-right tabular-nums text-muted-foreground">
-                              {inr(row.openingBalance)}
+                              {money(row.openingBalance)}
                             </TableCell>
-                            <TableCell className="text-right tabular-nums">{inr(row.interest)}</TableCell>
-                            <TableCell className="text-right tabular-nums">{inr(row.principal)}</TableCell>
+                            <TableCell className="text-right tabular-nums">{money(row.interest)}</TableCell>
+                            <TableCell className="text-right tabular-nums">{money(row.principal)}</TableCell>
                             <TableCell className="text-right tabular-nums font-semibold">
-                              {inr(row.payment)}
+                              {money(row.payment)}
                             </TableCell>
                             <TableCell className="text-right tabular-nums text-muted-foreground">
-                              {inr(row.closingBalance)}
+                              {money(row.closingBalance)}
                             </TableCell>
                           </TableRow>
                         );
@@ -501,14 +507,16 @@ export default function CalculatorPage() {
               <div>
                 <h3 className="font-bold font-heading mb-3">{t("calc.howDecided")}</h3>
                 <ol className="space-y-2">
-                  {s.trace.map((t, i) => (
+                  {/* The loop variable used to be called `t`, shadowing the translator inside the
+                      one block that most needs it. */}
+                  {s.trace.map((step, i) => (
                     <li key={i} className="flex gap-3 text-sm">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
                         {i + 1}
                       </span>
                       <span>
-                        <span className="font-medium">{t.rule}</span>
-                        <span className="text-muted-foreground"> → {t.outcome}</span>
+                        <span className="font-medium">{step.rule}</span>
+                        <span className="text-muted-foreground"> → {step.outcome}</span>
                       </span>
                     </li>
                   ))}
@@ -517,7 +525,7 @@ export default function CalculatorPage() {
 
               <div className="flex flex-wrap gap-2">
                 <SourceChip
-                  label={`${s.scheme.name} — ${s.scheme.annualRatePct}% · ${s.scheme.tenureMonths / 12}y · cap ${inr(s.scheme.maxLoan)}`}
+                  label={`${s.scheme.name} — ${s.scheme.annualRatePct}% · ${s.scheme.tenureMonths / 12}y · cap ${money(s.scheme.maxLoan)}`}
                   provenance={s.scheme.provenance}
                 />
                 {activity && GESTATION_RANGE_NOTE[activity.id] && (
@@ -557,20 +565,25 @@ function Metric({
   label,
   value,
   accent,
+  note,
   icon,
 }: {
   label: string;
   value: string;
   accent?: boolean;
+  note?: string;
   icon?: React.ReactNode;
 }) {
   return (
     <div className={`rounded-lg p-3 ${accent ? "bg-amber-400/25 ring-1 ring-amber-300/60" : "bg-black/20"}`}>
-      <p className="text-white/70 text-[10px] font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+      {/* text-white/70 on this gradient measured about 2.9:1. The label is the only thing naming
+          what the figure is. */}
+      <p className="text-white/90 text-[10px] font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
         {icon}
         {label}
       </p>
-      <p className="font-bold text-lg leading-tight">{value}</p>
+      <p className="font-bold text-lg leading-tight tabular-nums">{value}</p>
+      {note && <p className="mt-1 text-[10px] font-medium leading-tight text-amber-50">{note}</p>}
     </div>
   );
 }

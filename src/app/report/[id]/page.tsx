@@ -41,9 +41,6 @@ import { GAZETTEER_COVERAGE, VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villag
 import { useT, money, num, type MessageKey } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 
-const inr = (n: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
-
 const CONFIDENCE_STYLE: Record<Confidence, string> = {
   measured: "text-emerald-800 border-emerald-500/40 bg-emerald-500/10",
   estimated: "text-blue-800 border-blue-500/40 bg-blue-500/10",
@@ -390,9 +387,14 @@ function FigureRow({ figure }: { figure: Figure }) {
     <div className="rounded-lg border bg-muted/20 p-2.5">
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <span className="text-base font-bold tabular-nums">
-          {figure.unit.startsWith("₹") ? money(figure.value) : inr(figure.value)}
+          {figure.unit.startsWith("₹")
+            ? money(figure.value)
+            : num(figure.value, figure.decimals ?? 0)}
           {figure.band ? (
-            <span className="text-xs font-normal text-muted-foreground"> ± {inr(figure.band)}</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              {" "}
+              ± {num(figure.band, figure.decimals ?? 0)}
+            </span>
           ) : null}
         </span>
         <span className="text-[11px] text-muted-foreground">{figure.unit.replace(/^₹\s?/, "")}</span>

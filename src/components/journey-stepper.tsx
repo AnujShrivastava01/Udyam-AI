@@ -91,6 +91,9 @@ export function JourneyStepper() {
                 ) : (
                   <Icon className="w-5 h-5" aria-hidden="true" />
                 )}
+                {/* The tick and the ring carried the whole state. aria-current marks the active
+                    step; "completed" has no equivalent attribute, so it is said in text. */}
+                {isCompleted && <span className="sr-only">{t("step.completed")}</span>}
               </div>
               <span
                 className={cn(

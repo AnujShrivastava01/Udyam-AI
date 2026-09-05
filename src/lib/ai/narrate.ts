@@ -17,7 +17,7 @@
 
 import type { Plan } from "@/lib/finance";
 import type { Locale } from "@/lib/i18n/keys";
-import { renderMessage } from "@/lib/i18n/render";
+import { money, renderMessage } from "@/lib/i18n/render";
 
 export interface NarrationResult {
   text: string;
@@ -185,8 +185,8 @@ export async function narratePlan(plan: Plan, locale: Locale): Promise<Narration
   // Handing over raw floats made it write "Rs 46467.35" — technically faithful and unreadable to
   // the person it is for. Formatting here means the only string the model can copy is already the
   // one we want on screen, and it keeps formatting decisions out of the model entirely.
-  const money = (n: number) =>
-    `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n))}`;
+  // The shared formatter from lib/i18n/render — this used to be a second copy with the same name
+  // and the same comment, which is exactly how two formatters drift apart.
 
   const facts = {
     activity: plan.activity?.name ?? "this activity",

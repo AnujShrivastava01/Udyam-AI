@@ -138,6 +138,17 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
   }
 
   // --- refuse rather than guess ----------------------------------------------------------
+  // No schedule means no loan was structured. Falling through here returned FEASIBLE with a zero
+  // debt service — a green verdict on a plan that does not exist. Since plan() now short-circuits
+  // to an empty schedule whenever the sanctioned loan is zero, this is reachable from the UI.
+  if (schedule.length === 0) {
+    return {
+      ...base,
+      verdict: "INSUFFICIENT_DATA",
+      ...say(msg("solvency.noData.headline"), msg("solvency.noData.detail")),
+    };
+  }
+
   if (gestationMonths == null) {
     return {
       ...base,

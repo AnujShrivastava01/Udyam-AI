@@ -27,7 +27,7 @@ import { Slider } from "@/components/ui/slider";
 import { VERDICT_META } from "@/lib/finance/solvency";
 import { recommendActivities, type Recommendation } from "@/lib/market/recommend";
 import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
-import { useT, type MessageKey } from "@/lib/i18n";
+import { useT, money, type MessageKey } from "@/lib/i18n";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
@@ -95,11 +95,14 @@ export default function DiscoverPage() {
                   type="number"
                   value={margin}
                   onChange={(e) => setMargin(Math.max(0, Number(e.target.value) || 0))}
+                  aria-label={t("discover.marginLabel")}
                   className="pl-9 h-11 text-lg font-bold"
                 />
               </div>
               <Slider
                 className="mt-3"
+                aria-label={t("discover.marginSlider")}
+                valueText={(v) => money(v)}
                 value={[margin]}
                 min={5_000}
                 max={300_000}
@@ -115,6 +118,7 @@ export default function DiscoverPage() {
                 type="number"
                 value={income}
                 onChange={(e) => setIncome(Math.max(0, Number(e.target.value) || 0))}
+                aria-label={t("calc.income.label")}
                 className="h-10"
               />
             </div>
@@ -204,11 +208,7 @@ export default function DiscoverPage() {
       </div>
 
       <p className="text-[11px] text-muted-foreground leading-relaxed max-w-3xl">
-        Ranking combines market saturation, distance to market, and the activity&apos;s own cash
-        flow against the scheme&apos;s repayment terms. Rows marked &ldquo;advised against&rdquo;
-        are ones where the borrower would be asked to pay before the unit earns, or to find more
-        margin than they have. We show them so the reasoning is visible — not as alternatives to
-        pick from.
+        {t("discover.rankingNote")}
       </p>
     </div>
   );

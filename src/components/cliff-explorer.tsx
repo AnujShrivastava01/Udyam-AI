@@ -179,7 +179,7 @@ export function CliffExplorer() {
           </p>
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={sweep} margin={{ top: 8, right: 12, bottom: 0, left: 4 }}>
+              <AreaChart data={sweep} margin={{ top: 20, right: 12, bottom: 0, left: 4 }}>
                 <defs>
                   <linearGradient id="cliffFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0d9488" stopOpacity={0.45} />

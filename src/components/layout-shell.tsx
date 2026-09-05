@@ -31,6 +31,22 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = HTML_LANG[language] ?? "en";
   }, [language]);
 
+  /**
+   * Dark mode follows the operating system.
+   *
+   * globals.css carries a complete `.dark` palette and roughly a hundred `dark:` variants are
+   * written throughout the components — but nothing ever put the class on <html>, so every one of
+   * them was dead and a user who has told their OS they want a dark interface got a cream one.
+   * There is no in-app toggle by design: the OS preference is already the user's answer.
+   */
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => document.documentElement.classList.toggle("dark", query.matches);
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });

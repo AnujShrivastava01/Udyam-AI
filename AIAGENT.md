@@ -172,7 +172,7 @@ applied 67 corrections. Placeholder integrity was verified at zero mismatches ac
 | Provider | Vertex AI over REST + `google-auth-library` | Explicit key path; avoids ambient-credential capture |
 | Location | `global` | This project does not serve these models regionally |
 | Thinking budget | `0` | Dynamic thinking swings latency 70–160s; narration needs none |
-| Model | `gemini-2.5-flash` | Narration is a short rephrase — latency matters more than reasoning depth. `gemini-2.5-pro` is available and configurable via `VERTEX_MODEL`, but buys nothing here. |
+| Model | `gemini-2.5-pro` | The configured default in `.env.example` and the fallback in `narrate.ts`. `gemini-2.5-flash` and `-flash-lite` are both supported through `VERTEX_MODEL` and are cheaper; pro is the default because the numeric firewall rejects more flash output than pro output, and a rejected narration costs a second call. Note pro REFUSES `thinkingBudget: 0`, which is why the budget is model-aware. |
 | Temperature | `0.4` | Warm phrasing, low drift |
 | Max tokens | `300` | Two or three sentences is the whole job |
 | Runtime | `nodejs`, `maxDuration: 30` | Kernel is synchronous; only the model call is I/O |

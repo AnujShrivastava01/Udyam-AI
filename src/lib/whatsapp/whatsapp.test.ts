@@ -9,9 +9,9 @@ beforeEach(() => resetSession(PHONE));
 
 describe("recipient normalisation", () => {
   it("strips WhatsApp suffixes and punctuation", () => {
-    expect(normaliseRecipient("919244524591@s.whatsapp.net")).toBe("919244524591");
-    expect(normaliseRecipient("+91 92445 24591")).toBe("919244524591");
-    expect(normaliseRecipient("919244524591")).toBe("919244524591");
+    expect(normaliseRecipient("919000000001@s.whatsapp.net")).toBe("919000000001");
+    expect(normaliseRecipient("+91 90000 00001")).toBe("919000000001");
+    expect(normaliseRecipient("919000000001")).toBe("919000000001");
   });
 });
 
