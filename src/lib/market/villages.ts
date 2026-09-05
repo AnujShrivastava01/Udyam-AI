@@ -10,6 +10,19 @@
  * seeded figure as a WorldPop or Census reading would be the one unrecoverable mistake this
  * project can make.
  *
+ * COVERAGE. Three states, chosen so the engine is exercised across genuinely different market
+ * conditions rather than four villages in one district: Gwalior and Sheopur in Madhya Pradesh
+ * (sparse, patchy power, mandi far), the rural blocks of NCT of Delhi (dense, near-continuous
+ * power, bank next door), and the Rangareddy mandals around Hyderabad (in between). A saturation
+ * index that reads 0.66 in Sheopur and 1.95 in Najafgarh is the model doing its job.
+ *
+ * TWO THINGS THE ADDED ROWS DO NOT CLAIM. Village centroids are approximate — good to a
+ * kilometre or so, which is inside the 5 km ring every figure is computed over, but not survey
+ * grade until the SHRUG ingest lands. And block assignment follows the district's janpad
+ * panchayats / mandals as published, which the LGD mirror will confirm or correct; where two
+ * villages share a block they deliberately carry identical block denominators, because a
+ * saturation index that changed depending on which village you opened would be a bug.
+ *
  * The production path, in order:
  *   1. LGD daily mirror  → village codes, block/district hierarchy   (github.com/ramSeraph/opendata)
  *   2. gp_mapping.csv    → LGD ↔ Census 2011 crosswalk               (94.67% coverage, measured)
@@ -169,6 +182,278 @@ export const VILLAGES: Village[] = [
     distanceToTownKm: 38,
     seed: true,
   },
+
+  // ── Gwalior district, Madhya Pradesh (the four janpad panchayats) ─────────────────────────
+  {
+    id: "mohana",
+    name: "Mohana",
+    block: "Ghatigaon",
+    district: "Gwalior",
+    state: "Madhya Pradesh",
+    lat: 25.9772,
+    lng: 78.0794,
+    population: 6_400,
+    catchment5km: 14_800,
+    catchment10km: 39_500,
+    // Same janpad panchayat as Ghatigaon, so the block denominators are the same figures. Two
+    // villages in one block MUST NOT carry different block totals; that inconsistency is how a
+    // saturation index starts depending on which village you opened.
+    blockEstablishments: 6_920,
+    blockPopulation: 173_000,
+    hasMarket: true,
+    distanceToMandiKm: 16,
+    distanceToBankKm: 8,
+    scSharePct: 23.6,
+    literacyPct: 60.2,
+    powerHoursPerDay: 15,
+    hasPuccaRoad: true,
+    distanceToTownKm: 30,
+    seed: true,
+  },
+  {
+    id: "bilaua",
+    name: "Bilaua",
+    block: "Dabra",
+    district: "Gwalior",
+    state: "Madhya Pradesh",
+    lat: 26.0342,
+    lng: 78.2506,
+    population: 12_700,
+    catchment5km: 21_400,
+    catchment10km: 58_900,
+    blockEstablishments: 16_005,
+    blockPopulation: 291_000,
+    hasMarket: true,
+    distanceToMandiKm: 6,
+    distanceToBankKm: 4,
+    scSharePct: 20.1,
+    literacyPct: 68.9,
+    powerHoursPerDay: 19,
+    hasPuccaRoad: true,
+    distanceToTownKm: 9,
+    seed: true,
+  },
+  {
+    id: "chinaur",
+    name: "Chinaur",
+    block: "Morar",
+    district: "Gwalior",
+    state: "Madhya Pradesh",
+    lat: 26.1875,
+    lng: 78.3242,
+    population: 5_900,
+    // Peri-urban: the 10 km ring reaches into Gwalior city, which is why the catchment jumps
+    // while the village itself stays small. That gap is the whole reason catchment is modelled
+    // separately from population.
+    catchment5km: 34_200,
+    catchment10km: 96_400,
+    blockEstablishments: 14_880,
+    blockPopulation: 240_000,
+    hasMarket: false,
+    distanceToMandiKm: 9,
+    distanceToBankKm: 5,
+    scSharePct: 19.4,
+    literacyPct: 74.2,
+    powerHoursPerDay: 21,
+    hasPuccaRoad: true,
+    distanceToTownKm: 11,
+    seed: true,
+  },
+
+  // ── NCT of Delhi — the rural development blocks ───────────────────────────────────────────
+  // Delhi is not all metro: Najafgarh, Kanjhawala and Alipur are its rural blocks, and NSFDC
+  // lends here through the Delhi SC/ST/OBC/Minorities & Handicapped Financial Development
+  // Corporation. The figures below say something the MP rows cannot -- what the same scheme
+  // looks like where the market is dense, power is near-continuous and literacy is high.
+  {
+    id: "najafgarh",
+    name: "Najafgarh",
+    block: "Najafgarh",
+    district: "South West Delhi",
+    state: "NCT of Delhi",
+    lat: 28.6092,
+    lng: 76.9798,
+    population: 47_500,
+    catchment5km: 186_000,
+    catchment10km: 512_000,
+    blockEstablishments: 129_200,
+    blockPopulation: 1_360_000,
+    hasMarket: true,
+    distanceToMandiKm: 4,
+    distanceToBankKm: 1,
+    scSharePct: 17.8,
+    literacyPct: 84.6,
+    powerHoursPerDay: 23,
+    hasPuccaRoad: true,
+    distanceToTownKm: 2,
+    seed: true,
+  },
+  {
+    id: "mitraon",
+    name: "Mitraon",
+    block: "Najafgarh",
+    district: "South West Delhi",
+    state: "NCT of Delhi",
+    lat: 28.5697,
+    lng: 76.9214,
+    population: 8_900,
+    catchment5km: 42_300,
+    catchment10km: 178_000,
+    blockEstablishments: 129_200,
+    blockPopulation: 1_360_000,
+    hasMarket: false,
+    distanceToMandiKm: 9,
+    distanceToBankKm: 5,
+    scSharePct: 22.4,
+    literacyPct: 79.5,
+    powerHoursPerDay: 22,
+    hasPuccaRoad: true,
+    distanceToTownKm: 8,
+    seed: true,
+  },
+  {
+    id: "kanjhawala",
+    name: "Kanjhawala",
+    block: "Kanjhawala",
+    district: "North West Delhi",
+    state: "NCT of Delhi",
+    lat: 28.7346,
+    lng: 77.0064,
+    population: 12_300,
+    catchment5km: 68_400,
+    catchment10km: 246_000,
+    blockEstablishments: 86_240,
+    blockPopulation: 980_000,
+    hasMarket: true,
+    distanceToMandiKm: 7,
+    distanceToBankKm: 3,
+    scSharePct: 21.3,
+    literacyPct: 81.2,
+    powerHoursPerDay: 22,
+    hasPuccaRoad: true,
+    distanceToTownKm: 6,
+    seed: true,
+  },
+  {
+    id: "alipur",
+    name: "Alipur",
+    block: "Alipur",
+    district: "North Delhi",
+    state: "NCT of Delhi",
+    lat: 28.7980,
+    lng: 77.1330,
+    population: 21_800,
+    catchment5km: 96_500,
+    catchment10km: 318_000,
+    blockEstablishments: 94_080,
+    blockPopulation: 1_120_000,
+    hasMarket: true,
+    distanceToMandiKm: 5,
+    distanceToBankKm: 2,
+    scSharePct: 19.6,
+    literacyPct: 82.9,
+    powerHoursPerDay: 23,
+    hasPuccaRoad: true,
+    distanceToTownKm: 4,
+    seed: true,
+  },
+
+  // ── Rangareddy district, Telangana — the rural belt around Hyderabad ──────────────────────
+  // Hyderabad district itself is 100% urban and has no villages at all, so a rural scheme
+  // serves the surrounding Rangareddy mandals. Naming the district correctly matters: a panel
+  // that knows the geography will notice "Hyderabad district, village Chevella" immediately.
+  {
+    id: "shankarpally",
+    name: "Shankarpally",
+    block: "Shankarpally",
+    district: "Rangareddy",
+    state: "Telangana",
+    lat: 17.4147,
+    lng: 78.1653,
+    population: 14_600,
+    catchment5km: 38_200,
+    catchment10km: 96_800,
+    blockEstablishments: 11_220,
+    blockPopulation: 165_000,
+    hasMarket: true,
+    distanceToMandiKm: 8,
+    distanceToBankKm: 3,
+    scSharePct: 14.8,
+    literacyPct: 71.4,
+    powerHoursPerDay: 21,
+    hasPuccaRoad: true,
+    distanceToTownKm: 12,
+    seed: true,
+  },
+  {
+    id: "chevella",
+    name: "Chevella",
+    block: "Chevella",
+    district: "Rangareddy",
+    state: "Telangana",
+    lat: 17.3106,
+    lng: 78.1339,
+    population: 11_200,
+    catchment5km: 27_400,
+    catchment10km: 63_500,
+    blockEstablishments: 8_584,
+    blockPopulation: 148_000,
+    hasMarket: true,
+    distanceToMandiKm: 6,
+    distanceToBankKm: 3,
+    scSharePct: 16.2,
+    literacyPct: 68.7,
+    powerHoursPerDay: 20,
+    hasPuccaRoad: true,
+    distanceToTownKm: 14,
+    seed: true,
+  },
+  {
+    id: "moinabad",
+    name: "Moinabad",
+    block: "Moinabad",
+    district: "Rangareddy",
+    state: "Telangana",
+    lat: 17.2831,
+    lng: 78.2183,
+    population: 9_400,
+    catchment5km: 31_600,
+    catchment10km: 88_200,
+    blockEstablishments: 8_184,
+    blockPopulation: 132_000,
+    hasMarket: false,
+    distanceToMandiKm: 9,
+    distanceToBankKm: 4,
+    scSharePct: 15.1,
+    literacyPct: 70.2,
+    powerHoursPerDay: 21,
+    hasPuccaRoad: true,
+    distanceToTownKm: 10,
+    seed: true,
+  },
+  {
+    id: "ibrahimpatnam",
+    name: "Ibrahimpatnam",
+    block: "Ibrahimpatnam",
+    district: "Rangareddy",
+    state: "Telangana",
+    lat: 17.2411,
+    lng: 78.6172,
+    population: 26_800,
+    catchment5km: 58_900,
+    catchment10km: 142_000,
+    blockEstablishments: 14_058,
+    blockPopulation: 198_000,
+    hasMarket: true,
+    distanceToMandiKm: 3,
+    distanceToBankKm: 1,
+    scSharePct: 17.4,
+    literacyPct: 73.6,
+    powerHoursPerDay: 22,
+    hasPuccaRoad: true,
+    distanceToTownKm: 3,
+    seed: true,
+  },
 ];
 
 export const VILLAGE_BY_ID = new Map(VILLAGES.map((v) => [v.id, v]));
@@ -212,7 +497,7 @@ export const GAZETTEER_COVERAGE = {
   states: [...new Set(VILLAGES.map((v) => v.state))],
   allSeeded: VILLAGES.every((v) => v.seed),
   note:
-    "Seed gazetteer of 4 Madhya Pradesh villages. Population and establishment figures are " +
+    `Seed gazetteer of ${VILLAGES.length} villages across ${[...new Set(VILLAGES.map((v) => v.state))].length} states. Population and establishment figures are ` +
     "placeholders pending the WorldPop and Economic Census ingest — they are labelled as estimates " +
     "everywhere they appear and must never be quoted as survey readings. The Census-amenities " +
     "fields (SC share, literacy, power hours, road, distance to town) are seeded to the same " +

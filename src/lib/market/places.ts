@@ -53,8 +53,25 @@ export interface NearbyPlace {
 }
 
 export type PlacesOutcome =
-  | { ok: true; places: NearbyPlace[]; searchedTypes: string[]; radiusKm: number }
+  | {
+      ok: true;
+      places: NearbyPlace[];
+      searchedTypes: string[];
+      radiusKm: number;
+      /**
+       * True when the result set hit Google's per-request ceiling of 20.
+       *
+       * Found by testing: a search near Najafgarh returns exactly 20, and so does one near
+       * Shankarpally, while rural Gwalior returns three. Twenty is not a count, it is the cap —
+       * rendering it as a count would understate a dense market and, worse, make two very
+       * different places look identical.
+       */
+      capped: boolean;
+    }
   | { ok: false; reason: string; status?: number };
+
+/** Google returns at most this many places per request, on both search endpoints. */
+export const MAX_RESULTS_PER_REQUEST = 20;
 
 /**
  * Which Google place types stand in for a trade's competition.
@@ -209,13 +226,15 @@ export async function nearbySearch({
     }
 
     const json = (await res.json()) as { places?: RawPlace[] };
+    // An empty result set comes back as `{}`, not `{places: []}`. Treating a missing key as an
+    // error would report "search failed" for the very common rural case of nothing mapped.
+    const places = normalise(json.places ?? [], { lat, lng });
     return {
       ok: true,
-      // An empty result set comes back as `{}`, not `{places: []}`. Treating a missing key as an
-      // error would report "search failed" for the very common rural case of nothing mapped.
-      places: normalise(json.places ?? [], { lat, lng }),
+      places,
       searchedTypes: types,
       radiusKm: radius / 1000,
+      capped: places.length >= Math.min(MAX_RESULTS_PER_REQUEST, maxResults),
     };
   } catch (e) {
     return { ok: false, reason: e instanceof Error ? e.message : "request failed" };
@@ -273,11 +292,13 @@ export async function textSearch({
     }
 
     const json = (await res.json()) as { places?: RawPlace[] };
+    const places = normalise(json.places ?? [], { lat, lng });
     return {
       ok: true,
-      places: normalise(json.places ?? [], { lat, lng }),
+      places,
       searchedTypes: [],
       radiusKm: radius / 1000,
+      capped: places.length >= Math.min(MAX_RESULTS_PER_REQUEST, maxResults),
     };
   } catch (e) {
     return { ok: false, reason: e instanceof Error ? e.message : "request failed" };

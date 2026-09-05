@@ -278,8 +278,29 @@ export function handleMessage(phone: string, raw: string): Reply {
   }
 }
 
+/**
+ * The village menu, grouped by district.
+ *
+ * A flat numbered list was fine at four villages. At fifteen across three states it is a wall
+ * of text on a phone, and a user in Gwalior has to scroll past Delhi to reach their own block.
+ *
+ * The numbering stays continuous and stays an INDEX INTO VILLAGES: the reply handler reads
+ * `VILLAGES[n - 1]`, so renumbering within each group would silently select a different
+ * village than the one the user typed.
+ */
 function villageList(): string {
-  return VILLAGES.map((v, i) => `*${i + 1}* ${v.name} (${v.block})`).join("\n");
+  const lines: string[] = [];
+  let lastGroup = "";
+  VILLAGES.forEach((v, i) => {
+    const group = `${v.district}, ${v.state}`;
+    if (group !== lastGroup) {
+      if (lines.length) lines.push("");
+      lines.push(`_${group}_`);
+      lastGroup = group;
+    }
+    lines.push(`*${i + 1}* ${v.name} (${v.block})`);
+  });
+  return lines.join("\n");
 }
 
 function activityList(): string {

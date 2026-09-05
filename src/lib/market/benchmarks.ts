@@ -38,6 +38,17 @@ export const RURAL_MPCE = {
   allIndia: 4_122,
   byState: {
     "Madhya Pradesh": 3_441,
+    // Added with the Delhi and Telangana gazetteer rows. A state absent from this table scales
+    // by 1.0 — i.e. it is priced at the national rural average — which for Delhi understates the
+    // market by roughly a third and does so silently. An approximate figure that is stated beats
+    // an exact-looking default that is wrong.
+    //
+    // TO VERIFY before any submission: read all three off the HCES 2023-24 factsheet
+    // (Household Consumption Expenditure Survey, MoSPI) — Statement 1, rural MPCE by State/UT.
+    // The Madhya Pradesh row above reconciles with that source; these two are carried at the
+    // same confidence as every other figure in this file, which is to say `needsVerification`.
+    "NCT of Delhi": 6_576,
+    Telangana: 4_802,
   } as Record<string, number>,
   provenance: HCES,
 };

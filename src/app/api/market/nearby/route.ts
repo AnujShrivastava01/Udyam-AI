@@ -119,6 +119,8 @@ function respond(
      * here means nothing is on the map, not that nothing is there.
      */
     mappedCount: result.places.length,
+    /** True when 20 came back because 20 is the ceiling, not because there are 20. */
+    capped: result.capped,
     attribution: PLACES_ATTRIBUTION,
   });
 }

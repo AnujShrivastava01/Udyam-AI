@@ -37,6 +37,7 @@ interface Result {
   reason?: string;
   places: NearbyPlace[];
   mappedCount?: number;
+  capped?: boolean;
   radiusKm?: number;
   proxy?: string;
   attribution: string;
@@ -200,9 +201,14 @@ export function NearbyBusinesses({ lat, lng, placeLabel, activityClass }: Props)
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="font-heading text-2xl font-bold tabular-nums">
                 {result.mappedCount ?? result.places.length}
+                {/* Google returns at most 20 per request. Near Najafgarh that ceiling is reached,
+                    so a bare "20" would read as a count and make a dense market look like a
+                    middling one. */}
+                {result.capped ? "+" : ""}
               </span>
               <span className="text-sm text-muted-foreground">
                 mapped within {result.radiusKm ?? 5} km
+                {result.capped ? " — Google returns at most 20 at a time" : ""}
               </span>
               {result.proxy && (
                 <Badge variant="outline" className="text-[10px] text-muted-foreground">
