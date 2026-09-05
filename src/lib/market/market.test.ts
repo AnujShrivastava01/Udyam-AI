@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
-import { CATEGORY_SPEND, RURAL_MPCE, categoryForActivityClass } from "./benchmarks";
 import {
-  DEFAULT_SECTOR_SHARE,
+  CATEGORY_SPEND,
+  RURAL_MPCE,
+  TOTAL_ESTABLISHMENT_DENSITY,
+  categoryForActivityClass,
+  nationalSectorShare,
+} from "./benchmarks";
+import {
   RURAL_OAE_GVA_PER_YEAR,
   addressableDemand,
   buildFeasibilityReport,
@@ -72,7 +77,9 @@ describe("saturation", () => {
   it("compares observed against what the population would support nationally", () => {
     const s = saturation(ghatigaon, "livestock");
     expect(s.expectedSector).toBe(Math.round((ghatigaon.blockPopulation / 1000) * 12.63));
-    expect(s.observedSector).toBe(Math.round(ghatigaon.blockEstablishments * DEFAULT_SECTOR_SHARE));
+    expect(s.observedSector).toBe(
+      Math.round(ghatigaon.blockEstablishments * nationalSectorShare("livestock")!),
+    );
     expect(s.index).toBeCloseTo(s.observedSector / s.expectedSector, 2);
   });
 
@@ -84,8 +91,29 @@ describe("saturation", () => {
     expect(RURAL_OAE_GVA_PER_YEAR).toBe(71_217);
   });
 
-  it("surfaces the sector-share assumption rather than hiding it", () => {
-    expect(saturation(ghatigaon, "retail").sectorShareAssumed).toBe(DEFAULT_SECTOR_SHARE);
+  it("derives sector share from the benchmarks rather than asserting a constant", () => {
+    const derived = nationalSectorShare("retail")!;
+    expect(saturation(ghatigaon, "retail").sectorShareAssumed).toBeCloseTo(derived, 3);
+    expect(derived).toBeCloseTo(9.29 / TOTAL_ESTABLISHMENT_DENSITY, 4);
+  });
+
+  it("keeps the model internally coherent: a block at the national density scores ~1.0", () => {
+    // Regression guard. Seeded establishment counts must reconcile with the density benchmarks,
+    // or the index lands somewhere absurd and the report claims room for thousands of units.
+    const atNationalDensity = {
+      ...ghatigaon,
+      blockPopulation: 100_000,
+      blockEstablishments: Math.round(100 * TOTAL_ESTABLISHMENT_DENSITY),
+    };
+    expect(saturation(atNationalDensity, "livestock").index).toBeCloseTo(1, 1);
+  });
+
+  it("keeps every seeded village inside a plausible saturation range", () => {
+    for (const v of VILLAGES) {
+      const idx = saturation(v, "retail").index;
+      expect(idx).toBeGreaterThan(0.3);
+      expect(idx).toBeLessThan(2.5);
+    }
   });
 
   it("returns unknown for a class with no density benchmark", () => {
@@ -124,9 +152,13 @@ describe("feasibility report", () => {
     expect(r.dataQuality.warnings.join(" ")).toMatch(/seeded placeholders/i);
   });
 
-  it("always discloses the sector-share modelling assumption", () => {
+  it("always discloses that sector counts are derived, not counted", () => {
     const r = buildFeasibilityReport(ghatigaon, goat);
-    expect(r.dataQuality.warnings.join(" ")).toMatch(/assumption/i);
+    const disclosure = r.dataQuality.warnings.join(" ");
+    expect(disclosure).toMatch(/derived from the national benchmark/i);
+    expect(disclosure).toMatch(/not counted/i);
+    // and it must own the weaker claim the data actually supports
+    expect(disclosure).toMatch(/total establishment density/i);
   });
 
   it("penalises a long gestation in the score", () => {

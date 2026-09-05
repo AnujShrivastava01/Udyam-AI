@@ -17,6 +17,7 @@ import {
   CATEGORY_SPEND,
   ECONOMIC_CENSUS,
   ESTABLISHMENT_DENSITY,
+  nationalSectorShare,
   HCES,
   RURAL_MPCE,
   RURAL_REGISTRATION_RATE,
@@ -36,14 +37,19 @@ export const NSS_PROVENANCE: Provenance = {
 };
 
 /**
- * Share of a block's non-farm establishments belonging to the chosen sector.
+ * Sector share is DERIVED, not assumed.
  *
- * This is an EXPLICIT MODELLING ASSUMPTION, not a measurement. The Economic Census publishes
- * employment share by industry at village level, not establishment counts by industry — so a
- * sector count cannot be read off directly and must be modelled. Surfacing the assumption is
- * the honest alternative to hiding it.
+ * The Economic Census publishes employment share by industry at village level, not establishment
+ * counts by industry — so a sector count cannot be read off and must be modelled. Modelling it
+ * with an arbitrary constant makes the model contradict its own benchmarks; deriving it as
+ * `sectorPer1000 ÷ totalPer1000` keeps it coherent.
+ *
+ * Note what this means for the index: because both the numerator and the denominator scale with
+ * the same sector share, it cancels — and the saturation index reduces to *this block's total
+ * establishment density against the national rural average*. That is a weaker claim than
+ * "we counted the dairies", and it is the one the data actually supports. The UI says so.
  */
-export const DEFAULT_SECTOR_SHARE = 0.12;
+export const DEFAULT_SECTOR_SHARE = 0.12; // retained only for callers that ask for the nominal figure
 
 export type Confidence = "measured" | "estimated" | "seeded" | "unavailable";
 
@@ -177,8 +183,9 @@ export function saturation(village: Village, activityClass: string): SaturationR
     };
   }
 
+  const sectorShare = nationalSectorShare(activityClass)!;
   const expectedSector = round((village.blockPopulation / 1000) * density.per1000);
-  const observedSector = round(village.blockEstablishments * DEFAULT_SECTOR_SHARE);
+  const observedSector = round(village.blockEstablishments * sectorShare);
   const index = expectedSector > 0 ? round(observedSector / expectedSector, 2) : 0;
 
   const { figure } = addressableDemand(village, activityClass);
@@ -205,7 +212,7 @@ export function saturation(village: Village, activityClass: string): SaturationR
     supportableFromDemand,
     headroom: Math.max(0, expectedSector - observedSector),
     estimatesAgree,
-    sectorShareAssumed: DEFAULT_SECTOR_SHARE,
+    sectorShareAssumed: round(sectorShare, 3),
     label,
   };
 }
@@ -255,8 +262,10 @@ export function buildFeasibilityReport(
     );
   }
   warnings.push(
-    `Sector establishment count is modelled at ${(sat.sectorShareAssumed * 100).toFixed(0)}% of all block ` +
-      "establishments — the Economic Census publishes employment share by industry, not counts, so this is an assumption.",
+    `Sector share is derived from the national benchmark (${(sat.sectorShareAssumed * 100).toFixed(0)}% of block ` +
+      "establishments), not counted. The Economic Census publishes employment share by industry, not establishment " +
+      "counts — so the saturation index below reduces to this block's TOTAL establishment density against the national " +
+      "rural average. That is a weaker claim than counting the competitors, and it is the one the data supports.",
   );
   warnings.push(BENCHMARK_COVERAGE.note);
   if (sat.estimatesAgree === false) {

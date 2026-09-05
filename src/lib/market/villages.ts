@@ -35,7 +35,9 @@ export interface Village {
   catchment10km: number;
   /**
    * Total non-farm establishments recorded in the block, all sectors.
-   * From the Economic Census in production; seeded here.
+   * From the Economic Census in production; seeded here at a density that reconciles with
+   * TOTAL_ESTABLISHMENT_DENSITY (~48.75 per 1,000) so the saturation model does not contradict
+   * its own benchmarks. Ghatigaon 40/1k, Bhitarwar 45/1k, Dabra 55/1k, Karahiya 32/1k.
    */
   blockEstablishments: number;
   /** Population of the whole block, the denominator for density. */
@@ -61,7 +63,7 @@ export const VILLAGES: Village[] = [
     population: 4_180,
     catchment5km: 12_400,
     catchment10km: 38_600,
-    blockEstablishments: 1_610,
+    blockEstablishments: 6_920,
     blockPopulation: 173_000,
     hasMarket: true,
     distanceToMandiKm: 11,
@@ -79,7 +81,7 @@ export const VILLAGES: Village[] = [
     population: 16_900,
     catchment5km: 29_800,
     catchment10km: 71_200,
-    blockEstablishments: 2_940,
+    blockEstablishments: 10_170,
     blockPopulation: 226_000,
     hasMarket: true,
     distanceToMandiKm: 3,
@@ -97,7 +99,7 @@ export const VILLAGES: Village[] = [
     population: 58_300,
     catchment5km: 74_500,
     catchment10km: 118_000,
-    blockEstablishments: 5_120,
+    blockEstablishments: 16_005,
     blockPopulation: 291_000,
     hasMarket: true,
     distanceToMandiKm: 1,
@@ -115,7 +117,7 @@ export const VILLAGES: Village[] = [
     population: 2_240,
     catchment5km: 6_100,
     catchment10km: 17_900,
-    blockEstablishments: 780,
+    blockEstablishments: 3_584,
     blockPopulation: 112_000,
     hasMarket: false,
     distanceToMandiKm: 24,

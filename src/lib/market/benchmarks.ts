@@ -108,6 +108,22 @@ export const ESTABLISHMENT_DENSITY: Record<
 };
 
 /**
+ * All non-farm establishments per 1,000 rural persons.
+ *
+ * Sixth Economic Census: roughly 58.5 million establishments against a population of about
+ * 1.2 billion. This is the denominator that makes the sector figures above commensurable — a
+ * sector share must be `sectorPer1000 / TOTAL_ESTABLISHMENT_DENSITY`, never an arbitrary
+ * constant, or the model contradicts itself.
+ */
+export const TOTAL_ESTABLISHMENT_DENSITY = 48.75;
+
+/** Share of a block's establishments a sector should hold at the national rural average. */
+export function nationalSectorShare(activityClass: string): number | null {
+  const d = ESTABLISHMENT_DENSITY[activityClass];
+  return d ? d.per1000 / TOTAL_ESTABLISHMENT_DENSITY : null;
+}
+
+/**
  * Share of rural enterprises holding ANY formal registration.
  *
  * This is why Udyam and GST counts cannot be used as a competitor census: they see roughly one
