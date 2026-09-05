@@ -29,7 +29,7 @@ export interface NarrationResult {
 }
 
 export function isAiConfigured(): boolean {
-  return Boolean(process.env.VERTEX_PROJECT_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  return Boolean(process.env.VERTEX_PROJECT_ID && process.env.VERTEX_KEY_FILE);
 }
 
 /**
@@ -63,12 +63,28 @@ export function allowedNumbers(plan: Plan): Set<string> {
   const set = new Set<string>();
   for (const n of raw) {
     if (n == null || Number.isNaN(n)) continue;
+    // The UNROUNDED value first. Rounding-only was a bug: an interest rate of 6.5 became "7",
+    // so the model quoting the rate we gave it was rejected as an invention.
+    set.add(String(n));
+    set.add(n.toFixed(2));
     const r = Math.round(n);
     set.add(String(r));
     set.add(new Intl.NumberFormat("en-IN").format(r)); // 46,467
-    set.add(new Intl.NumberFormat("en-US").format(r)); // 46,467 — grouping differs above 5 digits
-    set.add(n.toFixed(2));
+    set.add(new Intl.NumberFormat("en-US").format(r)); // grouping differs above 5 digits
   }
+
+  // Numbers embedded in the STRINGS we handed the model are equally legitimate — the activity is
+  // literally named "Goat rearing — 20 does + 1 buck". Rejecting the model for repeating a proper
+  // noun we supplied is a false positive, and it made the firewall fire on every well-behaved
+  // answer.
+  for (const label of [plan.activity?.name, plan.activity?.unit, plan.structure.scheme.name]) {
+    if (!label) continue;
+    for (const m of label.match(/\d[\d,]*(?:\.\d+)?/g) ?? []) {
+      set.add(m);
+      set.add(m.replace(/,/g, ""));
+    }
+  }
+
   return set;
 }
 
@@ -130,18 +146,25 @@ export async function narratePlan(plan: Plan, locale: Locale): Promise<Narration
 
   if (!isAiConfigured()) return fallback();
 
-  // The model is given the numbers. It is never asked to derive one.
+  // The model is given the numbers, PRE-FORMATTED, and is never asked to derive one.
+  //
+  // Handing over raw floats made it write "Rs 46467.35" — technically faithful and unreadable to
+  // the person it is for. Formatting here means the only string the model can copy is already the
+  // one we want on screen, and it keeps formatting decisions out of the model entirely.
+  const money = (n: number) =>
+    `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n))}`;
+
   const facts = {
     activity: plan.activity?.name ?? "this activity",
     verdict: plan.solvency.verdict,
     gestationMonths: plan.activity?.gestationMonths ?? null,
     firstInstalmentMonth: plan.solvency.firstInstalmentMonth,
-    amountDueBeforeIncome: plan.solvency.preIncomeObligation,
+    amountDueBeforeIncome: money(plan.solvency.preIncomeObligation),
     paymentsBeforeIncome: plan.solvency.preIncomePayments,
-    projectCost: plan.structure.projectCost,
-    ownContribution: plan.structure.requiredMargin,
-    loan: plan.structure.sanctionedLoan,
-    quarterlyInstalment: plan.schedule.instalment,
+    projectCost: money(plan.structure.projectCost),
+    ownContribution: money(plan.structure.requiredMargin),
+    loan: money(plan.structure.sanctionedLoan),
+    quarterlyInstalment: money(plan.schedule.instalment),
     scheme: plan.structure.scheme.name,
     interestRatePct: plan.structure.scheme.annualRatePct,
   };
@@ -158,23 +181,49 @@ Write 2–3 short sentences that explain what this means for them, warmly and wi
 HARD RULES:
 - Use ONLY the numbers given above. Do NOT calculate, round, convert, estimate or invent any number.
 - Do not add a number that is not in the facts — not even an approximation or a "roughly".
+- Copy rupee amounts EXACTLY as written above, including the ₹ symbol and the commas.
 - Do not give financial advice beyond explaining the verdict.
 - No preamble, no sign-off, no markdown. Just the sentences.`;
 
   try {
-    const { VertexAI } = await import("@google-cloud/vertexai");
-    const vertex = new VertexAI({
-      project: process.env.VERTEX_PROJECT_ID!,
-      location: process.env.VERTEX_LOCATION ?? "us-central1",
+    // Called over REST with an explicitly-loaded key rather than through the SDK's ambient
+    // credential lookup. Two reasons, both learned the hard way:
+    //
+    //   1. GOOGLE_APPLICATION_CREDENTIALS, if set anywhere in the environment, silently
+    //      authenticates as a DIFFERENT identity and produces a 403 that looks like a missing
+    //      role. Loading the key by explicit path removes that whole class of failure.
+    //   2. This project serves models at location `global`, not at a region. Asking a regional
+    //      endpoint for them returns 404 "model not found", which reads like a wrong model id.
+    const { GoogleAuth } = await import("google-auth-library");
+    const auth = new GoogleAuth({
+      keyFile: process.env.VERTEX_KEY_FILE!,
+      scopes: ["https://www.googleapis.com/auth/cloud-platform"],
     });
-    const model = vertex.getGenerativeModel({
-      model: process.env.VERTEX_MODEL ?? "gemini-2.0-flash",
-      generationConfig: { temperature: 0.4, maxOutputTokens: 300 },
+    const authed = await auth.getClient();
+
+    const project = process.env.VERTEX_PROJECT_ID!;
+    const location = process.env.VERTEX_LOCATION ?? "global";
+    const modelId = process.env.VERTEX_MODEL ?? "gemini-2.5-flash";
+    const host = location === "global" ? "aiplatform.googleapis.com" : `${location}-aiplatform.googleapis.com`;
+
+    const res = await authed.request<{
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    }>({
+      url: `https://${host}/v1/projects/${project}/locations/${location}/publishers/google/models/${modelId}:generateContent`,
+      method: "POST",
+      data: {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 800,
+          // Dynamic thinking makes latency swing wildly; a fixed budget keeps narration snappy.
+          thinkingConfig: { thinkingBudget: 0 },
+        },
+      },
     });
 
-    const res = await model.generateContent(prompt);
     const text =
-      res.response?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("").trim() ?? "";
+      res.data?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("").trim() ?? "";
 
     if (!text) return fallback();
 

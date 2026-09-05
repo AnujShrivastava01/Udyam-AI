@@ -172,10 +172,10 @@ and refuses to rank, which is a designed behaviour rather than an unhandled case
   block's total establishment density against the national average. The UI says so.
 - WhatsApp runs through Whapi, which drives a real WhatsApp session. Fast to demo, carries a ban
   risk on the number, and is **not** a government deployment path — that is Meta's Cloud API.
-- Vertex AI narration requires a **paid** Google Cloud billing account. Publisher models are not
-  served to a project on a free trial, and the failure presents as a 404 rather than a billing
-  error — see AIAGENT.md. Without it the product falls back to the deterministic template, which
-  is the designed behaviour and changes no figure a borrower sees.
+- Vertex AI narration is live on `gemini-2.5-flash` at location `global`. If it is ever
+  unreachable the product falls back to the deterministic template — the designed behaviour, and
+  it changes no figure a borrower sees. See AIAGENT.md for the two 404 traps (wrong location,
+  wrong model family) that make this look like a permissions problem when it is not.
 
 ---
 

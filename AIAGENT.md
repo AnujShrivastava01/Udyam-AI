@@ -151,30 +151,34 @@ applied 67 corrections. Placeholder integrity was verified at zero mismatches ac
 
 | Setting | Value | Why |
 |---|---|---|
-| Provider | Vertex AI (`@google-cloud/vertexai`) | Service-account auth; no key in the client |
-| Model | `gemini-2.0-flash` | Narration is a short, easy task — latency matters more than depth |
+| Provider | Vertex AI over REST + `google-auth-library` | Explicit key path; avoids ambient-credential capture |
+| Location | `global` | This project does not serve these models regionally |
+| Thinking budget | `0` | Dynamic thinking swings latency 70–160s; narration needs none |
+| Model | `gemini-2.5-flash` | Narration is a short rephrase — latency matters more than reasoning depth. `gemini-2.5-pro` is available and configurable via `VERTEX_MODEL`, but buys nothing here. |
 | Temperature | `0.4` | Warm phrasing, low drift |
 | Max tokens | `300` | Two or three sentences is the whole job |
 | Runtime | `nodejs`, `maxDuration: 30` | Kernel is synchronous; only the model call is I/O |
 
 Credentials live in `/secrets` and `.env.local`, both gitignored.
 
-**A deployment note that cost us several hours, recorded so it costs you none.** Vertex AI
-publisher models — the Gemini family — are not served to a project on a Google Cloud **free
-trial** billing account. The failure is silent and misleading: the API enables normally, the
-service account's `aiplatform.endpoints.predict` permission checks out, and
-`projects/<p>/locations/<region>` responds — but every publisher model returns
-`404 NOT_FOUND … or your project does not have access to it`, in every region, on both `v1` and
-`v1beta1`.
+**Two deployment facts that cost real debugging time.**
 
-It reads like a missing IAM role or a wrong model id. It is neither. The billing account must be
-upgraded from trial to paid; the trial credit still applies. Diagnose it by checking whether the
-platform endpoint responds while publisher models 404 — that asymmetry is the signature.
+1. **Models are served at location `global`, not at a region.** Asking
+   `us-central1-aiplatform.googleapis.com/.../locations/us-central1/...` returns
+   `404 NOT_FOUND … or your project does not have access to it`. That reads like missing IAM or
+   a wrong model id and is neither. We chased a phantom permissions problem for hours on the
+   strength of it.
+2. **This project serves the `gemini-2.5-*` family**, not `gemini-2.0-*`. A model id that does
+   not exist for the project produces the identical 404. Verified working here:
+   `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-2.5-flash-lite`.
 
-Until then the product falls back to the deterministic template, which is the designed behaviour
-and costs a borrower nothing.
+A third trap worth naming: **do not rely on `GOOGLE_APPLICATION_CREDENTIALS`.** If it is set
+anywhere in the environment the SDK authenticates as whatever identity it points at, which
+produces a `403` on `aiplatform.endpoints.predict` that looks exactly like a missing role. We load
+the key by explicit path (`VERTEX_KEY_FILE`) so that whole class of failure cannot occur.
 
----
+Diagnostic shortcut: if `projects/<p>/locations/<loc>` responds but publisher models 404, the
+location or the model id is wrong — not your permissions.
 
 ## What is deliberately *not* an agent
 
