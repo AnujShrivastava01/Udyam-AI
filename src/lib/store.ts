@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+import type { CommunityPost } from '@/lib/community/posts';
+import type { Requirement } from '@/lib/marketplace/requirement';
+
 export type UserRole = 'entrepreneur' | 'ngo' | 'financial-institution' | 'mentor';
 export type Language = 'hi' | 'en' | 'hinglish';
 
@@ -42,11 +45,26 @@ interface AppState {
    * record of where the user had been, so it guessed, and the guess flattered.
    */
   visitedSteps: string[];
+  /**
+   * Posts this user wrote, in this browser.
+   *
+   * Not a feed. There is no server and no other users, so this holds exactly one person's writing
+   * and the community screen renders it as such — beside the illustrative examples, visibly
+   * distinct from them. Persisted so the interaction survives a reload, which is the whole of what
+   * it claims to demonstrate.
+   */
+  communityPosts: CommunityPost[];
+  /** Requirements the user composed on the marketplace screen. Same scope, same honesty. */
+  requirements: Requirement[];
   setRole: (role: UserRole) => void;
   setLanguage: (lang: Language) => void;
   setTheme: (theme: ThemeMode) => void;
   setOnboardingInput: (input: Partial<OnboardingInput>) => void;
   markStepVisited: (id: string) => void;
+  addCommunityPost: (post: CommunityPost) => void;
+  deleteCommunityPost: (id: string) => void;
+  addRequirement: (requirement: Requirement) => void;
+  deleteRequirement: (id: string) => void;
 }
 
 /**
@@ -73,6 +91,8 @@ export const useAppStore = create<AppState>()(
         businessCategory: '',
       },
       visitedSteps: [],
+      communityPosts: [],
+      requirements: [],
       setRole: (role) => set({ userRole: role }),
       setLanguage: (lang) => set({ language: lang }),
       setTheme: (theme) => set({ theme }),
@@ -86,10 +106,21 @@ export const useAppStore = create<AppState>()(
             ? state
             : { visitedSteps: [...state.visitedSteps, id] },
         ),
+      // Newest first in the array, so no consumer has to sort to render a feed in the order a
+      // reader expects.
+      addCommunityPost: (post) =>
+        set((state) => ({ communityPosts: [post, ...state.communityPosts] })),
+      deleteCommunityPost: (id) =>
+        set((state) => ({ communityPosts: state.communityPosts.filter((p) => p.id !== id) })),
+      addRequirement: (requirement) =>
+        set((state) => ({ requirements: [requirement, ...state.requirements] })),
+      deleteRequirement: (id) =>
+        set((state) => ({ requirements: state.requirements.filter((r) => r.id !== id) })),
     }),
     {
       name: 'siddhi.session',
       /**
+       * 4: communityPosts and requirements added — purely additive, so nothing is discarded.
        * 3: the districts on offer changed from three UP names to the gazetteer's own.
        * 2: marginCapital became nullable.
        *
@@ -97,7 +128,7 @@ export const useAppStore = create<AppState>()(
        * "State loaded from storage couldn't be migrated" and throw the session away — the outcome
        * was what I wanted, but an error in the console is not how you express an intention.
        */
-      version: 3,
+      version: 4,
       migrate: (persisted, from) => {
         const s = (persisted ?? {}) as Partial<AppState>;
         // v1 stored marginCapital as a plain number defaulting to 100000, and nothing recorded
@@ -106,9 +137,19 @@ export const useAppStore = create<AppState>()(
         // whole reason the field became nullable.
         // v1/v2 stored a district from a hardcoded UP list that no village in the gazetteer
         // matches, so the location is dropped too. Both mean the question gets asked again.
+        // v4 only ADDED collections, so a v3 session keeps everything it had and simply gains two
+        // empty arrays. Defaulting them here rather than relying on the initial state matters:
+        // zustand merges the persisted object over the initial one, and a persisted `undefined`
+        // would win over `[]` and crash the first `.map`.
+        const collections = {
+          communityPosts: s.communityPosts ?? [],
+          requirements: s.requirements ?? [],
+        };
+
         if (from < 3) {
           return {
             ...s,
+            ...collections,
             onboardingInput: {
               location: null,
               marginCapital: null,
@@ -117,7 +158,7 @@ export const useAppStore = create<AppState>()(
             visitedSteps: s.visitedSteps ?? [],
           };
         }
-        return s;
+        return { ...s, ...collections };
       },
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
@@ -127,6 +168,8 @@ export const useAppStore = create<AppState>()(
         theme: s.theme,
         onboardingInput: s.onboardingInput,
         visitedSteps: s.visitedSteps,
+        communityPosts: s.communityPosts,
+        requirements: s.requirements,
       }),
     },
   ),

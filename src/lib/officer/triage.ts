@@ -52,6 +52,17 @@ export interface TriagedApplication {
   sanctionedLoan: number;
   quarterlyInstalment: number;
   preIncomeObligation: number;
+  /**
+   * Annual surplus ÷ peak annual debt service, straight from the kernel. `null` when the activity
+   * carries no surplus figure — which is most of the indicative tier, and refusing is right.
+   */
+  dscr: number | null;
+  /** Peak annual debt service ÷ declared household income. */
+  incomeShare: number | null;
+  /** Months from disbursement to first income, from the activity record. */
+  gestationMonths: number | null;
+  /** The activity's indicative annual net surplus, in rupees, when NABARD states one. */
+  annualSurplus: number | null;
   /** True when the SCA's own routing disagrees with what the rules produce. */
   routingMismatch: boolean;
 }
@@ -113,6 +124,10 @@ export function triage(application: Application): TriagedApplication {
     sanctionedLoan: p.structure.sanctionedLoan,
     quarterlyInstalment: p.schedule.instalment,
     preIncomeObligation: p.solvency.preIncomeObligation,
+    dscr: p.solvency.dscr,
+    incomeShare: p.solvency.incomeShare,
+    gestationMonths: p.activity?.gestationMonths ?? null,
+    annualSurplus: p.activity?.annualSurplus ?? null,
     routingMismatch,
   };
 }
@@ -145,6 +160,29 @@ function primaryReason(
   return "Needs an officer's eye before sanction.";
 }
 
+/**
+ * Summarise rows that have ALREADY been triaged.
+ *
+ * Separate from `triageQueue` because the console scopes its queue by district, and the summary
+ * tiles have to describe the rows on screen. Re-running `triageQueue` over a filtered subset would
+ * recompute every plan to answer a question the existing rows already answer — and, worse, a
+ * summary that silently describes the whole queue while the list shows one district is a number
+ * that contradicts the table beneath it.
+ */
+export function summariseTriage(rows: TriagedApplication[]): TriageSummary {
+  return {
+    total: rows.length,
+    clear: rows.filter((r) => r.status === "CLEAR").length,
+    review: rows.filter((r) => r.status === "REVIEW").length,
+    block: rows.filter((r) => r.status === "BLOCK").length,
+    gestationGapped: rows.filter((r) => r.solvency === "GESTATION_GAP").length,
+    capBound: rows.filter((r) => r.flagCodes.includes("CAP_BINDING")).length,
+    deadZone: rows.filter((r) => r.flagCodes.includes("DEAD_ZONE")).length,
+    routingMismatches: rows.filter((r) => r.routingMismatch).length,
+    exposedBeforeIncome: Math.round(rows.reduce((sum, r) => sum + r.preIncomeObligation, 0)),
+  };
+}
+
 export function triageQueue(applications: Application[]): {
   rows: TriagedApplication[];
   summary: TriageSummary;
@@ -155,22 +193,7 @@ export function triageQueue(applications: Application[]): {
     (a, b) => rank[a.status] - rank[b.status] || b.preIncomeObligation - a.preIncomeObligation,
   );
 
-  return {
-    rows,
-    summary: {
-      total: rows.length,
-      clear: rows.filter((r) => r.status === "CLEAR").length,
-      review: rows.filter((r) => r.status === "REVIEW").length,
-      block: rows.filter((r) => r.status === "BLOCK").length,
-      gestationGapped: rows.filter((r) => r.solvency === "GESTATION_GAP").length,
-      capBound: rows.filter((r) => r.flagCodes.includes("CAP_BINDING")).length,
-      deadZone: rows.filter((r) => r.flagCodes.includes("DEAD_ZONE")).length,
-      routingMismatches: rows.filter((r) => r.routingMismatch).length,
-      exposedBeforeIncome: Math.round(
-        rows.reduce((sum, r) => sum + r.preIncomeObligation, 0),
-      ),
-    },
-  };
+  return { rows, summary: summariseTriage(rows) };
 }
 
 /**
@@ -264,5 +287,50 @@ export const SAMPLE_QUEUE: Application[] = [
     annualHouseholdIncome: 58_200,
     routedTo: "nsfdc-micro-finance",
     submittedOn: "2026-08-27",
+  },
+  // The three below are non-livestock trades. They matter because NABARD's unit-cost tables state
+  // capital cost and gestation but not profitability, while the indicative records for retail and
+  // manufacturing DO carry an annual surplus — so a queue of livestock files alone can never
+  // exercise debt-service coverage or income uplift. A real agency's queue is mixed; this one now
+  // is too.
+  {
+    id: "APP-4019",
+    applicant: "Savitri Bai Ahirwar",
+    village: "Karahiya",
+    block: "Sheopur",
+    district: "Sheopur",
+    statedActivityId: "kirana-store",
+    marginCapital: 12_000,
+    annualHouseholdIncome: 94_000,
+    routedTo: "nsfdc-micro-finance",
+    submittedOn: "2026-08-28",
+  },
+  {
+    id: "APP-4020",
+    applicant: "Jagdish Prasad",
+    village: "Bhitarwar",
+    block: "Bhitarwar",
+    district: "Gwalior",
+    // ₹1,85,000 puts this over the ₹1.40 lakh boundary, so the Term Loan tier is correct — and it
+    // is the one file in the queue whose scheme routing was got right on a cost above the cliff.
+    statedActivityId: "atta-chakki",
+    marginCapital: 19_000,
+    annualHouseholdIncome: 110_000,
+    routedTo: "nsfdc-term-loan",
+    submittedOn: "2026-08-29",
+  },
+  {
+    id: "APP-4021",
+    applicant: "Munni Devi",
+    village: "Ghatigaon",
+    block: "Ghatigaon",
+    district: "Gwalior",
+    // Nine months to first honey against a three-month moratorium: the gestation gap in its
+    // clearest form, on a file that is otherwise entirely sound.
+    statedActivityId: "bee-keeping-20",
+    marginCapital: 11_000,
+    annualHouseholdIncome: 78_000,
+    routedTo: "nsfdc-micro-finance",
+    submittedOn: "2026-08-30",
   },
 ];

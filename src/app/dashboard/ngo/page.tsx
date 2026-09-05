@@ -16,6 +16,8 @@ import {
   TrendingDown,
 } from "lucide-react";
 
+import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,10 +25,13 @@ import { Input } from "@/components/ui/input";
 import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import {
   SAMPLE_QUEUE,
+  summariseTriage,
   triageQueue,
   type TriageStatus,
   type TriagedApplication,
 } from "@/lib/officer/triage";
+import { SAMPLE_QUEUE_NOTE, queueFilename, queueToCsv } from "@/lib/officer/export";
+import { downloadCsv } from "@/lib/export/csv";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
@@ -58,11 +63,31 @@ const STATUS: Record<
 export default function OfficerConsolePage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<TriageStatus | "ALL">("ALL");
+  const [district, setDistrict] = useState<string>("ALL");
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const { rows, summary } = useMemo(() => triageQueue(SAMPLE_QUEUE), []);
+  const { rows } = useMemo(() => triageQueue(SAMPLE_QUEUE), []);
 
-  const visible = rows.filter((r) => {
+  const districts = useMemo(
+    () => [...new Set(rows.map((r) => r.application.district))].sort(),
+    [rows],
+  );
+
+  /**
+   * District is a SCOPE; the other two controls are a VIEW.
+   *
+   * An officer works one district, so the summary tiles have to describe that district — otherwise
+   * a headline reading "7 in the queue" sits above a table showing two. Status and search only
+   * narrow what is listed and must NOT move the counts: the point of the strip is to say what is in
+   * the queue, including the rows currently filtered out of sight.
+   */
+  const scoped = useMemo(
+    () => (district === "ALL" ? rows : rows.filter((r) => r.application.district === district)),
+    [rows, district],
+  );
+  const summary = useMemo(() => summariseTriage(scoped), [scoped]);
+
+  const visible = scoped.filter((r) => {
     if (filter !== "ALL" && r.status !== filter) return false;
     if (!query.trim()) return true;
     const q = query.toLowerCase();
@@ -72,6 +97,30 @@ export default function OfficerConsolePage() {
       r.application.village.toLowerCase().includes(q)
     );
   });
+
+  /**
+   * Exports exactly what is on screen, and names the filter in the file's own banner.
+   *
+   * A partial export that reads like a complete one is how a filtered view becomes somebody's
+   * sanction list two forwards later. The filter travels with the data.
+   */
+  function exportVisible() {
+    const generatedAt = new Date().toISOString();
+    const applied = [
+      district === "ALL" ? null : "district=" + district,
+      filter === "ALL" ? null : "status=" + filter,
+      query.trim() ? "search=" + query.trim() : null,
+    ].filter(Boolean);
+
+    downloadCsv(
+      queueFilename(generatedAt),
+      queueToCsv(visible, {
+        note: SAMPLE_QUEUE_NOTE,
+        generatedAt,
+        filter: applied.length ? applied.join(", ") : undefined,
+      }),
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 pb-24">
@@ -87,14 +136,28 @@ export default function OfficerConsolePage() {
             sorted by what will go wrong, not by when it arrived.
           </p>
         </div>
-        <div className="flex gap-2">
-          {/* Neither button was wired. On a console whose pitch is "37 SCAs opening a CSV", two
-              dead CSV controls are the worst possible place for an inert affordance. */}
-          <Button variant="outline" className="rounded-full" disabled>
-            <Download className="w-4 h-4 mr-2" aria-hidden="true" /> Export queue
+        <div className="flex flex-wrap gap-2">
+          {/* Export was a dead affordance on a console whose whole pitch is "37 SCAs opening a
+              CSV" — the worst possible place for a button that does nothing. It writes a real file
+              now. Upload stays disabled and says why on hover: there is no column mapper behind it
+              yet, and a control that half-imports somebody's queue is worse than one that admits
+              it cannot. */}
+          <Button
+            variant="outline"
+            className="rounded-full"
+            onClick={exportVisible}
+            disabled={visible.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+            Export {visible.length === rows.length ? "queue" : visible.length + " shown"}
           </Button>
-          <Button className="rounded-full" disabled>
-            Upload CSV <ArrowUpRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
+          <Link href="/dashboard/investor">
+            <Button variant="outline" className="rounded-full">
+              Funding view <ArrowUpRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
+            </Button>
+          </Link>
+          <Button className="rounded-full" disabled title="Column mapping is not built yet">
+            Upload CSV
           </Button>
         </div>
       </header>
@@ -125,7 +188,7 @@ export default function OfficerConsolePage() {
         <SummaryTile
           label="Exposed before income"
           value={`₹${inr(summary.exposedBeforeIncome)}`}
-          sub="across the whole queue"
+          sub={district === "ALL" ? "across the whole queue" : `across ${district}`}
           tone="rose"
         />
         <SummaryTile
@@ -171,12 +234,13 @@ export default function OfficerConsolePage() {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           {(["ALL", "BLOCK", "REVIEW", "CLEAR"] as const).map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
               className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                 filter === f ? "border-primary bg-primary/10 text-primary" : "hover:bg-muted/50"
               }`}
@@ -186,6 +250,34 @@ export default function OfficerConsolePage() {
           ))}
         </div>
       </div>
+
+      {/* District scope, derived from the queue itself rather than a hardcoded list, so a queue
+          uploaded from any state produces the right chips. Hidden entirely when there is only one
+          district — a filter with a single option is furniture. */}
+      {districts.length > 1 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            District
+          </span>
+          {["ALL", ...districts].map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setDistrict(d)}
+              aria-pressed={district === d}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                district === d
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted/50"
+              }`}
+            >
+              {d === "ALL"
+                ? `All (${rows.length})`
+                : `${d} (${rows.filter((r) => r.application.district === d).length})`}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* queue */}
       <div className="space-y-2">
