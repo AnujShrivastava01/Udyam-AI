@@ -322,7 +322,7 @@ export const HINGLISH: Dictionary = {
   "onb.districtHint": "Hamare paas sirf {states} ke gaon ka data hai.",
   "agent.open": "App se baat karein",
   "agent.title": "Mujhse baat kijiye",
-  "agent.hint": "Button dabaiye, boliye, phir chhod dijiye. Hindi, Hinglish ya English.",
+  "agent.hint": "Bas boliye. Hindi, Hinglish ya English.",
   "agent.examples":
     "Bolkar dekhiye: “mera district Gwalior hai”, “mujhe bakri palni hai”, “mere paas pachas hazaar rupaye hain”, “paise ka plan kholiye”, “meri kist kitni hai”, ya “yeh samjhaiye”.",
   "agent.speak": "Dabakar boliye",
@@ -332,4 +332,9 @@ export const HINGLISH: Dictionary = {
   "agent.youSaid": "Aapne kaha:",
   "agent.micDenied": "Mic uplabdh nahi hai. Anumati dekar dobara koshish kijiye.",
   "agent.awaitingConfirm": "Rakam pakki karne ke liye “haan” kahiye, ya “nahi” kehkar dobara boliye.",
+  "agent.connecting": "Jud raha hoon…",
+  "agent.listening": "Sun raha hoon — bas boliye",
+  "agent.hearing": "Mujhe sunai de raha hai…",
+  "agent.close": "Voice mode band karein",
+  "agent.end": "Baatcheet khatam karein",
 };

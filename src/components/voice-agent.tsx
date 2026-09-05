@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Mic, Square, X } from "lucide-react";
+import { Mic, X } from "lucide-react";
 
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { startRecording } from "@/lib/voice/wav";
+import { listenContinuously, type ContinuousListener } from "@/lib/voice/vad";
 
 interface Turn {
   you: string;
@@ -31,16 +31,20 @@ interface AgentResponse {
   error?: string;
 }
 
+type Phase = "connecting" | "listening" | "hearing" | "thinking" | "speaking" | "error";
+
 /**
- * Talk to the app.
+ * Hands-free voice mode.
  *
- * One turn: hold the mic, say something, let go. The server transcribes it, Gemini picks one action
- * from a closed list, and the answer comes back as both text and speech. Everything it decides is
- * applied HERE — the store and the router are the client's, and the route only ever proposes.
+ * Open it and talk. The listener decides when a turn ends from the microphone itself, so nobody
+ * has to hold a button, and the loop runs until it is closed: listen, answer, listen again.
  *
- * The transcript and the reply are both shown, always. A voice interface that gives you no written
- * record of what it thought you said is impossible to correct and impossible to trust, and this one
- * is setting a loan amount.
+ * The microphone is PAUSED while the agent speaks. Without that the reply is captured as the next
+ * turn and the agent talks to itself — which is the failure everyone hits first, and echo
+ * cancellation does not reliably prevent it through a phone speaker.
+ *
+ * The transcript stays on screen throughout. A voice interface that hides what it thought you said
+ * cannot be corrected, and this one sets a loan amount.
  */
 export function VoiceAgent() {
   const { t, locale } = useT();
@@ -48,25 +52,50 @@ export function VoiceAgent() {
   const { onboardingInput, setOnboardingInput } = useAppStore();
 
   const [open, setOpen] = useState(false);
-  const [state, setState] = useState<"idle" | "recording" | "thinking" | "speaking">("idle");
+  const [phase, setPhase] = useState<Phase>("connecting");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [pendingAmount, setPendingAmount] = useState<number | null>(null);
+  const [level, setLevel] = useState(0);
 
-  const recorder = useRef<{ stop: () => Promise<string> } | null>(null);
+  const listener = useRef<ContinuousListener | null>(null);
   const audioEl = useRef<HTMLAudioElement | null>(null);
+  const busy = useRef(false);
+  const frame = useRef(0);
 
-  useEffect(
-    () => () => {
-      audioEl.current?.pause();
-      void recorder.current?.stop().catch(() => {});
-    },
-    [],
-  );
+  // Rendered, so it has to be state — a ref does not re-render, and this line is the only thing
+  // telling the user the agent is holding an amount waiting for a yes.
+  const [awaitingAmount, setAwaitingAmount] = useState(false);
 
-  const send = useCallback(
+  // The async handler needs the CURRENT values without being rebuilt every keystroke, so it reads
+  // through refs. Both are synced in an effect: assigning during render is a write React is
+  // entitled to discard.
+  const store = useRef(onboardingInput);
+  const pending = useRef<number | null>(null);
+  useEffect(() => {
+    store.current = onboardingInput;
+  }, [onboardingInput]);
+
+  const teardown = useCallback(() => {
+    cancelAnimationFrame(frame.current);
+    listener.current?.stop();
+    listener.current = null;
+    audioEl.current?.pause();
+    audioEl.current = null;
+    busy.current = false;
+    pending.current = null;
+  }, []);
+
+  useEffect(() => teardown, [teardown]);
+
+  const handleTurn = useCallback(
     async (audio: string) => {
-      setState("thinking");
+      // One turn at a time. A second utterance arriving mid-request is dropped rather than queued:
+      // answering a question the user has already moved past is worse than missing it.
+      if (busy.current) return;
+      busy.current = true;
+      listener.current?.pause();
+      setPhase("thinking");
+
       try {
         const res = await fetch("/api/voice/agent", {
           method: "POST",
@@ -75,169 +104,213 @@ export function VoiceAgent() {
             audio,
             locale,
             context: {
-              district: onboardingInput.location?.district,
-              block: onboardingInput.location?.block,
-              category: onboardingInput.businessCategory || undefined,
-              marginCapital: onboardingInput.marginCapital,
-              pendingAmount,
+              district: store.current.location?.district,
+              block: store.current.location?.block,
+              category: store.current.businessCategory || undefined,
+              marginCapital: store.current.marginCapital,
+              pendingAmount: pending.current,
             },
           }),
         });
         const data: AgentResponse = await res.json();
         if (!res.ok) {
           setError(data.error ?? `HTTP ${res.status}`);
-          setState("idle");
+          setPhase("listening");
+          listener.current?.resume();
           return;
         }
 
         setTurns((prev) => [...prev, { you: data.transcript, agent: data.reply }]);
-        setPendingAmount(data.context.pendingAmount ?? null);
+        pending.current = data.context.pendingAmount ?? null;
+        setAwaitingAmount(pending.current != null);
 
-        // Apply what it decided. An amount only lands here after the user has confirmed the
-        // read-back, so nothing reaches the store on a single hearing.
         const c = data.context;
-        const location = onboardingInput.location ?? { village: "", block: "", district: "" };
-        if (c.district !== onboardingInput.location?.district || c.block !== onboardingInput.location?.block) {
+        const location = store.current.location ?? { village: "", block: "", district: "" };
+        if (
+          c.district !== store.current.location?.district ||
+          c.block !== store.current.location?.block
+        ) {
           setOnboardingInput({
             location: { ...location, district: c.district ?? "", block: c.block ?? "" },
           });
         }
-        if (c.category && c.category !== onboardingInput.businessCategory) {
+        if (c.category && c.category !== store.current.businessCategory) {
           setOnboardingInput({ businessCategory: c.category });
         }
-        if (c.marginCapital != null && c.marginCapital !== onboardingInput.marginCapital) {
+        if (c.marginCapital != null && c.marginCapital !== store.current.marginCapital) {
           setOnboardingInput({ marginCapital: c.marginCapital });
         }
+
+        const resume = () => {
+          if (data.navigateTo) router.push(data.navigateTo);
+          setPhase("listening");
+          listener.current?.resume();
+          busy.current = false;
+        };
 
         if (data.audio) {
           const el = new Audio(`data:${data.mimeType};base64,${data.audio}`);
           audioEl.current = el;
-          el.onended = () => {
-            setState("idle");
-            if (data.navigateTo) router.push(data.navigateTo);
-          };
-          setState("speaking");
-          await el.play().catch(() => {
-            setState("idle");
-            if (data.navigateTo) router.push(data.navigateTo);
-          });
+          el.onended = resume;
+          el.onerror = resume;
+          setPhase("speaking");
+          await el.play().catch(resume);
         } else {
-          setState("idle");
-          if (data.navigateTo) router.push(data.navigateTo);
+          resume();
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "request failed");
-        setState("idle");
+        setPhase("listening");
+        listener.current?.resume();
+        busy.current = false;
       }
     },
-    [locale, onboardingInput, pendingAmount, router, setOnboardingInput],
+    [locale, router, setOnboardingInput],
   );
 
-  const start = async () => {
+  // `busy` is cleared by the audio's onended, so it is reset here for the paths that do not play.
+  useEffect(() => {
+    if (phase === "listening") busy.current = false;
+  }, [phase]);
+
+  const begin = useCallback(async () => {
     setError(null);
+    setPhase("connecting");
     try {
-      recorder.current = await startRecording();
-      setState("recording");
+      listener.current = await listenContinuously({
+        onTurn: handleTurn,
+        onPhase: (p) =>
+          setPhase((current) =>
+            current === "listening" || current === "hearing"
+              ? p === "speech"
+                ? "hearing"
+                : "listening"
+              : current,
+          ),
+        onError: (m) => setError(m),
+      });
+      setPhase("listening");
+
+      const tick = () => {
+        setLevel(listener.current?.level() ?? 0);
+        frame.current = requestAnimationFrame(tick);
+      };
+      frame.current = requestAnimationFrame(tick);
     } catch {
-      // Almost always a denied microphone permission, which is the user's decision, not a fault.
       setError(t("agent.micDenied"));
-      setState("idle");
+      setPhase("error");
     }
+  }, [handleTurn, t]);
+
+  const close = () => {
+    teardown();
+    setOpen(false);
+    setLevel(0);
   };
 
-  const stop = async () => {
-    const r = recorder.current;
-    recorder.current = null;
-    if (!r) return;
-    try {
-      await send(await r.stop());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "recording failed");
-      setState("idle");
-    }
+  const label: Record<Phase, string> = {
+    connecting: t("agent.connecting"),
+    listening: t("agent.listening"),
+    hearing: t("agent.hearing"),
+    thinking: t("agent.thinking"),
+    speaking: t("agent.speaking"),
+    error: error ?? t("agent.micDenied"),
   };
 
-  const busy = state === "thinking" || state === "speaking";
+  // The orb answers to the microphone while listening and pulses on its own while speaking, so
+  // there is always something telling you whose turn it is.
+  const scale =
+    phase === "hearing" || phase === "listening"
+      ? 1 + level * 0.35
+      : phase === "speaking"
+        ? 1.12
+        : 1;
 
   return (
     <>
-      {/* Sits above the mobile bottom nav so it never covers it. */}
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen(true);
+          setTurns([]);
+          void begin();
+        }}
         aria-label={t("agent.open")}
-        aria-expanded={open}
         className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:bottom-6"
       >
-        {open ? <X className="h-6 w-6" aria-hidden="true" /> : <Mic className="h-6 w-6" aria-hidden="true" />}
+        <Mic className="h-6 w-6" aria-hidden="true" />
       </button>
 
       {open && (
         <div
           role="dialog"
+          aria-modal="true"
           aria-label={t("agent.title")}
-          className="fixed bottom-36 right-4 z-50 flex w-[min(22rem,calc(100vw-2rem))] flex-col rounded-2xl border-2 bg-card shadow-2xl md:bottom-24"
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-neutral-950 px-6 text-neutral-100"
         >
-          <div className="border-b px-4 py-3">
-            <p className="font-heading font-bold">{t("agent.title")}</p>
-            <p className="text-[11px] leading-relaxed text-muted-foreground">{t("agent.hint")}</p>
-          </div>
+          <button
+            type="button"
+            onClick={close}
+            aria-label={t("agent.close")}
+            className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
 
-          <div className="max-h-64 space-y-3 overflow-y-auto px-4 py-3">
-            {turns.length === 0 && (
-              <p className="text-xs leading-relaxed text-muted-foreground">{t("agent.examples")}</p>
-            )}
-            {turns.map((turn, i) => (
-              <div key={i} className="space-y-1.5">
-                {/* What it THOUGHT you said, shown every time — the only way to catch a mishearing. */}
-                <p className="rounded-lg bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground">
-                  <span className="font-semibold">{t("agent.youSaid")}</span> {turn.you}
-                </p>
-                <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm leading-relaxed">
-                  {turn.agent}
-                </p>
-              </div>
-            ))}
-            {error && (
-              <p role="status" className="text-xs text-amber-800 dark:text-amber-400">
-                {error}
-              </p>
-            )}
-          </div>
-
-          <div className="border-t p-3">
-            <button
-              type="button"
-              onClick={state === "recording" ? stop : start}
-              disabled={busy}
+          <div className="relative flex h-64 w-64 items-center justify-center">
+            {/* Glow, behind the orb. */}
+            <div
+              className="absolute h-56 w-56 rounded-full blur-3xl transition-opacity duration-500"
+              style={{
+                background: "radial-gradient(circle, rgba(99,102,241,0.55), rgba(56,189,248,0.25))",
+                opacity: phase === "thinking" ? 0.35 : 0.6 + level * 0.4,
+              }}
+            />
+            <div
               className={cn(
-                "flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60",
-                state === "recording"
-                  ? "bg-rose-600 text-white hover:bg-rose-700"
-                  : "bg-primary text-primary-foreground hover:bg-primary/90",
+                "voice-orb relative h-44 w-44 rounded-full",
+                phase === "speaking" && "voice-orb-speaking",
+                phase === "thinking" && "voice-orb-thinking",
               )}
-            >
-              {state === "recording" ? (
-                <>
-                  <Square className="h-4 w-4" aria-hidden="true" /> {t("agent.stop")}
-                </>
-              ) : busy ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  {state === "speaking" ? t("agent.speaking") : t("agent.thinking")}
-                </>
-              ) : (
-                <>
-                  <Mic className="h-4 w-4" aria-hidden="true" /> {t("agent.speak")}
-                </>
-              )}
-            </button>
-            {pendingAmount != null && (
-              <p className="mt-2 text-center text-[11px] text-amber-800 dark:text-amber-400">
-                {t("agent.awaitingConfirm")}
-              </p>
-            )}
+              style={{ transform: `scale(${scale})` }}
+              aria-hidden="true"
+            />
           </div>
+
+          <p role="status" className="mt-8 text-center text-lg font-medium text-neutral-200">
+            {label[phase]}
+          </p>
+
+          {turns.length === 0 && phase === "listening" && (
+            <p className="mt-3 max-w-sm text-center text-sm leading-relaxed text-neutral-400">
+              {t("agent.examples")}
+            </p>
+          )}
+
+          {/* The last exchange, in words. */}
+          {turns.length > 0 && (
+            <div className="mt-6 w-full max-w-md space-y-2">
+              <p className="text-center text-xs text-neutral-500">
+                <span className="font-semibold">{t("agent.youSaid")}</span>{" "}
+                {turns[turns.length - 1].you}
+              </p>
+              <p className="text-center text-base leading-relaxed text-neutral-100">
+                {turns[turns.length - 1].agent}
+              </p>
+            </div>
+          )}
+
+          {awaitingAmount && (
+            <p className="mt-4 text-center text-xs text-amber-300">{t("agent.awaitingConfirm")}</p>
+          )}
+
+          <button
+            type="button"
+            onClick={close}
+            className="mt-10 rounded-full bg-white/10 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            {t("agent.end")}
+          </button>
         </div>
       )}
     </>

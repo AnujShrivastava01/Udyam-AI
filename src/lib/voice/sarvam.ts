@@ -48,7 +48,9 @@ const BASE = process.env.SARVAM_BASE_URL ?? "https://api.sarvam.ai";
 
 /** Speaker and models, all overridable — see the drift note above. */
 const TTS_MODEL = process.env.SARVAM_TTS_MODEL ?? "bulbul:v3";
-const TTS_SPEAKER = process.env.SARVAM_TTS_SPEAKER ?? "ritu";
+// rupali serves bulbul:v3 only — she is absent from v2's speaker list, so a model downgrade is a
+// hard 400 rather than a different voice.
+const TTS_SPEAKER = process.env.SARVAM_TTS_SPEAKER ?? "rupali";
 const STT_MODEL = process.env.SARVAM_STT_MODEL ?? "saarika:v2.5";
 
 export function isSarvamConfigured(): boolean {

@@ -413,7 +413,7 @@ export const EN = {
   // ── voice agent ──────────────────────────────────────────
   "agent.open": "Talk to the app",
   "agent.title": "Talk to me",
-  "agent.hint": "Hold the button, speak, then let go. Hindi, Hinglish or English.",
+  "agent.hint": "Just talk. Hindi, Hinglish or English.",
   "agent.examples":
     "Try: “my district is Gwalior”, “I want to keep goats”, “I have fifty thousand rupees”, “open the money plan”, “how much is my instalment”, or “explain this”.",
   "agent.speak": "Hold and speak",
@@ -423,6 +423,11 @@ export const EN = {
   "agent.youSaid": "You said:",
   "agent.micDenied": "The microphone is not available. Allow access and try again.",
   "agent.awaitingConfirm": "Say yes to confirm the amount, or no to say it again.",
+  "agent.connecting": "Connecting…",
+  "agent.listening": "Listening — just speak",
+  "agent.hearing": "I can hear you…",
+  "agent.close": "Close voice mode",
+  "agent.end": "End conversation",
 } as const;
 
 export type MessageKey = keyof typeof EN;
