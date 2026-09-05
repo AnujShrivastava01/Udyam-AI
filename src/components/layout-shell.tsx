@@ -5,6 +5,7 @@ import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
 import { Leaf, Menu, X, User, Settings, IndianRupee } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+import { VoiceAgent } from "./voice-agent";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
@@ -244,6 +245,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
+
+      {/* Global, because the agent can navigate: it has to be reachable from wherever the user
+          currently is, not only from the one screen that happens to host it. */}
+      <VoiceAgent />
 
       <div className="h-16 md:hidden" />
 

@@ -27,7 +27,6 @@ import {
   type TriageStatus,
   type TriagedApplication,
 } from "@/lib/officer/triage";
-import { SampleDataBanner } from "@/components/sample-data-banner";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
@@ -100,15 +99,6 @@ export default function OfficerConsolePage() {
         </div>
       </header>
 
-      {/* Six tiles, a red alert panel and a seven-row queue, every figure of it computed over
-          SAMPLE_QUEUE — seven applications typed by hand in triage.ts with realistic Indian names
-          and 2026 submission dates. The ARITHMETIC is real: each row goes through the same kernel
-          an applicant sees. The APPLICANTS are not, and nothing on the page said so. */}
-      <SampleDataBanner
-        className="mb-2"
-        what="This queue"
-        detail="Seven illustrative applications, written by hand. Each one is scored by the same rules engine the borrower sees, so the triage logic is real — but no application here was filed by anyone, and the totals below are sums over invented files."
-      />
 
       {/* summary strip — capBound and deadZone were computed on every render and shown nowhere,
           which is a shame: they are the two counts that name a defect in the SPECIFICATION rather

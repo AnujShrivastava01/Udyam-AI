@@ -28,7 +28,6 @@ import {
 import { ACTIVITIES, ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { plan } from "@/lib/finance";
 import { useT, money, type MessageKey } from "@/lib/i18n";
-import { SampleDataBanner } from "@/components/sample-data-banner";
 
 /**
  * The borrower's own view of a live loan.
@@ -81,7 +80,6 @@ export default function LoanTrackerPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6 pb-24">
-      <SampleDataBanner what={t("emi.sampleWhat")} detail={t("emi.sampleDetail")} />
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>

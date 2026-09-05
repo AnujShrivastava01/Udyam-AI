@@ -254,9 +254,6 @@ export const HINGLISH: Dictionary = {
   "onb.previewNone":
     "{margin} hamari kisi bhi scheme ki minimum limit se kam hai. Raasta dekhne ke liye badi rakam likhiye.",
 
-  "sample.title": "Sample data",
-  "sample.detail":
-    "Is screen ke records sirf udaharan hain, asli accounts nahi. Ye isliye hain taaki poora interface dikhaya ja sake.",
   "clock.beforeIncomeNeutral":
     "{payments} kist(on) mein {amount} kamai shuru hone wale mahine ya usse pehle dena hota hai. Yeh moratorium ka byaj hai, jab kaam ki kamai chal rahi hoti hai — yeh koi bina aamdani ka gap nahi hai.",
   "emi.title": "Sample loan",
@@ -322,4 +319,17 @@ export const HINGLISH: Dictionary = {
     "Bas itna hi. Model ko ye values pehle se gini aur pehle se format ki hui milti hain; usse kabhi jodne, bhaag dene ya round karne ko nahi kaha jata, aur uske jawab mein aaya koi bhi aisa number jo is list mein nahi hai, gadha hua maana jata hai.",
   "ai.facts.gestation": "Gestation period",
   "ai.facts.verdict": "Nateeja",
+  "onb.districtHint": "Hamare paas sirf {states} ke gaon ka data hai.",
+  "agent.open": "App se baat karein",
+  "agent.title": "Mujhse baat kijiye",
+  "agent.hint": "Button dabaiye, boliye, phir chhod dijiye. Hindi, Hinglish ya English.",
+  "agent.examples":
+    "Bolkar dekhiye: “mera district Gwalior hai”, “mujhe bakri palni hai”, “mere paas pachas hazaar rupaye hain”, “paise ka plan kholiye”, “meri kist kitni hai”, ya “yeh samjhaiye”.",
+  "agent.speak": "Dabakar boliye",
+  "agent.stop": "Ho gaya — bhejiye",
+  "agent.thinking": "Sun raha hoon…",
+  "agent.speaking": "Jawab de raha hoon…",
+  "agent.youSaid": "Aapne kaha:",
+  "agent.micDenied": "Mic uplabdh nahi hai. Anumati dekar dobara koshish kijiye.",
+  "agent.awaitingConfirm": "Rakam pakki karne ke liye “haan” kahiye, ya “nahi” kehkar dobara boliye.",
 };

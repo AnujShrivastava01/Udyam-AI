@@ -341,10 +341,6 @@ export const EN = {
   "onb.previewNone":
     "{margin} is below the minimum any of the schemes we model will structure against. Enter a larger amount to see what it routes to.",
 
-  // ── shared disclosure ──────────────────────────────────
-  "sample.title": "Sample data",
-  "sample.detail":
-    "The records on this screen are illustrative, not real accounts. They exist so the interface can be demonstrated end to end.",
   "clock.beforeIncomeNeutral":
     "{amount} across {payments} payment(s) falls due at or before the month income starts. That is moratorium interest inside a window the enterprise is already earning through — not an uncovered gap.",
   // ── borrower loan tracker ─────────────────────────────────
@@ -413,6 +409,20 @@ export const EN = {
     "This is the whole of it. The model receives these values already computed and already formatted; it is never asked to add, divide or round anything, and any figure in its reply that is not on this list is treated as an invention.",
   "ai.facts.gestation": "Gestation",
   "ai.facts.verdict": "Verdict",
+  "onb.districtHint": "We hold village data for {states} only.",
+  // ── voice agent ──────────────────────────────────────────
+  "agent.open": "Talk to the app",
+  "agent.title": "Talk to me",
+  "agent.hint": "Hold the button, speak, then let go. Hindi, Hinglish or English.",
+  "agent.examples":
+    "Try: “my district is Gwalior”, “I want to keep goats”, “I have fifty thousand rupees”, “open the money plan”, “how much is my instalment”, or “explain this”.",
+  "agent.speak": "Hold and speak",
+  "agent.stop": "Done — send",
+  "agent.thinking": "Listening…",
+  "agent.speaking": "Answering…",
+  "agent.youSaid": "You said:",
+  "agent.micDenied": "The microphone is not available. Allow access and try again.",
+  "agent.awaitingConfirm": "Say yes to confirm the amount, or no to say it again.",
 } as const;
 
 export type MessageKey = keyof typeof EN;

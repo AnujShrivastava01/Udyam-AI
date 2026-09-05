@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, ThumbsUp, Share2, BadgeCheck, Send, PlusCircle } from "lucide-react";
 import Link from "next/link";
-import { SampleDataBanner } from "@/components/sample-data-banner";
 import { useState } from "react";
 
 const MOCK_POSTS = [
@@ -60,11 +59,6 @@ export default function CommunityPage() {
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
 
-      <SampleDataBanner
-        className="mb-6"
-        what="This feed"
-        detail="Posts, group names and counterparties on this page are written by hand to show the shape of the feature. No post here is from a real person, NGO or bank."
-      />
 
       {/* Header Area */}
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 md:p-8 rounded-3xl border shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-6">

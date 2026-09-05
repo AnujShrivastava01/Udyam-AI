@@ -27,6 +27,12 @@ import { plan } from "@/lib/finance";
 import { useT, money, type MessageKey } from "@/lib/i18n";
 import { GAZETTEER_DISTRICTS, blocksInDistrict } from "@/lib/market/villages";
 
+// Every district on file is in one state today, so repeating it on each row is noise that made the
+// options twice as wide as they needed to be. It comes back automatically if the gazetteer ever
+// spans two.
+const GAZETTEER_STATES = [...new Set(GAZETTEER_DISTRICTS.map((d) => d.state))];
+const SHOW_STATE_PER_ROW = GAZETTEER_STATES.length > 1;
+
 /**
  * Each category maps to the activity we actually hold a NABARD unit cost and gestation figure for,
  * so the report the user lands on is about the thing they just chose. Handicrafts has no such row;
@@ -171,17 +177,21 @@ export default function OnboardingPage() {
                         // never appeared in the trigger at all.
                         value={onboardingInput.location?.district ?? null}
                       >
-                        <SelectTrigger id="district">
+                        <SelectTrigger id="district" className="w-full">
                           <SelectValue placeholder={t("onb.districtPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
                           {GAZETTEER_DISTRICTS.map((d) => (
                             <SelectItem key={d.district} value={d.district}>
-                              {d.district} · {d.state}
+                              {SHOW_STATE_PER_ROW ? `${d.district} · ${d.state}` : d.district}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {/* The state, said once, instead of on every row. */}
+                      <p className="text-[11px] text-muted-foreground">
+                        {t("onb.districtHint", { states: GAZETTEER_STATES.join(", ") })}
+                      </p>
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="block">{t("onb.block")}</Label>
@@ -193,7 +203,7 @@ export default function OnboardingPage() {
                         value={onboardingInput.location?.block ?? null}
                         disabled={!district}
                       >
-                        <SelectTrigger id="block">
+                        <SelectTrigger id="block" className="w-full">
                           <SelectValue
                             placeholder={
                               district ? t("onb.blockPlaceholder") : t("onb.blockNeedsDistrict")
