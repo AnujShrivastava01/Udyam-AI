@@ -228,89 +228,110 @@ export function VoiceAgent() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          setOpen(true);
-          setTurns([]);
-          void begin();
-        }}
-        aria-label={t("agent.open")}
-        className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:bottom-6"
-      >
-        <Mic className="h-6 w-6" aria-hidden="true" />
-      </button>
+      {/* The launcher hides while the panel is up — the panel sits on the same anchor, and two
+          controls stacked on one corner is how you get a mis-tap. */}
+      {!open && (
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(true);
+            setTurns([]);
+            void begin();
+          }}
+          aria-label={t("agent.open")}
+          className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:bottom-6"
+        >
+          <Mic className="h-6 w-6" aria-hidden="true" />
+        </button>
+      )}
 
+      {/*
+        A panel, not a takeover.
+
+        This was full-screen, which is wrong for THIS agent: it fills fields and moves between
+        pages, and a fullscreen overlay hides the very thing it is driving. Anchored in the corner,
+        the user watches the district land in the form and the calculator open while they talk.
+
+        Not a modal either — no aria-modal, no focus trap, no backdrop. The rest of the page stays
+        live and operable on purpose, so someone can keep tapping while the agent listens.
+      */}
       {open && (
         <div
           role="dialog"
-          aria-modal="true"
           aria-label={t("agent.title")}
-          className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-neutral-950 px-6 text-neutral-100"
+          className="fixed bottom-20 right-4 z-50 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/95 text-neutral-100 shadow-2xl backdrop-blur-md md:bottom-6"
         >
-          <button
-            type="button"
-            onClick={close}
-            aria-label={t("agent.close")}
-            className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <X className="h-5 w-5" aria-hidden="true" />
-          </button>
-
-          <div className="relative flex h-64 w-64 items-center justify-center">
-            {/* Glow, behind the orb. */}
-            <div
-              className="absolute h-56 w-56 rounded-full blur-3xl transition-opacity duration-500"
-              style={{
-                background: "radial-gradient(circle, rgba(99,102,241,0.55), rgba(56,189,248,0.25))",
-                opacity: phase === "thinking" ? 0.35 : 0.6 + level * 0.4,
-              }}
-            />
-            <div
-              className={cn(
-                "voice-orb relative h-44 w-44 rounded-full",
-                phase === "speaking" && "voice-orb-speaking",
-                phase === "thinking" && "voice-orb-thinking",
-              )}
-              style={{ transform: `scale(${scale})` }}
-              aria-hidden="true"
-            />
+          <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
+            <p className="text-sm font-semibold">{t("agent.title")}</p>
+            <button
+              type="button"
+              onClick={close}
+              aria-label={t("agent.close")}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
 
-          <p role="status" className="mt-8 text-center text-lg font-medium text-neutral-200">
-            {label[phase]}
-          </p>
-
-          {turns.length === 0 && phase === "listening" && (
-            <p className="mt-3 max-w-sm text-center text-sm leading-relaxed text-neutral-400">
-              {t("agent.examples")}
-            </p>
-          )}
-
-          {/* The last exchange, in words. */}
-          {turns.length > 0 && (
-            <div className="mt-6 w-full max-w-md space-y-2">
-              <p className="text-center text-xs text-neutral-500">
-                <span className="font-semibold">{t("agent.youSaid")}</span>{" "}
-                {turns[turns.length - 1].you}
-              </p>
-              <p className="text-center text-base leading-relaxed text-neutral-100">
-                {turns[turns.length - 1].agent}
-              </p>
+          <div className="flex flex-col items-center px-4 pb-4 pt-5">
+            <div className="relative flex h-28 w-28 items-center justify-center">
+              <div
+                className="absolute h-24 w-24 rounded-full blur-2xl transition-opacity duration-500"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(99,102,241,0.55), rgba(56,189,248,0.25))",
+                  opacity: phase === "thinking" ? 0.35 : 0.55 + level * 0.4,
+                }}
+              />
+              <div
+                className={cn(
+                  "voice-orb relative h-20 w-20 rounded-full",
+                  phase === "speaking" && "voice-orb-speaking",
+                  phase === "thinking" && "voice-orb-thinking",
+                )}
+                style={{ transform: `scale(${scale})` }}
+                aria-hidden="true"
+              />
             </div>
-          )}
 
-          {awaitingAmount && (
-            <p className="mt-4 text-center text-xs text-amber-300">{t("agent.awaitingConfirm")}</p>
-          )}
+            <p role="status" className="mt-4 text-center text-sm font-medium text-neutral-200">
+              {label[phase]}
+            </p>
 
-          <button
-            type="button"
-            onClick={close}
-            className="mt-10 rounded-full bg-white/10 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            {t("agent.end")}
-          </button>
+            {turns.length === 0 && phase === "listening" && (
+              <p className="mt-2 text-center text-[11px] leading-relaxed text-neutral-400">
+                {t("agent.examples")}
+              </p>
+            )}
+
+            {/* The exchange, in words. Scrolls rather than growing the panel off-screen. */}
+            {turns.length > 0 && (
+              <div className="mt-4 max-h-40 w-full space-y-2 overflow-y-auto">
+                {turns.slice(-4).map((turn, i) => (
+                  <div key={i} className="space-y-1">
+                    <p className="text-[11px] text-neutral-500">
+                      <span className="font-semibold">{t("agent.youSaid")}</span> {turn.you}
+                    </p>
+                    <p className="text-sm leading-relaxed text-neutral-100">{turn.agent}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {awaitingAmount && (
+              <p className="mt-3 text-center text-[11px] text-amber-300">
+                {t("agent.awaitingConfirm")}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={close}
+              className="mt-4 w-full rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {t("agent.end")}
+            </button>
+          </div>
         </div>
       )}
     </>
