@@ -84,12 +84,14 @@ export function JourneyStepper() {
     return visitedSteps.includes(step.id) ? ("visited" as const) : ("pending" as const);
   };
 
+  const prev = activeIndex > 0 ? STEPS[activeIndex - 1] : null;
+  const next = activeIndex >= 0 && activeIndex < STEPS.length - 1 ? STEPS[activeIndex + 1] : null;
+
   return (
-    <nav
-      aria-label="Journey"
-      className="w-full bg-card border-b px-4 py-2 md:px-8 shadow-sm overflow-x-auto no-scrollbar"
-    >
-      <div className="flex items-center justify-between min-w-[600px] max-w-5xl mx-auto">
+    <nav aria-label="Journey" className="w-full bg-card border-b shadow-sm flex flex-col">
+      {/* Shrinks to fit rather than scrolling: the strip lives inside the FIXED header, so a
+          horizontal scrollbar here added height to the bar on every page. */}
+      <div className="flex items-start justify-between w-full max-w-5xl mx-auto px-2 py-3 md:px-8">
         {STEPS.map((step, index) => {
           const status = stateOf(index);
           const reached = status !== "pending";
@@ -109,7 +111,7 @@ export function JourneyStepper() {
               {index !== 0 && (
                 <div
                   className={cn(
-                    "absolute top-5 -left-1/2 w-full h-[2px] -z-10 transition-colors",
+                    "absolute top-4 md:top-5 -left-1/2 w-full h-[2px] -z-10 transition-colors",
                     linkedBack ? "bg-primary" : "bg-muted group-hover:bg-primary/30",
                   )}
                 />
@@ -117,7 +119,7 @@ export function JourneyStepper() {
 
               <div
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300",
+                  "flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-all duration-300 relative",
                   status === "current"
                     ? "border-primary bg-primary text-primary-foreground shadow-md scale-110"
                     : status === "done"
@@ -127,23 +129,29 @@ export function JourneyStepper() {
                         : "border-muted bg-card text-muted-foreground group-hover:border-primary/50 group-hover:text-primary/70",
                 )}
               >
-                {status === "done" ? (
-                  <Check className="w-5 h-5" aria-hidden="true" />
-                ) : (
-                  <Icon className="w-5 h-5" aria-hidden="true" />
+                <Icon className="w-4 h-4 md:w-5 md:h-5" aria-hidden="true" />
+
+                {/* The tick is a corner badge rather than a replacement for the icon, so the step
+                    stays identifiable at a glance. It appears only for `done` — a step the user
+                    has merely opened gets the lighter ring above and no tick, because those are
+                    two different claims. */}
+                {status === "done" && (
+                  <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5 border border-background">
+                    <Check className="w-2.5 h-2.5" aria-hidden="true" />
+                  </div>
                 )}
-                {/* A tick and a ring carried the whole distinction. aria-current marks the step
-                    the user is on; the other two states have no equivalent attribute, so they are
-                    said in text — and they say different things, because they mean different
-                    things. */}
+
+                {/* aria-current marks the step the user is on; the other two states have no
+                    equivalent attribute, so they are said in text — and they say different things,
+                    because they mean different things. */}
                 {status === "done" && <span className="sr-only">{t("step.done")}</span>}
                 {status === "visited" && <span className="sr-only">{t("step.visited")}</span>}
               </div>
               <span
                 className={cn(
-                  "mt-2 text-xs font-medium tracking-wide transition-colors",
+                  "mt-2 text-[9px] md:text-xs font-medium tracking-wide transition-colors text-center leading-tight px-0.5",
                   status === "current"
-                    ? "text-foreground font-semibold"
+                    ? "text-foreground font-bold"
                     : status === "pending"
                       ? "text-muted-foreground group-hover:text-foreground"
                       : "text-foreground/80 group-hover:text-foreground",
@@ -155,6 +163,45 @@ export function JourneyStepper() {
           );
         })}
       </div>
+
+      {/* Prev / Next on a phone, where the six targets above are small. Rendered only when the
+          current route is one of the steps — activeIndex is -1 elsewhere, and STEPS[-1] would
+          have thrown. */}
+      {activeIndex >= 0 && (
+        <div className="bg-muted/30 border-t px-4 py-2 flex items-center justify-between text-sm md:hidden">
+          {prev ? (
+            <Link
+              href={prev.href}
+              className="text-primary font-medium flex items-center gap-1 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <span className="text-lg leading-none" aria-hidden="true">
+                &laquo;
+              </span>{" "}
+              {t(`step.${prev.id}` as DictionaryKeys)}
+            </Link>
+          ) : (
+            <div />
+          )}
+
+          <span className="text-xs text-muted-foreground font-medium">
+            {t(`step.${STEPS[activeIndex].id}` as DictionaryKeys)}
+          </span>
+
+          {next ? (
+            <Link
+              href={next.href}
+              className="text-primary font-medium flex items-center gap-1 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              {t(`step.${next.id}` as DictionaryKeys)}{" "}
+              <span className="text-lg leading-none" aria-hidden="true">
+                &raquo;
+              </span>
+            </Link>
+          ) : (
+            <div />
+          )}
+        </div>
+      )}
     </nav>
   );
 }

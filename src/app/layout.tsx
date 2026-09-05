@@ -34,6 +34,10 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  themeColor: "#0d9488",
+};
+
 export const metadata: Metadata = {
   title: {
     default: "UdyamAI — what you can repay, not what you can borrow",
@@ -42,6 +46,11 @@ export const metadata: Metadata = {
   description:
     "AI business advisory and financial structuring for rural micro-entrepreneurs. Joins NABARD gestation periods to NSFDC repayment terms to show whether a loan is survivable before the enterprise earns. Built for Smart India Hackathon 2026, SIH26091.",
   applicationName: "UdyamAI",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "UdyamAI — what you can repay, not what you can borrow",
     description:
@@ -55,15 +64,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // lang is corrected on the client once the locale is known (LayoutShell). It cannot be correct
-  // here: the store is not read on the server, so the server does not know which language this
-  // visitor last chose.
+  // lang is corrected on the client once the locale is known, and LayoutShell also toggles the
+  // dark class here from the OS preference — both are attributes the server cannot know, which is
+  // exactly what suppressHydrationWarning is for.
   return (
     <html
       lang="en"
       className={`${inter.variable} ${devanagari.variable} ${outfit.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         <StoreHydration />
         <SmoothScroll>
           <LayoutShell>{children}</LayoutShell>

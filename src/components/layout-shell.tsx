@@ -3,8 +3,9 @@
 import { useAppStore } from "@/lib/store";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
-import { Leaf, User, Settings, IndianRupee } from "lucide-react";
+import { Leaf, Menu, X, User, Settings, IndianRupee } from "lucide-react";
 import Link from "next/link";
+import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,12 @@ const BOTTOM_NAV = [
   { href: "/profile/me", icon: Settings, key: "nav.profile" },
 ] as const;
 
+const LANGUAGES = [
+  { id: "en", short: "EN", long: "English" },
+  { id: "hi", short: "हिन्दी", long: "हिन्दी (Hindi)" },
+  { id: "hinglish", short: "Hinglish", long: "Hinglish" },
+] as const;
+
 // BCP 47 tags. Hinglish is Hindi written in Latin script, which is exactly what hi-Latn means —
 // a screen reader given "en" would read "Aapka loan" with English phonology.
 const HTML_LANG: Record<string, string> = { hi: "hi", hinglish: "hi-Latn", en: "en" };
@@ -25,6 +32,16 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  /**
+   * The menu remembers WHERE it was opened, so a route change closes it without an effect.
+   *
+   * The straightforward version — `useEffect(() => setMobileMenuOpen(false), [pathname])` — is a
+   * state sync, and React lints it for good reason: it renders the menu open on the new route for
+   * one frame before closing it. Deriving from the pathname it was opened at has no such frame.
+   */
+  const [menu, setMenu] = useState({ open: false, at: pathname });
+  const mobileMenuOpen = menu.open && menu.at === pathname;
+  const setMobileMenuOpen = (open: boolean) => setMenu({ open, at: pathname });
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -52,6 +69,17 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Escape closes it too — a dropdown you can only dismiss with a pointer is a trap for anyone
+  // navigating by keyboard.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenu((m) => ({ ...m, open: false }));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileMenuOpen]);
 
   /**
    * The header is fixed, so main has to reserve its height by hand. That reservation used to be a
@@ -99,22 +127,15 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Three languages, all visible. A cycling toggle hides the options from exactly the
-                user who most needs to find their own language. Was `hidden sm:flex`, which removed
-                the ONLY language control below 640px — on a product whose users are most likely to
-                be on a small phone and least likely to read English. */}
+            {/* Three languages, all visible from sm upward. Below that the pills crowd the bar, so
+                the same three live in the menu instead — a cycling toggle would hide the options
+                from exactly the user who most needs to find their own language. */}
             <div
               role="group"
               aria-label={t("nav.language")}
-              className="flex items-center rounded-full border bg-muted/30 p-0.5 shrink-0"
+              className="hidden sm:flex items-center rounded-full border bg-muted/30 p-0.5 shrink-0"
             >
-              {(
-                [
-                  { id: "en", label: "EN" },
-                  { id: "hi", label: "हिन्दी" },
-                  { id: "hinglish", label: "Hinglish" },
-                ] as const
-              ).map((l) => (
+              {LANGUAGES.map((l) => (
                 <button
                   key={l.id}
                   type="button"
@@ -127,17 +148,74 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  {l.label}
+                  {l.short}
                 </button>
               ))}
             </div>
 
-            {/* A notification bell and a hamburger used to sit here. Neither opened anything. An
-                inert affordance is worse than no affordance: it teaches the user that tapping does
-                nothing, and the red dot on the bell implied unread news that did not exist. */}
+            {/* A notification bell used to sit here and opened nothing, with a red dot implying
+                unread news that did not exist. The hamburger beside it was inert too — it now
+                opens the menu below, so it stays. */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden"
+              aria-label={t("nav.menu")}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" aria-hidden="true" />
+              ) : (
+                <Menu className="w-5 h-5" aria-hidden="true" />
+              )}
+            </Button>
           </div>
         </div>
         {!isLandingPage && <JourneyStepper />}
+
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 z-40 sm:hidden"
+            aria-hidden="true"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        {mobileMenuOpen && (
+          <div
+            id="mobile-menu"
+            className="absolute top-14 right-4 w-[220px] bg-card border rounded-lg shadow-xl z-50 sm:hidden flex flex-col p-3 gap-2"
+          >
+            {/* The menu used to end with a name and role for a signed-in user. There is no sign-in
+                and no user — that block named a persona and presented it as the reader. */}
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
+              {t("nav.language")} / भाषा
+            </span>
+            <div role="group" aria-label={t("nav.language")} className="flex flex-col gap-1">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.id}
+                  type="button"
+                  aria-pressed={language === l.id}
+                  onClick={() => {
+                    setLanguage(l.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    "text-left px-3 py-2 rounded-md text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    language === l.id
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "hover:bg-muted text-foreground",
+                  )}
+                >
+                  {l.long}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* overflow-hidden here created a scrollport that silently killed every `sticky` inside it —
