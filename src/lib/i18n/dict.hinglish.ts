@@ -337,4 +337,14 @@ export const HINGLISH: Dictionary = {
   "agent.hearing": "Mujhe sunai de raha hai…",
   "agent.close": "Voice mode band karein",
   "agent.end": "Baatcheet khatam karein",
+  "map.title": "Yeh report jis ilaake par bani hai",
+  "map.subtitle":
+    "Ye ghere 5 km aur 10 km ki doori hain jin par demand ka anumaan lagta hai — ye sajawat nahi hain.",
+  "map.alt": "{district} zile ke {village} ka naqsha, 5 km aur 10 km ke gheron ke saath.",
+  "map.within5": "5 km ke andar log",
+  "map.within10": "10 km ke andar log",
+  "map.toMandi": "Nazdeeki mandi tak",
+  "map.toBank": "Nazdeeki bank shakha tak",
+  "map.note":
+    "10 km ka ghera wo aabadi hai jisse sambhavit demand guna ki jaati hai. Aabadi figures abhi placeholder hain; coordinates gaon ke apne hain. Map data © OpenStreetMap contributors.",
 };

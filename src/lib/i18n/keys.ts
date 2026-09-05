@@ -428,6 +428,17 @@ export const EN = {
   "agent.hearing": "I can hear you…",
   "agent.close": "Close voice mode",
   "agent.end": "End conversation",
+  // ── catchment map ─────────────────────────────────────────────────────────
+  "map.title": "The catchment this report is computed over",
+  "map.subtitle":
+    "The rings are the 5 km and 10 km radii the demand estimate integrates over — not decoration.",
+  "map.alt": "Map of {village} in {district} district, with the 5 km and 10 km catchment rings drawn around it.",
+  "map.within5": "People within 5 km",
+  "map.within10": "People within 10 km",
+  "map.toMandi": "To the nearest mandi",
+  "map.toBank": "To the nearest bank branch",
+  "map.note":
+    "The 10 km ring is the population that addressable demand is multiplied against. Population figures in this gazetteer are seeded placeholders pending the WorldPop ingest; the coordinates are the villages’ own. Map data © OpenStreetMap contributors.",
 } as const;
 
 export type MessageKey = keyof typeof EN;

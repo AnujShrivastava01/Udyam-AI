@@ -25,6 +25,7 @@ import {
 } from "recharts";
 
 import { SourceChip } from "@/components/source-chip";
+import { VillageMap } from "@/components/village-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -220,6 +221,9 @@ export default function FeasibilityReportPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* The catchment the numbers below are computed over. */}
+      <VillageMap village={village} onSelect={setVillageId} />
 
       {/* data quality — stated before any finding, not after */}
       <div className="rounded-xl border-2 border-amber-500/40 bg-amber-500/10 p-4">
