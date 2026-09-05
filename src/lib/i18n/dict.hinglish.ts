@@ -545,4 +545,8 @@ export const HINGLISH: Dictionary = {
   "emi.yourPlanFor": "Aapki yojana — {activity}",
   "emi.changeDate": "Tareekh badlein",
   "emi.headline.projected": "Yeh yojana hai, chalu karz nahi",
+  "link.khata": "Rozana khata",
+  "link.khata.body": "Aapne kya becha, kya kharch kiya, aur kya kist nikal rahi hai.",
+  "link.market": "Aas-paas aur kaun hai",
+  "link.market.body": "Aapke gaon ke aas-paas Google par darj dukanein.",
 };

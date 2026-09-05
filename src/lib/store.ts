@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 import type { CommunityPost } from '@/lib/community/posts';
 import type { Requirement } from '@/lib/marketplace/requirement';
+import type { LedgerEntry } from '@/lib/ledger/book';
 
 export type UserRole = 'entrepreneur' | 'ngo' | 'financial-institution' | 'mentor';
 export type Language = 'hi' | 'en' | 'hinglish';
@@ -65,6 +66,14 @@ interface AppState {
    * is why nothing else in the app reads it.
    */
   disbursedOn: string | null;
+  /**
+   * The daily book — every sale and expense the user has written down.
+   *
+   * Their own bookkeeping, kept on their own device. It is the only data in this product that
+   * accumulates day by day, which is also why it is the only thing here that could ever say
+   * whether a business is ACTUALLY covering its instalment rather than whether it should.
+   */
+  ledger: LedgerEntry[];
   setRole: (role: UserRole) => void;
   setLanguage: (lang: Language) => void;
   setTheme: (theme: ThemeMode) => void;
@@ -75,6 +84,8 @@ interface AppState {
   addRequirement: (requirement: Requirement) => void;
   deleteRequirement: (id: string) => void;
   setDisbursedOn: (iso: string | null) => void;
+  addLedgerEntry: (entry: LedgerEntry) => void;
+  deleteLedgerEntry: (id: string) => void;
 }
 
 /**
@@ -104,6 +115,7 @@ export const useAppStore = create<AppState>()(
       communityPosts: [],
       requirements: [],
       disbursedOn: null,
+      ledger: [],
       setRole: (role) => set({ userRole: role }),
       setLanguage: (lang) => set({ language: lang }),
       setTheme: (theme) => set({ theme }),
@@ -128,10 +140,14 @@ export const useAppStore = create<AppState>()(
       deleteRequirement: (id) =>
         set((state) => ({ requirements: state.requirements.filter((r) => r.id !== id) })),
       setDisbursedOn: (iso) => set({ disbursedOn: iso }),
+      addLedgerEntry: (entry) => set((state) => ({ ledger: [entry, ...state.ledger] })),
+      deleteLedgerEntry: (id) =>
+        set((state) => ({ ledger: state.ledger.filter((e) => e.id !== id) })),
     }),
     {
       name: 'siddhi.session',
       /**
+       * 6: ledger added — additive, defaults to an empty book.
        * 5: disbursedOn added — additive, defaults to null, which is "no loan taken".
        * 4: communityPosts and requirements added — purely additive, so nothing is discarded.
        * 3: the districts on offer changed from three UP names to the gazetteer's own.
@@ -141,7 +157,7 @@ export const useAppStore = create<AppState>()(
        * "State loaded from storage couldn't be migrated" and throw the session away — the outcome
        * was what I wanted, but an error in the console is not how you express an intention.
        */
-      version: 5,
+      version: 6,
       migrate: (persisted, from) => {
         const s = (persisted ?? {}) as Partial<AppState>;
         // v1 stored marginCapital as a plain number defaulting to 100000, and nothing recorded
@@ -158,6 +174,7 @@ export const useAppStore = create<AppState>()(
           communityPosts: s.communityPosts ?? [],
           requirements: s.requirements ?? [],
           disbursedOn: s.disbursedOn ?? null,
+          ledger: s.ledger ?? [],
         };
 
         if (from < 3) {
@@ -185,6 +202,7 @@ export const useAppStore = create<AppState>()(
         communityPosts: s.communityPosts,
         requirements: s.requirements,
         disbursedOn: s.disbursedOn,
+        ledger: s.ledger,
       }),
     },
   ),

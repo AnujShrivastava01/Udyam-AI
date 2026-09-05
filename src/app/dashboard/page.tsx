@@ -15,6 +15,7 @@ import {
   HandCoins,
   IndianRupee,
   Landmark,
+  BookOpen,
   MapPin,
   MessageSquare,
   ScrollText,
@@ -400,6 +401,8 @@ export default function DashboardPage() {
           {t("dash.everythingElse")}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <QuickLink icon={BookOpen} titleKey="link.khata" bodyKey="link.khata.body" href="/khata" />
+          <QuickLink icon={Store} titleKey="link.market" bodyKey="link.market.body" href="/market" />
           <QuickLink icon={Compass} titleKey="link.discover" bodyKey="link.discover.body" href="/discover" />
           <QuickLink
             icon={BarChart2}

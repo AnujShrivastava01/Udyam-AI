@@ -644,6 +644,10 @@ export const EN = {
   "emi.yourPlanFor": "Your plan — {activity}",
   "emi.changeDate": "Change date",
   "emi.headline.projected": "This is the plan, not a live loan",
+  "link.khata": "Daily book",
+  "link.khata.body": "What you sold, what you spent, and whether it covers the instalment.",
+  "link.market": "Who else is nearby",
+  "link.market.body": "Businesses Google has mapped around your village.",
 } as const;
 
 export type MessageKey = keyof typeof EN;

@@ -545,4 +545,8 @@ export const HI: Dictionary = {
   "emi.yourPlanFor": "आपकी योजना — {activity}",
   "emi.changeDate": "तारीख़ बदलें",
   "emi.headline.projected": "यह योजना है, चालू कर्ज़ नहीं",
+  "link.khata": "रोज़नामचा",
+  "link.khata.body": "आपने क्या बेचा, क्या खर्च किया, और क्या किस्त निकल रही है।",
+  "link.market": "आस-पास और कौन है",
+  "link.market.body": "आपके गाँव के आस-पास गूगल पर दर्ज दुकानें।",
 };
