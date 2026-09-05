@@ -344,7 +344,7 @@ export const EN = {
   "clock.beforeIncomeNeutral":
     "{amount} across {payments} payment(s) falls due at or before the month income starts. That is moratorium interest inside a window the enterprise is already earning through — not an uncovered gap.",
   // ── borrower loan tracker ─────────────────────────────────
-  "emi.title": "Sample loan",
+  "emi.title": "Your repayment",
   "emi.sampleWhat": "This loan",
   "emi.sampleDetail":
     "A worked example on a ₹1,00,000 goat unit, computed live by the finance kernel. It is not an account: no loan has been applied for, disbursed or tracked.",
@@ -360,21 +360,21 @@ export const EN = {
   "emi.nextPayment": "Next payment",
   "emi.dueInMonth": "due in month {month}",
   "emi.interestOnly": "interest only",
-  "emi.paymentsMade": "{done} of {total} payments made",
-  "emi.outstanding": "{amount} outstanding",
+  "emi.paymentsMade": "{done} of {total} instalments have fallen due",
+  "emi.outstanding": "{amount} scheduled outstanding",
   "emi.tile.sanctioned": "Sanctioned",
   "emi.tile.repaid": "Repaid so far",
   "emi.tile.perQuarter": "Per quarter",
   "emi.scrubber": "Months since disbursement",
   "emi.scrubberValue": "Month {n} since disbursement",
-  "emi.scrubberNote": "demo control — production reads the SCA ledger",
+  "emi.scrubberNote": "explore the schedule — set a disbursement date to track it",
   "emi.gapTitle": "This loan was structured to collect before it earns",
   "emi.seeClock": "See the Solvency Clock",
   "emi.scheduleTitle": "Repayment schedule",
   "emi.scheduleNote": "Rows before month {months} fall due before this unit earns anything.",
   "emi.col.status": "Status",
   "emi.col.balance": "Balance",
-  "emi.row.paid": "paid",
+  "emi.row.paid": "date passed",
   "emi.row.upcoming": "upcoming",
   "calc.firstIncome": "first income",
   "discover.rankingNote":
@@ -623,7 +623,27 @@ export const EN = {
   "prof.noProfileTitle": "No such profile",
   "prof.noProfileBody": "This product has no accounts and no other users yet, so the only profile that exists is your own. A directory of real institutions — RSETIs, KVKs, District Industries Centres, NABARD offices — is the nearest thing to a people directory here.",
   "prof.ownProfile": "Your own profile",
-  "prof.directory": "Institution directory",
+  "prof.directory": "Institution directory",
+
+  // -- repayment tracking --
+  "emi.projected": "Projection",
+  "emi.tracked": "Tracking",
+  "emi.needsOnboardingTitle": "No plan to track yet",
+  "emi.needsOnboardingBody": "This screen follows your own loan. Answer the three questions and the engine will structure one — there is no sample borrower here to show you instead.",
+  "emi.setDateTitle": "Have you taken this loan?",
+  "emi.setDateBody": "Enter the date the money reached you and this becomes a real tracker — actual dates, what has fallen due, and what is next. Leave it blank and it stays a projection.",
+  "emi.disbursedOn": "Disbursement date",
+  "emi.trackIt": "Track it",
+  "emi.notTakenYet": "Not taken yet",
+  "emi.noLedger": "This app has no ledger, so it cannot know what you have actually paid. A row whose date has passed is shown as due, never as paid.",
+  "emi.dueOn": "due {date}",
+  "emi.remind": "Send myself a reminder",
+  "emi.reminderBody": "UdyamAI reminder: an instalment of {amount} is due on {date} for {activity}.",
+  "emi.row.next": "next",
+  "emi.projectedNote": "No disbursement date set, so this is what the schedule would look like — month numbers, not dates.",
+  "emi.yourPlanFor": "Your plan — {activity}",
+  "emi.changeDate": "Change date",
+  "emi.headline.projected": "This is the plan, not a live loan",
 } as const;
 
 export type MessageKey = keyof typeof EN;

@@ -37,15 +37,20 @@ const PAGE_WORD: Record<Page, Say> = {
 };
 
 const T = {
+  // Acknowledgements only. These used to hardcode what came next — "Now choose your block", "Now
+  // tell me how much capital you have" — which built a fixed chain of district, block, capital,
+  // plan. The business category was never in that chain, so the agent NEVER ASKED what work the
+  // user wanted to do, even though setting it was one of the actions it could take. The next
+  // question is now derived from what is actually still missing; see `nextQuestion`.
   district: {
-    en: "Alright, {name}. Now choose your block.",
-    hi: "ठीक है, {name}। अब अपना ब्लॉक चुनिए।",
-    hinglish: "Theek hai, {name}. Ab apna block chuniye.",
+    en: "Alright, {name}.",
+    hi: "ठीक है, {name}।",
+    hinglish: "Theek hai, {name}.",
   } satisfies Say,
   block: {
-    en: "Got it, {name}. Now tell me how much capital you have.",
-    hi: "समझ गया, {name}। अब बताइए आपके पास कितनी पूँजी है।",
-    hinglish: "Samajh gaya, {name}. Ab bataiye aapke paas kitni poonji hai.",
+    en: "Got it, {name}.",
+    hi: "समझ गया, {name}।",
+    hinglish: "Samajh gaya, {name}.",
   } satisfies Say,
   category: {
     en: "Noted, {name}.",
@@ -53,9 +58,9 @@ const T = {
     hinglish: "{name}, note kar liya.",
   } satisfies Say,
   marginAccepted: {
-    en: "Noted. Opening your money plan.",
-    hi: "नोट कर लिया। आपकी पैसे की योजना खोल रहा हूँ।",
-    hinglish: "Note kar liya. Aapka paise ka plan khol raha hoon.",
+    en: "Noted.",
+    hi: "नोट कर लिया।",
+    hinglish: "Note kar liya.",
   } satisfies Say,
   marginRejected: {
     en: "No problem. Please say the amount again.",
@@ -116,6 +121,82 @@ const T = {
     } satisfies Say,
   },
 };
+
+/**
+ * The four things onboarding needs, and how the agent asks for each.
+ *
+ * The category prompt lists the choices out loud. A closed set the user cannot see has to be read
+ * to them, or the only way to discover the options is to guess — and a voice-first product for
+ * users who may not read the screen cannot rely on the screen.
+ */
+const ASK = {
+  district: {
+    en: "Which district are you in?",
+    hi: "आप किस ज़िले में हैं?",
+    hinglish: "Aap kis zile mein hain?",
+  } satisfies Say,
+  block: {
+    en: "Which block?",
+    hi: "कौन सा ब्लॉक?",
+    hinglish: "Kaun sa block?",
+  } satisfies Say,
+  category: {
+    en: "What work do you want to do? You can say dairy, a kirana shop, tailoring, food processing, handicrafts, or local services.",
+    hi: "आप कौन सा काम करना चाहते हैं? आप कह सकते हैं डेयरी, किराना दुकान, सिलाई, खाद्य प्रसंस्करण, हस्तशिल्प, या स्थानीय सेवाएँ।",
+    hinglish:
+      "Aap kaun sa kaam karna chahte hain? Aap keh sakte hain dairy, kirana dukaan, silai, food processing, handicrafts, ya local services.",
+  } satisfies Say,
+  margin: {
+    en: "How much money can you put in yourself?",
+    hi: "आप अपनी तरफ़ से कितने पैसे लगा सकते हैं?",
+    hinglish: "Aap apni taraf se kitne paise laga sakte hain?",
+  } satisfies Say,
+  done: {
+    en: "That is everything I need. Opening your money plan.",
+    hi: "मुझे बस इतना ही चाहिए था। आपकी पैसे की योजना खोल रहा हूँ।",
+    hinglish: "Mujhe bas itna hi chahiye tha. Aapka paise ka plan khol raha hoon.",
+  } satisfies Say,
+};
+
+export type MissingField = "district" | "block" | "category" | "margin";
+
+export interface OnboardingState {
+  district?: string;
+  block?: string;
+  category?: string;
+  marginCapital?: number | null;
+}
+
+/**
+ * The first thing still unanswered, in the order the plan actually needs them.
+ *
+ * District before block because the block list is filtered by district; category before margin
+ * because the trade decides the unit cost that the margin is checked against. Returns null when
+ * there is nothing left to ask.
+ */
+export function firstMissing(ctx: OnboardingState): MissingField | null {
+  if (!ctx.district) return "district";
+  if (!ctx.block) return "block";
+  if (!ctx.category) return "category";
+  if (ctx.marginCapital == null || ctx.marginCapital <= 0) return "margin";
+  return null;
+}
+
+/**
+ * What the agent should ask next, given everything it now knows.
+ *
+ * Appended to the acknowledgement so a turn both confirms what was heard and moves the
+ * conversation on — which is what makes the agent drive onboarding rather than merely answer.
+ */
+export function nextQuestion(ctx: OnboardingState, locale: Locale): string {
+  const missing = firstMissing(ctx);
+  return missing ? ASK[missing][locale] : ASK.done[locale];
+}
+
+/** True once every question has an answer, so the caller knows it may open the plan. */
+export function onboardingComplete(ctx: OnboardingState): boolean {
+  return firstMissing(ctx) === null;
+}
 
 /** The sentence the agent speaks for an action. Numbers come from `plan`, never from the model. */
 export function replyFor(action: AgentAction, locale: Locale, plan: Plan | null): string {

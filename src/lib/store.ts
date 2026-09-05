@@ -56,6 +56,15 @@ interface AppState {
   communityPosts: CommunityPost[];
   /** Requirements the user composed on the marketplace screen. Same scope, same honesty. */
   requirements: Requirement[];
+  /**
+   * The day the loan money actually reached the user, as yyyy-mm-dd. Null until they say so.
+   *
+   * The one fact this product cannot compute and cannot guess. With it, the repayment screen
+   * places every instalment on a real calendar; without it, that screen stays a projection and
+   * says so. It is emphatically NOT evidence that a loan exists — there is no lender here — which
+   * is why nothing else in the app reads it.
+   */
+  disbursedOn: string | null;
   setRole: (role: UserRole) => void;
   setLanguage: (lang: Language) => void;
   setTheme: (theme: ThemeMode) => void;
@@ -65,6 +74,7 @@ interface AppState {
   deleteCommunityPost: (id: string) => void;
   addRequirement: (requirement: Requirement) => void;
   deleteRequirement: (id: string) => void;
+  setDisbursedOn: (iso: string | null) => void;
 }
 
 /**
@@ -93,6 +103,7 @@ export const useAppStore = create<AppState>()(
       visitedSteps: [],
       communityPosts: [],
       requirements: [],
+      disbursedOn: null,
       setRole: (role) => set({ userRole: role }),
       setLanguage: (lang) => set({ language: lang }),
       setTheme: (theme) => set({ theme }),
@@ -116,10 +127,12 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ requirements: [requirement, ...state.requirements] })),
       deleteRequirement: (id) =>
         set((state) => ({ requirements: state.requirements.filter((r) => r.id !== id) })),
+      setDisbursedOn: (iso) => set({ disbursedOn: iso }),
     }),
     {
       name: 'siddhi.session',
       /**
+       * 5: disbursedOn added — additive, defaults to null, which is "no loan taken".
        * 4: communityPosts and requirements added — purely additive, so nothing is discarded.
        * 3: the districts on offer changed from three UP names to the gazetteer's own.
        * 2: marginCapital became nullable.
@@ -128,7 +141,7 @@ export const useAppStore = create<AppState>()(
        * "State loaded from storage couldn't be migrated" and throw the session away — the outcome
        * was what I wanted, but an error in the console is not how you express an intention.
        */
-      version: 4,
+      version: 5,
       migrate: (persisted, from) => {
         const s = (persisted ?? {}) as Partial<AppState>;
         // v1 stored marginCapital as a plain number defaulting to 100000, and nothing recorded
@@ -144,6 +157,7 @@ export const useAppStore = create<AppState>()(
         const collections = {
           communityPosts: s.communityPosts ?? [],
           requirements: s.requirements ?? [],
+          disbursedOn: s.disbursedOn ?? null,
         };
 
         if (from < 3) {
@@ -170,6 +184,7 @@ export const useAppStore = create<AppState>()(
         visitedSteps: s.visitedSteps,
         communityPosts: s.communityPosts,
         requirements: s.requirements,
+        disbursedOn: s.disbursedOn,
       }),
     },
   ),

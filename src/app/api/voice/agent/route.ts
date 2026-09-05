@@ -8,7 +8,13 @@ import { callerKey, throttled } from "@/lib/api/throttle";
 import { activeProvider, listen, speak, verdictAsSpeech, confirmationPrompt } from "@/lib/voice";
 import { agentPrompt, validateAction, type AgentAction } from "@/lib/voice/agent";
 import { fastPath } from "@/lib/voice/fastpath";
-import { replyFor, UNKNOWN_REPLY, NO_PLAN_REPLY } from "@/lib/voice/replies";
+import {
+  nextQuestion,
+  onboardingComplete,
+  replyFor,
+  UNKNOWN_REPLY,
+  NO_PLAN_REPLY,
+} from "@/lib/voice/replies";
 
 /**
  * The voice agent: one spoken turn in, one action and one spoken answer out.
@@ -133,7 +139,10 @@ export async function POST(req: NextRequest) {
     case "confirm":
       if (action.yes && ctx.pendingAmount != null) {
         next.marginCapital = ctx.pendingAmount;
-        navigateTo = "/calculator";
+        // Navigation is decided AFTER the switch, from whether anything is still unanswered.
+        // This used to jump to the calculator the moment a margin was confirmed, which is how a
+        // user could reach a costed plan without ever having been asked what work they wanted to
+        // do — the activity then silently fell back to a default.
       }
       break;
     case "navigate":
@@ -147,6 +156,24 @@ export async function POST(req: NextRequest) {
         profile: "/profile/me",
       }[action.page];
       break;
+  }
+
+  // ── 3b. is anything still unanswered? ─────────────────────────────────────
+  // The agent drives onboarding rather than waiting to be driven: after every turn it asks for the
+  // first thing it still does not know. Before this the reply chain was hardcoded — district said
+  // "now choose your block", block said "now tell me your capital" — and the business category was
+  // in no chain at all, so the agent could set it but never asked for it.
+  const filled = {
+    district: next.district,
+    block: next.block,
+    category: next.category,
+    marginCapital: next.marginCapital,
+  };
+  const complete = onboardingComplete(filled);
+
+  // Only open the plan once there is a plan worth opening.
+  if (complete && (action.kind === "confirm" ? action.yes : false)) {
+    navigateTo = "/calculator";
   }
 
   // ── 4. the kernel, for anything numeric ───────────────────────────────────
@@ -190,6 +217,20 @@ export async function POST(req: NextRequest) {
     reply = replyFor(action, locale, current);
   }
 
+  // A turn that only acknowledges leaves the user guessing what to say next. Anything that CHANGED
+  // an answer is followed by the next question, so the conversation moves on by itself. Answers
+  // and explanations are left alone — interrupting a reply the user asked for to demand the next
+  // field is how an assistant becomes a form.
+  const MOVES_ONBOARDING_ON =
+    action.kind === "set_district" ||
+    action.kind === "set_block" ||
+    action.kind === "set_category" ||
+    (action.kind === "confirm" && action.yes);
+
+  if (MOVES_ONBOARDING_ON) {
+    reply = `${reply} ${nextQuestion(filled, locale)}`.trim();
+  }
+
   const audio = await speak(reply, locale);
 
   return NextResponse.json({
@@ -203,6 +244,8 @@ export async function POST(req: NextRequest) {
     mimeType: "audio/wav",
     // Everything the client should apply. It decides; this route only proposes.
     context: next,
+    /** What the agent is still waiting to be told, or null when nothing is. */
+    awaiting: complete ? null : nextQuestion(filled, locale),
     navigateTo,
     ...(audio.ok ? {} : { synthesisError: audio.reason }),
   });
