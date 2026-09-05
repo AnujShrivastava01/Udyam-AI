@@ -323,8 +323,12 @@ export function buildFeasibilityReport(
       title: "Opportunity",
       requirement: 2,
       headline:
+        // "Room for roughly N more units" states a unit count. It is not one: the sector share
+        // does NOT cancel out of headroom the way it cancels out of the index, so this figure is
+        // linearly scaled by a modelled 25.9% assumption, on top of a seeded establishment count.
+        // The density shortfall is the same finding stated at the strength the data supports.
         sat.label === "underserved"
-          ? `Room for roughly ${sat.headroom} more units of this kind`
+          ? `This block runs about ${Math.round((1 - sat.index) * 100)}% below the national rural density for this sector`
           : sat.label === "crowded"
             ? "This sector is already above the national rural norm here"
             : "Supply is broadly in line with what this population supports",

@@ -104,9 +104,18 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
   );
 
   const peak = peakAnnualDebtService(schedule);
-  const dscr = annualSurplus != null && peak > 0 ? r2(annualSurplus / peak) : null;
-  const incomeShare =
-    annualHouseholdIncome != null && annualHouseholdIncome > 0 ? r2(peak / annualHouseholdIncome) : null;
+
+  // Round for DISPLAY, compare on the raw ratio.
+  //
+  // Both gates used to test the rounded value, which hands back half a percentage point of slack
+  // on the RBI cap and 0.005 on the DSCR floor: a true 50.49% repayment share rounded to 0.50 and
+  // passed a cap set at exactly 0.50. A regulatory ceiling that a rounding step can carry you over
+  // is not a ceiling.
+  const rawDscr = annualSurplus != null && peak > 0 ? annualSurplus / peak : null;
+  const rawIncomeShare =
+    annualHouseholdIncome != null && annualHouseholdIncome > 0 ? peak / annualHouseholdIncome : null;
+  const dscr = rawDscr == null ? null : r2(rawDscr);
+  const incomeShare = rawIncomeShare == null ? null : r2(rawIncomeShare);
 
   const base = {
     preIncomeObligation: 0,
@@ -122,12 +131,12 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
   // --- affordability is a regulatory gate, and it does not depend on gestation -------------
   // This check runs FIRST and independently: a breach of RBI's repayment cap is knowable from
   // the schedule and the household income alone. Missing gestation data must never suppress it.
-  if (incomeShare != null && incomeShare > RBI_REPAYMENT_CAP_OF_INCOME) {
+  if (rawIncomeShare != null && rawIncomeShare > RBI_REPAYMENT_CAP_OF_INCOME) {
     return {
       ...base,
       verdict: "UNAFFORDABLE",
       ...say(
-        msg("solvency.unaffordable.headline", { share: `${(incomeShare * 100).toFixed(0)}%` }),
+        msg("solvency.unaffordable.headline", { share: `${(incomeShare! * 100).toFixed(0)}%` }),
         msg("solvency.unaffordable.detail", {
           debtService: `₹${inr(peak)}`,
           income: `₹${inr(annualHouseholdIncome!)}`,
@@ -190,12 +199,12 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
   }
 
   // --- coverage ---------------------------------------------------------------------------
-  if (dscr != null && dscr < minDscr) {
+  if (rawDscr != null && rawDscr < minDscr) {
     return {
       ...withGap,
       verdict: "DSCR_FAIL",
       ...say(
-        msg("solvency.dscr.headline", { dscr: `${dscr.toFixed(2)}×`, min: `${minDscr}×` }),
+        msg("solvency.dscr.headline", { dscr: `${dscr!.toFixed(2)}×`, min: `${minDscr}×` }),
         msg("solvency.dscr.detail", {
           surplus: `₹${inr(annualSurplus!)}`,
           debtService: `₹${inr(peak)}`,
