@@ -13,7 +13,7 @@ export type Language = 'hi' | 'en' | 'hinglish';
  */
 export type ThemeMode = 'system' | 'light' | 'dark';
 
-interface OnboardingInput {
+export interface OnboardingInput {
   location: { village: string; block: string; district: string } | null;
   /**
    * null until the user actually types a figure.

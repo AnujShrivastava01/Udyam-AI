@@ -445,6 +445,33 @@ export const EN = {
     "Real bodies that do this work, most of them free. No invented advisors, no ratings, no fees we cannot verify.",
   "mentors.free": "Free",
   "mentors.districtNote": "Shown for {district}. All of these operate nationally, one office per district.",
+  // ── the user's own profile ─────────────────────────────────
+  "own.title": "Your enterprise",
+  "own.emptyTitle": "Nothing here yet — and nothing invented to fill it",
+  "own.emptyBody":
+    "This page shows what you have told us and what the engine computed from it. Answer the three questions and it fills itself.",
+  "own.start": "Start",
+  "own.noActivity": "Not chosen yet",
+  "own.stepsOpened": "Steps opened",
+  "own.planTitle": "The plan the engine computed for you",
+  "own.noPlan":
+    "Enter the capital you have and the engine will structure a plan here.",
+  "own.openPlan": "Open the full plan",
+  "own.share": "Summary for a bank or NGO",
+  "own.sampleNotice":
+    "This is an example profile, not yours. Your own is at /profile/me.",
+  // ── shareable summary ─────────────────────────────────────────────────────
+  "share.title": "Loan structuring summary",
+  "share.subtitle":
+    "Every figure below is computed from published scheme terms. This is not an application and not a sanction.",
+  "share.applicant": "Applicant",
+  "share.structure": "Structure",
+  "share.verdict": "Solvency",
+  "share.basis": "How this was decided",
+  "share.footer":
+    "Structured against {scheme}. Source: {source}. Scheme terms change; confirm against the administering agency before acting on this. No application has been filed and no lender has seen this document.",
+  "share.print": "Print or save as PDF",
+  "share.back": "Back to profile",
 } as const;
 
 export type MessageKey = keyof typeof EN;

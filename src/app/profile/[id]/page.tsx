@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Target, ShieldCheck, Mail, IndianRupee, Store, TrendingUp } from "lucide-react";
+import { useParams } from "next/navigation";
+
+import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
+import { buildOwnProfile } from "@/lib/profile/build";
+import { OwnProfileView } from "@/components/own-profile";
 
 /**
  * A sample profile, and nothing on it is the viewer's.
@@ -20,9 +26,33 @@ import { MapPin, Target, ShieldCheck, Mail, IndianRupee, Store, TrendingUp } fro
  * The header now reads entirely as the sample persona. The store is not consulted at all here.
  */
 export default function ProfilePage() {
+  const params = useParams<{ id: string }>();
+  const { t } = useT();
+  const onboardingInput = useAppStore((st) => st.onboardingInput);
+  const visitedSteps = useAppStore((st) => st.visitedSteps);
+
+  // `/profile/me` is the visitor's own, built entirely from their answers and the kernel. Any
+  // other id keeps the illustrative persona below, and says so — this page used to splice the
+  // visitor's real category and district into that persona, which is the mix that made a reader
+  // take the whole card as their own record.
+  if (params?.id === "me") {
+    return (
+      <div className="max-w-5xl mx-auto p-4 md:p-8 pb-24">
+        <OwnProfileView profile={buildOwnProfile(onboardingInput, visitedSteps)} />
+      </div>
+    );
+  }
+
+  return <SampleProfile notice={t("own.sampleNotice")} />;
+}
+
+function SampleProfile({ notice }: { notice: string }) {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
+      <p className="mb-6 rounded-lg border bg-muted/30 px-4 py-2.5 text-sm text-muted-foreground">
+        {notice}
+      </p>
 
       {/* Profile Header */}
       <div className="relative mb-16 mt-8">

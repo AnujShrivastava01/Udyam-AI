@@ -352,4 +352,27 @@ export const HINGLISH: Dictionary = {
     "Asli sansthaein jo yeh kaam karti hain, zyadatar muft. Koi gadhe hue advisor nahi, koi rating nahi.",
   "mentors.free": "Muft",
   "mentors.districtNote": "{district} ke liye. Ye sabhi poore desh mein hain, har zile mein ek daftar.",
+  "own.title": "Aapka udyam",
+  "own.emptyTitle": "Abhi yahan kuch nahi hai — aur bharne ke liye kuch gadha bhi nahi",
+  "own.emptyBody":
+    "Yeh page wahi dikhata hai jo aapne bataya aur jo engine ne usse gina. Teen sawalon ke jawab dijiye, yeh khud bhar jayega.",
+  "own.start": "Shuru karein",
+  "own.noActivity": "Abhi nahi chuna",
+  "own.stepsOpened": "Khole gaye steps",
+  "own.planTitle": "Engine ne aapke liye jo plan banaya",
+  "own.noPlan": "Apni poonji bataiye, engine yahan plan bana dega.",
+  "own.openPlan": "Poora plan kholein",
+  "own.share": "Bank ya NGO ke liye summary",
+  "own.sampleNotice": "Yeh ek udaharan profile hai, aapki nahi. Aapki apni /profile/me par hai.",
+  "share.title": "Loan structuring summary",
+  "share.subtitle":
+    "Neeche ka har figure published scheme sharton se gina gaya hai. Yeh application nahi hai aur sanction bhi nahi.",
+  "share.applicant": "Aavedak",
+  "share.structure": "Structure",
+  "share.verdict": "Chukane ki kshamta",
+  "share.basis": "Yeh kaise tay hua",
+  "share.footer":
+    "{scheme} ke aadhar par. Source: {source}. Scheme ki sharten badalti rehti hain; is par karrvai se pehle sambandhit agency se pushti kar lein. Abhi koi application nahi hua hai.",
+  "share.print": "Print ya PDF mein sahejein",
+  "share.back": "Profile par wapas",
 };
