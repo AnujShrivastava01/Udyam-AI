@@ -105,7 +105,7 @@ describe("scoring", () => {
 
   it("the spec-literal solver fails hardest exactly where the caps bind", () => {
     const report = scoreSolver(specLiteralSolver, generateCases({ count: 500 }));
-    expect(report.perRegion["cap-binding"].pct).toBe(0);
+    expect(report.perRegion["above-ceiling"].pct).toBe(0);
     expect(report.perRegion["dead-zone"].pct).toBe(0);
   });
 

@@ -31,7 +31,7 @@ export type CaseRegion =
   | "ordinary-term"
   | "tier-boundary"
   | "dead-zone"
-  | "cap-binding"
+  | "above-ceiling"
   | "near-ceiling"
   | "plantation-exception"
   | "capitalised";
@@ -64,7 +64,7 @@ const MIX: [CaseRegion, number][] = [
   ["ordinary-term", 0.20],
   ["tier-boundary", 0.14],
   ["dead-zone", 0.14],
-  ["cap-binding", 0.12],
+  ["above-ceiling", 0.12],
   ["near-ceiling", 0.08],
   ["plantation-exception", 0.08],
   ["capitalised", 0.08],
@@ -92,11 +92,20 @@ function drawProjectCost(region: CaseRegion, rnd: () => number): number {
     case "dead-zone":
       // Strictly inside ₹1,38,889 → ₹1,40,000, where the cap binds but the tier has not changed.
       return toTen(Math.ceil(MFS_CAP_BINDS_AT) + 10 + r * (MFS.maxProjectCost - Math.ceil(MFS_CAP_BINDS_AT) - 10));
-    case "cap-binding":
-      // Term-loan territory where 90% would exceed the ₹45 lakh cap.
-      return toTen(TERM.maxLoan / TERM.loanShare + r * 200_000);
+    case "above-ceiling":
+      // This region was called "cap-binding" and was documented as term-loan territory where 90%
+      // of project cost would exceed the ₹45 lakh loan cap. There is no such territory: the term
+      // tier is parameterised so that maxLoan / loanShare (45,00,000 / 0.9) is EXACTLY
+      // maxProjectCost (50,00,000). A project big enough for the cap to bind is already above the
+      // ceiling, so every case here trips ABOVE_TIER_CEILING and CAP_BINDING was never once
+      // exercised by the term tier in 500 cases. The region is real and worth testing — it is
+      // refusal behaviour — so it keeps its draw and is named for what it does.
+      // (The Micro Finance tier DOES have a cap-binding zone; the `dead-zone` region covers it.)
+      return toTen(TERM.maxLoan / TERM.loanShare + 100 + r * 200_000);
     case "near-ceiling":
-      return toTen(TERM.maxProjectCost - r * 300_000);
+      // Just under the ceiling, where routing must still succeed. Kept distinct from
+      // ordinary-term because it is the region either side of the refusal boundary that matters.
+      return toTen(TERM.maxProjectCost - 300_000 + r * 299_000);
     case "plantation-exception":
       return toTen(300_000 + r * 1_500_000);
     case "capitalised":

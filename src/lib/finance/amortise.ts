@@ -83,13 +83,28 @@ export function amortise(input: AmortiseInput): AmortiseResult {
   if (tenureMonths <= moratoriumMonths) {
     throw new Error("amortise: tenure must exceed the moratorium");
   }
+  if (!Number.isInteger(moratoriumMonths) || moratoriumMonths < 0) {
+    throw new Error("amortise: moratorium must be a non-negative whole number of months");
+  }
   if (moratoriumMonths % restMonths !== 0) {
     throw new Error("amortise: moratorium must be a whole number of rest periods");
+  }
+  // The amortising window has to divide exactly into rest periods.
+  //
+  // This used to be Math.round, which failed silently in both directions. A 13-month tenure with a
+  // 12-month moratorium rounded 1/3 down to ZERO instalments: levelInstalment returns 0 for
+  // periods <= 0, so the function returned instalment 0, a schedule that never touched principal,
+  // and a NEGATIVE total interest. Rounding up was worse in a quieter way — a 14-month tenure
+  // produced one instalment falling due at month 15, past the tenure the scheme actually grants.
+  // Every scheme and rail in the registry has an exact window (36-3, 84-6, 84-12, 60-3), so this
+  // refuses only inputs that were already producing a wrong answer.
+  if ((tenureMonths - moratoriumMonths) % restMonths !== 0) {
+    throw new Error("amortise: amortising window must be a whole number of rest periods");
   }
 
   const periodicRate = annualRatePct / 100 / (12 / restMonths);
   const moratoriumPeriods = moratoriumMonths / restMonths;
-  const instalmentCount = Math.round((tenureMonths - moratoriumMonths) / restMonths);
+  const instalmentCount = (tenureMonths - moratoriumMonths) / restMonths;
 
   const schedule: ScheduleRow[] = [];
   let balance = principal;

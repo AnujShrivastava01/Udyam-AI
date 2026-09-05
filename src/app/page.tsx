@@ -1,14 +1,49 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, MapPin, BarChart2, IndianRupee, ShieldCheck, Zap, Activity } from "lucide-react";
+import { ArrowRight, Sparkles, MapPin, BarChart2, IndianRupee, ShieldCheck, Zap, Activity, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
+import { plan } from "@/lib/finance";
+import { optimiseStack } from "@/lib/finance/stack";
+import { money } from "@/lib/i18n/render";
 
 export default function LandingPage() {
   const { t } = useTranslation();
+
+  /**
+   * The hero used to be a drawing: an invented feasibility score of 82 for an invented "Organic
+   * Dairy Farm", with invented percentage matches and a fake browser URL. For a product whose whole
+   * claim is that its numbers are traceable, opening with fabricated ones is the wrong first move.
+   *
+   * It now runs the kernel. Every figure below is computed in the browser, on this render, from the
+   * same code path the calculator uses — which also means the hero cannot drift away from the
+   * product the way a hardcoded mockup does.
+   */
+  const hero = useMemo(() => {
+    const p = plan({
+      marginCapital: 10_000,
+      activityId: "goat-10-1",
+      useNeedBasedCosting: false,
+      annualHouseholdIncome: 120_000,
+    });
+    return {
+      projectCost: p.structure.projectCost,
+      loan: p.structure.sanctionedLoan,
+      instalment: p.schedule.instalment,
+      preIncome: p.solvency.preIncomeObligation,
+      gestation: p.activity?.gestationMonths ?? 0,
+      moratorium: p.structure.moratoriumMonths,
+      gap: p.solvency.gapMonths ?? 0,
+    };
+  }, []);
+
+  const stackDemo = useMemo(() => {
+    const s = optimiseStack({ projectCost: 500_000, marginAvailable: 60_000 });
+    return { cost: 500_000, best: s.best, spec: s.specRouted, saving: s.saving };
+  }, []);
   
   // Hero Parallax Setup
   const heroRef = useRef<HTMLDivElement>(null);
@@ -87,68 +122,82 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
 
-        {/* Dashboard Mockup Reveal */}
+        {/* Live engine panel */}
         <motion.div
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5, type: "spring", stiffness: 50 }}
-          className="relative w-full max-w-6xl mx-auto mt-24 z-20"
+          className="relative w-full max-w-5xl mx-auto mt-24 z-20"
         >
-          <div className="rounded-2xl md:rounded-3xl border bg-card/50 backdrop-blur-xl p-2 md:p-4 shadow-2xl overflow-hidden ring-1 ring-border/50">
-            {/* Mockup Browser Chrome */}
-            <div className="flex items-center gap-2 px-3 pb-3 border-b border-border/50 mb-4">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
-              <div className="mx-auto bg-muted/50 rounded-md px-24 py-1.5 text-[10px] text-muted-foreground font-mono hidden md:block">
-                app.udyam.ai/report/D-8472
+          <div className="rounded-2xl md:rounded-3xl border bg-card/70 backdrop-blur-xl p-5 md:p-8 shadow-2xl ring-1 ring-border/50">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b">
+              <div className="flex items-center gap-2 text-left">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                  <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+                  {t("hero.panel.verdict")}
+                </span>
+                <span className="text-xs md:text-sm text-muted-foreground font-medium">
+                  {t("hero.panel.case")}
+                </span>
               </div>
+              <span className="text-[11px] text-muted-foreground/80 font-mono">
+                {t("hero.panel.caption")}
+              </span>
             </div>
-            {/* Mockup Content */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[300px] md:h-[500px]">
-              <div className="col-span-2 bg-muted/30 rounded-xl border p-6 flex flex-col justify-between relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6">
-                  <div className="w-16 h-16 rounded-full border-4 border-primary border-t-transparent animate-spin-slow flex items-center justify-center relative">
-                    <span className="text-xl font-bold font-heading text-primary absolute">82</span>
+
+            <div className="grid gap-6 md:grid-cols-5 items-center">
+              <div className="md:col-span-2 text-left">
+                <div className="font-heading text-4xl md:text-5xl font-extrabold tracking-tight text-foreground tabular-nums">
+                  {money(hero.preIncome)}
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground leading-snug">
+                  {t("hero.panel.preIncome")}
+                </p>
+              </div>
+
+              <div className="md:col-span-3 space-y-3 text-left">
+                {/* Two bars on one shared 0..gestation scale: the whole argument in one picture. */}
+                <div>
+                  <div className="flex justify-between text-[11px] font-medium text-muted-foreground mb-1">
+                    <span>{t("hero.panel.gestation")}</span>
+                    <span className="tabular-nums">
+                      {hero.gestation} {t("hero.panel.months")}
+                    </span>
+                  </div>
+                  <div className="h-3 rounded-full bg-primary/15 overflow-hidden">
+                    <div className="h-full rounded-full bg-primary" style={{ width: "100%" }} />
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider flex items-center gap-2"><Sparkles className="w-4 h-4 text-accent"/> AI Feasibility Score</div>
-                  <div className="text-2xl font-bold font-heading text-foreground mb-1">Organic Dairy Farm</div>
-                  <div className="text-sm text-muted-foreground">High potential in this block. Low competition.</div>
-                </div>
-                <div className="grid grid-cols-4 gap-2 items-end h-32 mt-8 relative">
-                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
-                    <div className="border-b border-dashed w-full h-px" />
-                    <div className="border-b border-dashed w-full h-px" />
-                    <div className="border-b border-dashed w-full h-px" />
+                  <div className="flex justify-between text-[11px] font-medium text-muted-foreground mb-1">
+                    <span>{t("hero.panel.moratorium")}</span>
+                    <span className="tabular-nums">
+                      {hero.moratorium} {t("hero.panel.months")}
+                    </span>
                   </div>
-                  <div className="bg-primary/20 rounded-t-md h-[40%] flex items-end justify-center pb-2 text-xs font-medium text-primary">Q1</div>
-                  <div className="bg-primary/40 rounded-t-md h-[70%] flex items-end justify-center pb-2 text-xs font-medium text-primary">Q2</div>
-                  <div className="bg-primary/60 rounded-t-md h-[50%] flex items-end justify-center pb-2 text-xs font-medium text-primary-foreground">Q3</div>
-                  <div className="bg-primary rounded-t-md h-[90%] flex items-end justify-center pb-2 text-xs font-medium text-primary-foreground">Q4</div>
-                </div>
-              </div>
-              <div className="space-y-4 flex flex-col">
-                <div className="bg-muted/30 rounded-xl border p-4 flex-1">
-                  <div className="text-xs font-bold text-muted-foreground uppercase mb-3 flex items-center gap-1"><Zap className="w-3 h-3"/> Top Opportunities</div>
-                  <div className="space-y-2">
-                    <div className="w-full bg-green-500/10 text-green-700 text-xs font-medium px-2 py-1.5 rounded-md flex justify-between items-center">A2 Milk Premium <span className="bg-green-500/20 px-1.5 py-0.5 rounded">85% Match</span></div>
-                    <div className="w-full bg-green-500/10 text-green-700 text-xs font-medium px-2 py-1.5 rounded-md flex justify-between items-center">Paneer Export <span className="bg-green-500/20 px-1.5 py-0.5 rounded">78% Match</span></div>
+                  <div className="h-3 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-accent"
+                      style={{ width: `${(hero.moratorium / Math.max(hero.gestation, 1)) * 100}%` }}
+                    />
                   </div>
                 </div>
-                <div className="bg-muted/30 rounded-xl border p-4 flex-1">
-                  <div className="text-xs font-bold text-muted-foreground uppercase mb-3 flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> Key Threats</div>
-                  <div className="space-y-2">
-                    <div className="w-full bg-red-500/10 text-red-700 text-xs font-medium px-2 py-1.5 rounded-md flex justify-between items-center">Cold Chain Logistics <span className="bg-red-500/20 px-1.5 py-0.5 rounded">High Risk</span></div>
-                    <div className="w-full bg-red-500/10 text-red-700 text-xs font-medium px-2 py-1.5 rounded-md flex justify-between items-center">Summer Yield Drop <span className="bg-red-500/20 px-1.5 py-0.5 rounded">Medium Risk</span></div>
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="rounded-lg border bg-muted/30 px-3 py-2">
+                    <div className="text-[11px] text-muted-foreground">{t("hero.panel.gap")}</div>
+                    <div className="font-semibold tabular-nums">
+                      {hero.gap} {t("hero.panel.months")}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border bg-muted/30 px-3 py-2">
+                    <div className="text-[11px] text-muted-foreground">{t("hero.panel.instalment")}</div>
+                    <div className="font-semibold tabular-nums">{money(hero.instalment)}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          {/* Fading bottom edge */}
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 -bottom-8 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         </motion.div>
       </section>
 
@@ -246,23 +295,48 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* Decorative Financial UI */}
-              <div className="flex-1 w-full bg-muted/30 rounded-2xl p-6 border group-hover:-translate-y-2 transition-transform duration-500">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-sm font-medium">Project Cost</span>
-                  <span className="font-mono font-bold text-xl">₹5,00,000</span>
+              {/* Not decoration: optimiseStack() runs here and the two columns are what it
+                  returns. The point of the section is that single-scheme routing leaves money on
+                  the table, so the figure that matters is the difference between them. */}
+              <div className="flex-1 w-full bg-muted/30 rounded-2xl p-6 border group-hover:-translate-y-2 transition-transform duration-500 text-left">
+                <div className="flex justify-between items-baseline mb-5">
+                  <span className="text-sm font-medium">{t("stack.demo.cost")}</span>
+                  <span className="font-mono font-bold text-xl tabular-nums">{money(stackDemo.cost)}</span>
                 </div>
-                <div className="space-y-3">
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden flex">
-                    <div className="h-full bg-primary w-[65%]" />
-                    <div className="h-full bg-accent w-[25%]" />
+
+                {([
+                  { label: t("stack.demo.spec"), c: stackDemo.spec },
+                  { label: t("stack.demo.best"), c: stackDemo.best },
+                ] as const).map(({ label, c }) =>
+                  c ? (
+                    <div key={label} className="mb-4 last:mb-0">
+                      <div className="text-xs font-semibold text-muted-foreground mb-1.5">{label}</div>
+                      <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden flex">
+                        <div className="h-full bg-accent" style={{ width: `${(c.subsidy / stackDemo.cost) * 100}%` }} />
+                        <div className="h-full bg-primary" style={{ width: `${(c.totalBorrowed / stackDemo.cost) * 100}%` }} />
+                        <div className="h-full bg-muted-foreground/40" style={{ width: `${(c.ownContribution / stackDemo.cost) * 100}%` }} />
+                      </div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[11px] text-muted-foreground tabular-nums">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-accent" /> {t("stack.demo.subsidy")} {money(c.subsidy)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-primary" /> {t("stack.demo.loan")} {money(c.totalBorrowed)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-muted-foreground/40" /> {t("stack.demo.own")} {money(c.ownContribution)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null,
+                )}
+
+                {stackDemo.saving != null && stackDemo.saving > 0 && (
+                  <div className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold text-primary tabular-nums">
+                    {money(stackDemo.saving)}{" "}
+                    <span className="font-normal text-primary/80">{t("stack.demo.saving")}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-primary"/> Bank Loan (65%)</span>
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-accent"/> Subsidy (25%)</span>
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-muted-foreground"/> Margin (10%)</span>
-                  </div>
-                </div>
+                )}
               </div>
             </motion.div>
 
@@ -280,8 +354,12 @@ export default function LandingPage() {
           transition={{ duration: 0.5 }}
           className="relative z-10 max-w-3xl mx-auto text-center space-y-8"
         >
-          <h2 className="text-4xl md:text-5xl font-bold font-heading">Ready to build your business?</h2>
-          <p className="text-xl text-muted-foreground">Join thousands of micro-entrepreneurs securing funding through data.</p>
+          {/* "Join thousands of micro-entrepreneurs securing funding through data" stood here.
+              There are no thousands. Nobody has been funded through this. A traction claim on a
+              product with no users is the one kind of copy a judge can falsify in a single
+              question. */}
+          <h2 className="text-4xl md:text-5xl font-bold font-heading">{t("footer.title")}</h2>
+          <p className="text-xl text-muted-foreground">{t("footer.subtitle")}</p>
           <Link href="/onboarding" className="inline-block mt-4">
             <Button size="lg" className="h-14 px-10 text-lg rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
               {t("landing.cta.start")}

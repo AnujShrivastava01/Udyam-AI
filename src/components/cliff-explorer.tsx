@@ -20,13 +20,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { MFS_CAP_BINDS_AT, SCHEMES, quoteAtProjectCost } from "@/lib/finance";
+import { useT, money } from "@/lib/i18n";
 
 const BOUNDARY = SCHEMES["nsfdc-micro-finance"].maxProjectCost; // ₹1,40,000
 const MIN = 100_000;
 const MAX = 220_000;
-
-const inr = (n: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
 /**
  * The ₹1.40 lakh cliff.
@@ -36,6 +34,7 @@ const inr = (n: number) =>
  * unaided, and the specification's Logic A / Logic B presents it as a trivial `if`.
  */
 export function CliffExplorer() {
+  const { t } = useT();
   const [projectCost, setProjectCost] = useState(BOUNDARY);
 
   const sweep = useMemo(() => {
@@ -82,38 +81,33 @@ export function CliffExplorer() {
           variant="outline"
           className="w-fit border-amber-400/40 bg-amber-400/15 text-amber-300 mb-1"
         >
-          <Sparkles className="w-3 h-3 mr-1" /> The ₹1.40 lakh cliff
+          <Sparkles className="w-3 h-3 mr-1" aria-hidden="true" /> {t("cliff.badge")}
         </Badge>
-        <CardTitle className="text-2xl font-heading">
-          One rupee changes everything about this loan
-        </CardTitle>
-        <CardDescription className="text-slate-300">
-          Drag across ₹1,40,000 and watch the quarterly instalment{" "}
-          <strong className="text-emerald-400">halve</strong> while lifetime interest{" "}
-          <strong className="text-rose-400">triples</strong>. The cheaper headline rate is not the
-          lighter burden.
-        </CardDescription>
+        <CardTitle className="text-2xl font-heading">{t("cliff.title")}</CardTitle>
+        <CardDescription className="text-slate-200">{t("cliff.subtitle")}</CardDescription>
       </CardHeader>
 
       <CardContent className="pt-6 space-y-6">
         {/* live figures */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <LiveStat label="Project cost" value={`₹${inr(projectCost)}`} />
+          <LiveStat label={t("cliff.projectCost")} value={money(projectCost)} />
           <LiveStat
-            label="Scheme"
-            value={isMicro ? "Micro Finance" : "Term Loan"}
+            label={t("cliff.scheme")}
+            value={t(
+              isMicro ? "scheme.nsfdc-micro-finance.name" : "scheme.nsfdc-term-loan.name",
+            )}
             accent={isMicro ? "teal" : "indigo"}
             k={scheme.id}
           />
           <LiveStat
-            label="Per quarter"
-            value={`₹${inr(current.schedule.instalment)}`}
+            label={t("cliff.perQuarter")}
+            value={money(current.schedule.instalment)}
             k={`q-${scheme.id}`}
             accent="emerald"
           />
           <LiveStat
-            label="Lifetime interest"
-            value={`₹${inr(current.schedule.totalInterest)}`}
+            label={t("cliff.lifetimeInterest")}
+            value={money(current.schedule.totalInterest)}
             k={`i-${scheme.id}`}
             accent="rose"
           />
@@ -122,16 +116,34 @@ export function CliffExplorer() {
         {/* the slider */}
         <div>
           <Slider
+            aria-label={t("cliff.slider")}
+            valueText={(v) => money(v)}
             value={[projectCost]}
             min={MIN}
             max={MAX}
             step={500}
             onValueChange={(v) => setProjectCost((v as number[])[0])}
           />
-          <div className="flex justify-between text-[11px] text-muted-foreground mt-1.5">
-            <span>₹{inr(MIN)}</span>
-            <span className="font-semibold text-amber-600">₹1,40,000 — the boundary</span>
-            <span>₹{inr(MAX)}</span>
+          {/* The boundary caption used to sit in a justify-between row, which put it at the
+              midpoint of the track. The boundary is at 33% of this range, so the label pointed at
+              ₹1,60,000 while naming ₹1,40,000 — on the one control whose entire purpose is to show
+              where that line falls. It is now anchored to the value it names. */}
+          <div className="relative mt-1.5 h-9">
+            <span className="absolute left-0 top-0 text-[11px] text-muted-foreground">
+              {money(MIN)}
+            </span>
+            <span className="absolute right-0 top-0 text-[11px] text-muted-foreground">
+              {money(MAX)}
+            </span>
+            <span
+              className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+              style={{ left: `${((BOUNDARY - MIN) / (MAX - MIN)) * 100}%` }}
+            >
+              <span className="h-2 w-px bg-amber-500" aria-hidden="true" />
+              <span className="mt-0.5 whitespace-nowrap text-[11px] font-semibold text-amber-700 dark:text-amber-500">
+                {t("cliff.boundary")}
+              </span>
+            </span>
           </div>
         </div>
 
@@ -146,13 +158,14 @@ export function CliffExplorer() {
             >
               <div className="rounded-xl border-2 border-rose-500/40 bg-rose-500/10 p-4">
                 <p className="font-bold text-sm flex items-center gap-2 text-rose-800 dark:text-rose-300">
-                  <TriangleAlert className="w-4 h-4 shrink-0" /> You are inside the dead zone
+                  <TriangleAlert className="w-4 h-4 shrink-0" aria-hidden="true" />{" "}
+                  {t("cliff.inDeadZone")}
                 </p>
                 <p className="text-sm mt-1.5 leading-relaxed">
-                  The ₹1.25 lakh cap starts binding at ₹{inr(MFS_CAP_BINDS_AT)}, not at the ₹1.40 lakh
-                  boundary. Here the beneficiary must find{" "}
-                  <strong>{(current.structure.effectiveMarginPct * 100).toFixed(2)}%</strong> — not
-                  10% — so the structure is not financeable as specified.
+                  {t("cliff.deadZoneDetail", {
+                    bindsAt: money(MFS_CAP_BINDS_AT),
+                    effective: `${(current.structure.effectiveMarginPct * 100).toFixed(2)}%`,
+                  })}
                 </p>
               </div>
             </motion.div>
@@ -162,7 +175,7 @@ export function CliffExplorer() {
         {/* the chart — this is the moment */}
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Quarterly instalment across the boundary
+            {t("cliff.chartTitle")}
           </p>
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -191,8 +204,8 @@ export function CliffExplorer() {
                   tickFormatter={(t) => `₹${Math.round(t / 1000)}k`}
                 />
                 <Tooltip
-                  formatter={(v) => `₹${inr(Number(v ?? 0))}`}
-                  labelFormatter={(l) => `Project cost ₹${inr(Number(l))}`}
+                  formatter={(v) => money(Number(v ?? 0))}
+                  labelFormatter={(l) => t("cliff.tooltipCost", { cost: money(Number(l)) })}
                   contentStyle={{
                     borderRadius: 8,
                     border: "1px solid var(--color-border)",
@@ -231,7 +244,7 @@ export function CliffExplorer() {
             </ResponsiveContainer>
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            The shaded band is the dead zone — where the cap binds but the tier has not changed.
+            {t("cliff.deadZoneNote")}
           </p>
         </div>
 
@@ -240,7 +253,7 @@ export function CliffExplorer() {
           <DeltaCard
             direction="down"
             pct={instalmentDrop}
-            label="Quarterly instalment"
+            label={t("cliff.delta.instalment")}
             from={below.schedule.instalment}
             to={above.schedule.instalment}
             tone="emerald"
@@ -248,7 +261,7 @@ export function CliffExplorer() {
           <DeltaCard
             direction="up"
             pct={interestRise}
-            label="Lifetime interest"
+            label={t("cliff.delta.interest")}
             from={below.schedule.totalInterest}
             to={above.schedule.totalInterest}
             tone="rose"
@@ -256,10 +269,7 @@ export function CliffExplorer() {
         </div>
 
         <p className="text-sm leading-relaxed rounded-lg border bg-muted/30 p-3">
-          <strong>Why this matters:</strong> an advisor optimising on the headline interest rate
-          routes the borrower into the 6.5% scheme — which carries roughly double the quarterly
-          cash-flow burden and is therefore the option more likely to default. A threshold rule
-          cannot express that trade-off. An optimiser has to.
+          <strong>{t("cliff.whyLabel")}</strong> {t("cliff.why")}
         </p>
       </CardContent>
     </Card>
@@ -321,6 +331,8 @@ function DeltaCard({
   to: number;
   tone: "emerald" | "rose";
 }) {
+  const { t } = useT();
+  const atBoundary = t("cliff.atBoundary", { from: money(from), to: money(to) });
   const Icon = direction === "down" ? ArrowDown : ArrowUp;
   const colour =
     tone === "emerald"
@@ -329,13 +341,11 @@ function DeltaCard({
   return (
     <div className={`rounded-xl border-2 p-4 ${colour}`}>
       <p className="text-2xl font-bold font-heading flex items-center gap-1.5">
-        <Icon className="w-5 h-5" />
+        <Icon className="w-5 h-5" aria-hidden="true" />
         {Math.abs(pct).toFixed(1)}%
       </p>
       <p className="text-sm font-medium mt-0.5 text-foreground">{label}</p>
-      <p className="text-xs text-muted-foreground mt-1 tabular-nums">
-        ₹{inr(from)} → ₹{inr(to)} at the boundary
-      </p>
+      <p className="text-xs text-muted-foreground mt-1 tabular-nums">{atBoundary}</p>
     </div>
   );
 }

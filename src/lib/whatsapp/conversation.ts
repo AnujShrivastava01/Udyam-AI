@@ -137,9 +137,31 @@ const C = {
     hinglish:
       "\n_Figures NSFDC scheme aur NABARD unit cost se. Poori report: {url}_\n\nDobara shuru karne ke liye *hi* bhejein.",
   } satisfies Copy,
+
+  footerNoLink: {
+    en: "\n_Figures from NSFDC scheme terms and NABARD unit costs._\n\nSend *hi* to start again.",
+    hi: "\n_\u0906\u0901\u0915\u0921\u093c\u0947 NSFDC \u092f\u094b\u091c\u0928\u093e \u0914\u0930 NABARD \u092f\u0942\u0928\u093f\u091f \u0932\u093e\u0917\u0924 \u0938\u0947\u0964_\n\n\u0926\u094b\u092c\u093e\u0930\u093e \u0936\u0941\u0930\u0942 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f *hi* \u092d\u0947\u091c\u0947\u0902\u0964",
+    hinglish:
+      "\n_Figures NSFDC scheme aur NABARD unit cost se._\n\nDobara shuru karne ke liye *hi* bhejein.",
+  } satisfies Copy,
 } as const;
 
-const REPORT_URL = "http://localhost:3000/calculator";
+/**
+ * The link we put in a borrower's pocket.
+ *
+ * This was hardcoded to http://localhost:3000/calculator, which every advisory message then sent
+ * to a real phone. A borrower tapping it gets a connection error; a borrower who does not tap it
+ * still learns that the sender does not check what it sends. When no base URL is configured the
+ * footer drops the link line entirely — a message with one fewer sentence is strictly better than
+ * a message with a dead address in it.
+ */
+function reportUrl(): string | null {
+  const base = (process.env.APP_BASE_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "").trim();
+  if (!base) return null;
+  if (!/^https?:\/\//i.test(base)) return null;
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(base)) return null;
+  return `${base.replace(/\/+$/, "")}/calculator`;
+}
 
 // ── the machine ─────────────────────────────────────────────────────────────
 
@@ -294,7 +316,8 @@ function verdict(locale: Locale, villageId: string, margin: number, activityId: 
     }
   }
 
-  out.push(fill(C.footer[locale], { url: REPORT_URL }));
+  const url = reportUrl();
+  out.push(url ? fill(C.footer[locale], { url }) : C.footerNoLink[locale]);
 
   // WhatsApp truncates very long messages; send as a few shorter ones.
   return out;

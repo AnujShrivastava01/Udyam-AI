@@ -9,10 +9,7 @@ import type { Activity } from "@/lib/finance/activities";
 import type { ScheduleRow } from "@/lib/finance/amortise";
 import { VERDICT_META, type SolvencyResult } from "@/lib/finance/solvency";
 import { SourceChip } from "@/components/source-chip";
-import { useT, type MessageKey } from "@/lib/i18n";
-
-const inr = (n: number) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
+import { useT, money, type MessageKey } from "@/lib/i18n";
 
 const TONE: Record<
   "good" | "warn" | "bad" | "neutral",
@@ -85,7 +82,7 @@ export function SolvencyClock({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Icon className={`w-5 h-5 shrink-0 ${tone.text}`} />
+              <Icon className={`w-5 h-5 shrink-0 ${tone.text}`} aria-hidden="true" />
               {t("clock.title")}
             </CardTitle>
             <CardDescription className="mt-1">
@@ -108,8 +105,12 @@ export function SolvencyClock({
           </p>
         </div>
 
+        {/* The timeline is a picture of what the headline, the detail paragraph and the three
+            figures below already state in words. Screen readers get the words; exposing a row of
+            unlabelled coloured divs on top of that is noise, not access. The per-payment tooltips
+            are a mouse convenience — the full schedule lives in the amortisation table. */}
         {gestation != null && (
-          <div className="space-y-2">
+          <div className="space-y-2" aria-hidden="true">
             {/* income track */}
             <div className="flex items-center gap-3">
               <span className="w-20 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground text-right">
@@ -131,8 +132,14 @@ export function SolvencyClock({
                     {t("clock.earning")}
                   </span>
                 </motion.div>
+                {/* Was `inset-y-0 left-0` with no right bound: the label spanned the whole track
+                    and printed straight through the green "earning" block. It is now clipped to
+                    the gestation span it describes. */}
                 {gestationPct > 12 && (
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-[10px] font-bold text-rose-900 dark:text-rose-200">
+                  <span
+                    className="absolute inset-y-0 left-0 flex items-center overflow-hidden pl-2 pr-1 text-[10px] font-bold whitespace-nowrap text-rose-900 dark:text-rose-200"
+                    style={{ width: `${gestationPct}%` }}
+                  >
                     {t("clock.noIncome", { months: gestation })}
                   </span>
                 )}
@@ -150,9 +157,10 @@ export function SolvencyClock({
                   return (
                     <div
                       key={row.month}
-                      title={`Month ${row.month} · ₹${inr(row.payment)}${
-                        row.inMoratorium ? " (moratorium interest)" : ""
-                      }`}
+                      title={t(row.inMoratorium ? "clock.paymentMoratorium" : "clock.payment", {
+                        month: row.month,
+                        amount: money(row.payment),
+                      })}
                       className={`absolute top-1 bottom-1 w-1.5 rounded-sm ${
                         isPreIncome ? "bg-rose-600" : "bg-primary/70"
                       }`}
@@ -164,6 +172,8 @@ export function SolvencyClock({
             </div>
 
             {/* axis */}
+            {/* The unit caption was pinned to right-0, on top of the final tick, which at a
+                24-month horizon is the "24". It sits on its own line now. */}
             <div className="flex items-center gap-3">
               <span className="w-20 shrink-0" />
               <div className="relative h-4 flex-1">
@@ -176,36 +186,54 @@ export function SolvencyClock({
                     {m}
                   </span>
                 ))}
-<span className="absolute right-0 text-[10px] text-muted-foreground">{t("clock.months")}</span>
               </div>
             </div>
+            <p className="pl-[5.75rem] text-[10px] text-muted-foreground">{t("clock.months")}</p>
           </div>
         )}
 
-        {solvency.preIncomeObligation > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <Stat
-              label={t("clock.dueBeforeIncome")}
-              value={`₹${inr(solvency.preIncomeObligation)}`}
-              tone="bad"
-            />
-            <Stat
-              label={t("clock.paymentsInWindow")}
-              value={String(solvency.preIncomePayments)}
-              tone="bad"
-            />
-            <Stat
-              label={t("clock.uncoveredMonths")}
-              value={solvency.gapMonths != null ? `${solvency.gapMonths}` : "—"}
-              tone="bad"
-            />
-          </div>
-        )}
+        {/* Gated on the VERDICT, not on the rupee figure.
+            preIncomeObligation counts every payment falling due at or before first income, which
+            includes moratorium interest on an activity that earns before the moratorium ends. The
+            grid was gated on that figure alone with tone="bad" hardcoded, so mushroom — gestation
+            3 months, verdict FEASIBLE — printed a red "Due before income ₹1,389" panel directly
+            under a green tick. The exposure is real, but it is not a gap, and colouring it like
+            one teaches the user to distrust the verdict. */}
+        {solvency.preIncomeObligation > 0 &&
+          (solvency.verdict === "GESTATION_GAP" ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <Stat
+                label={t("clock.dueBeforeIncome")}
+                value={money(solvency.preIncomeObligation)}
+                tone="bad"
+              />
+              <Stat
+                label={t("clock.paymentsInWindow")}
+                value={String(solvency.preIncomePayments)}
+                tone="bad"
+              />
+              <Stat
+                label={t("clock.uncoveredMonths")}
+                value={solvency.gapMonths != null ? `${solvency.gapMonths}` : "—"}
+                tone="bad"
+              />
+            </div>
+          ) : (
+            <p className="rounded-lg border bg-muted/30 p-3 text-sm leading-relaxed text-muted-foreground">
+              {t("clock.beforeIncomeNeutral", {
+                amount: money(solvency.preIncomeObligation),
+                payments: solvency.preIncomePayments,
+              })}
+            </p>
+          ))}
 
         {activity && (
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <SourceChip
-              label={`Gestation ${activity.gestationMonths} mo · ${activity.name}`}
+              label={t("clock.gestationChip", {
+                months: activity.gestationMonths,
+                activity: t(`activity.${activity.id}.name` as MessageKey),
+              })}
               provenance={activity.provenance}
             />
           </div>

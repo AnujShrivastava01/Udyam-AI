@@ -2,6 +2,8 @@
 
 import { Info } from "lucide-react";
 
+import { useT } from "@/lib/i18n";
+
 /**
  * Declares that everything below is illustrative, not real.
  *
@@ -23,6 +25,7 @@ export function SampleDataBanner({
   detail?: string;
   className?: string;
 }) {
+  const { t } = useT();
   return (
     <div
       role="note"
@@ -30,7 +33,9 @@ export function SampleDataBanner({
     >
       <p className="flex items-start gap-2 text-sm font-bold text-amber-900 dark:text-amber-300">
         <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>{what} is sample content, not real data.</span>
+        <span>
+          {what} — {t("sample.title")}
+        </span>
       </p>
       {detail && (
         <p className="mt-1.5 pl-6 text-xs leading-relaxed text-amber-900/90 dark:text-amber-200/90">

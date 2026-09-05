@@ -45,7 +45,7 @@
      "exact": 70,
      "pct": 100
     },
-    "cap-binding": {
+    "above-ceiling": {
      "total": 60,
      "exact": 60,
      "pct": 100
@@ -110,7 +110,7 @@
      "exact": 0,
      "pct": 0
     },
-    "cap-binding": {
+    "above-ceiling": {
      "total": 60,
      "exact": 0,
      "pct": 0
@@ -331,7 +331,7 @@
      "exact": 0,
      "pct": 0
     },
-    "cap-binding": {
+    "above-ceiling": {
      "total": 60,
      "exact": 0,
      "pct": 0
@@ -552,7 +552,7 @@
      "exact": 56,
      "pct": 80
     },
-    "cap-binding": {
+    "above-ceiling": {
      "total": 60,
      "exact": 51,
      "pct": 85

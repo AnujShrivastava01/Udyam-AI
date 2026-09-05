@@ -6,6 +6,14 @@
  * as a PMEGP loan carrying a 25–35% margin-money SUBSIDY that never has to be repaid, or as a
  * blend — and the difference in lifetime cost is large.
  *
+ * NOTE ON BLENDS: the enumeration below considers pairs, but under the exclusions currently
+ * encoded NO two lending rails may co-exist — PMEGP bars every other subsidised rail, the two
+ * NSFDC tiers are alternatives to each other, and Kishore/Tarun are tiers of one MUDRA scheme.
+ * So today every candidate is a single lending rail, which is the conservative and correct
+ * behaviour. The pair branch is kept because it is what will matter the moment a combinable rail
+ * (a state top-up, a CGTMSE-backed second charge) is added, and `stack.test.ts` asserts the
+ * current state explicitly rather than passing vacuously.
+ *
  * This module solves for the cheapest viable capital structure rather than routing to a tier. It
  * is a small constrained optimisation, and it is the part of the product that is least dismissible
  * as a wrapper around a language model: given the same inputs it returns the same stack, and the
@@ -224,16 +232,36 @@ export interface StackOptions {
   /** Cash the beneficiary actually holds. */
   marginAvailable: number;
   convention?: MoratoriumConvention;
+  /**
+   * The activity's class, so a rail's moratorium exception applies here exactly as it does in
+   * structure(). Without it this module priced a plantation term loan on the standard 6-month
+   * moratorium while the structure card on the same page used the 12-month exception — two
+   * different quarterly instalments for one loan, side by side.
+   */
+  activityClass?: string;
   /** Rails the applicant is not eligible for (wrong category, already availed, etc.). */
   ineligible?: RailId[];
 }
 
-function priceRail(rail: Rail, amount: number, convention: MoratoriumConvention) {
+/** The moratorium this rail actually grants for this activity, exceptions included. */
+function moratoriumFor(rail: Rail, activityClass?: string): number {
+  if (!activityClass) return rail.moratoriumMonths;
+  const scheme = SCHEMES[rail.id as keyof typeof SCHEMES];
+  const exception = scheme?.moratoriumExceptions?.find((e) => e.appliesTo.includes(activityClass));
+  return exception?.moratoriumMonths ?? rail.moratoriumMonths;
+}
+
+function priceRail(
+  rail: Rail,
+  amount: number,
+  convention: MoratoriumConvention,
+  activityClass?: string,
+) {
   const sched = amortise({
     principal: amount,
     annualRatePct: rail.annualRatePct,
     tenureMonths: rail.tenureMonths,
-    moratoriumMonths: rail.moratoriumMonths,
+    moratoriumMonths: moratoriumFor(rail, activityClass),
     restMonths: 3,
     convention,
   });
@@ -249,7 +277,7 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
  */
 function buildStack(
   combo: Rail[],
-  { projectCost, marginAvailable, convention = "serviced" }: StackOptions,
+  { projectCost, marginAvailable, convention = "serviced", activityClass }: StackOptions,
 ): CapitalStack {
   const subsidy = r2(
     combo.reduce((sum, r) => sum + (r.subsidyOfProjectCost ?? 0) * projectCost, 0),
@@ -271,7 +299,7 @@ function buildStack(
     const capByShare = rail.maxShareOfProjectCost * projectCost;
     const amount = r2(Math.min(remaining, rail.maxAmount, capByShare));
     if (amount < rail.minAmount) continue;
-    const priced = priceRail(rail, amount, convention);
+    const priced = priceRail(rail, amount, convention, activityClass);
     components.push({ rail, amount, ...priced });
     remaining = r2(remaining - amount);
   }
@@ -349,7 +377,13 @@ export function optimiseStack(opts: StackOptions): StackResult {
     .filter((s) => s.components.length > 0)
     .sort((x, y) => {
       if (x.feasible !== y.feasible) return x.feasible ? -1 : 1;
-      return x.netCostOfCapital - y.netCostOfCapital;
+      if (x.netCostOfCapital !== y.netCostOfCapital) {
+        return x.netCostOfCapital - y.netCostOfCapital;
+      }
+      // Net cost of capital deliberately excludes the borrower's own money — their cash is not a
+      // cost of capital. But between two structures that cost the same, the one that demands less
+      // of it is plainly the better offer, and ranking on cost alone left that to array order.
+      return x.ownContribution - y.ownContribution;
     });
 
   const best = candidates.find((c) => c.feasible) ?? null;

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   AlertTriangle,
@@ -37,20 +38,54 @@ import { Progress } from "@/components/ui/progress";
 import { ACTIVITIES, ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { buildFeasibilityReport, type Confidence, type Figure } from "@/lib/market/feasibility";
 import { GAZETTEER_COVERAGE, VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
+import { useT, money, num, type MessageKey } from "@/lib/i18n";
+import { useAppStore } from "@/lib/store";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
-const CONFIDENCE_STYLE: Record<Confidence, { label: string; className: string }> = {
-  measured: { label: "measured", className: "text-emerald-700 border-emerald-500/40 bg-emerald-500/10" },
-  estimated: { label: "estimated", className: "text-blue-700 border-blue-500/40 bg-blue-500/10" },
-  seeded: { label: "seeded — not a survey reading", className: "text-amber-800 border-amber-500/40 bg-amber-500/10" },
-  unavailable: { label: "unavailable", className: "text-muted-foreground border-border bg-muted/40" },
+const CONFIDENCE_STYLE: Record<Confidence, string> = {
+  measured: "text-emerald-800 border-emerald-500/40 bg-emerald-500/10",
+  estimated: "text-blue-800 border-blue-500/40 bg-blue-500/10",
+  seeded: "text-amber-900 border-amber-500/40 bg-amber-500/10",
+  unavailable: "text-muted-foreground border-border bg-muted/40",
 };
 
+/**
+ * The route parameter is now read.
+ *
+ * It was ignored entirely: the page always opened on VILLAGES[0] and goat-20-1, so /report/kirana-store
+ * and /report/rep-12345 rendered the identical page and the calculator’s "see the full report"
+ * button silently discarded the activity the user had just chosen. The id is accepted as an
+ * activity id, a village id, or `village__activity`; anything else falls back to the defaults,
+ * which is what an id like rep-12345 was always going to do.
+ */
+function readRouteId(raw: string | undefined) {
+  const parts = decodeURIComponent(raw ?? "").split("__").filter(Boolean);
+  let village: string | undefined;
+  let activity: string | undefined;
+  for (const part of parts) {
+    if (ACTIVITY_BY_ID.has(part)) activity = part;
+    else if (VILLAGE_BY_ID.has(part)) village = part;
+  }
+  return { village, activity };
+}
+
 export default function FeasibilityReportPage() {
-  const [villageId, setVillageId] = useState(VILLAGES[0].id);
-  const [activityId, setActivityId] = useState("goat-20-1");
+  const { t } = useT();
+  const params = useParams<{ id: string }>();
+  const onboardingDistrict = useAppStore((st) => st.onboardingInput.location?.district);
+
+  const fromRoute = readRouteId(params?.id);
+  // Failing the route id, fall back to whatever district onboarding collected before dropping to
+  // the first row — the user told us where they are; showing them a different district is rude.
+  const defaultVillage =
+    fromRoute.village ??
+    VILLAGES.find((v) => v.district.toLowerCase() === (onboardingDistrict ?? "").toLowerCase())?.id ??
+    VILLAGES[0].id;
+
+  const [villageId, setVillageId] = useState(defaultVillage);
+  const [activityId, setActivityId] = useState(fromRoute.activity ?? "goat-20-1");
 
   const village = VILLAGE_BY_ID.get(villageId)!;
   const activity = ACTIVITY_BY_ID.get(activityId) ?? null;
@@ -70,27 +105,29 @@ export default function FeasibilityReportPage() {
     <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6 pb-24">
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
-          <Target className="w-8 h-8 text-primary" /> Feasibility Report
+          <Target className="w-8 h-8 text-primary" aria-hidden="true" /> {t("report.title")}
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Every number below names where it came from — or it is not shown.
-        </p>
+        <p className="text-muted-foreground text-lg">{t("report.subtitle")}</p>
       </header>
 
       {/* selectors */}
       <Card>
         <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Village
-            </p>
-            <div className="flex flex-wrap gap-1.5">
+            <h2
+              id="village-picker"
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+            >
+              {t("report.village")}
+            </h2>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="village-picker">
               {VILLAGES.map((v) => (
                 <button
                   key={v.id}
                   type="button"
                   onClick={() => setVillageId(v.id)}
-                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                  aria-pressed={villageId === v.id}
+                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     villageId === v.id ? "border-primary bg-primary/10 font-medium" : "hover:bg-muted/50"
                   }`}
                 >
@@ -103,22 +140,32 @@ export default function FeasibilityReportPage() {
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Activity
-            </p>
-            <div className="flex flex-wrap gap-1.5">
+            <h2
+              id="activity-picker"
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+            >
+              {t("report.activity")}
+            </h2>
+            {/* a.name / a.unit are the English fields on the record. The calculator renders the
+                same activity through activity.<id>.name, so one session showed "बकरी पालन" on one
+                page and "Goat rearing" on the next. Both pages now read the dictionary. */}
+            <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="activity-picker">
               {ACTIVITIES.map((a) => (
                 <button
                   key={a.id}
                   type="button"
                   onClick={() => setActivityId(a.id)}
-                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                  aria-pressed={activityId === a.id}
+                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     activityId === a.id ? "border-primary bg-primary/10 font-medium" : "hover:bg-muted/50"
                   }`}
                 >
-                  <span className="block max-w-[13rem] truncate">{a.name}</span>
+                  <span className="block max-w-[13rem] truncate">
+                    {t(`activity.${a.id}.name` as MessageKey)}
+                  </span>
                   <span className="block text-[10px] text-muted-foreground">
-                    {a.unit} · gestation {a.gestationMonths} mo
+                    {t(`activity.${a.id}.unit` as MessageKey)} ·{" "}
+                    {t("report.gestationMo", { months: a.gestationMonths })}
                   </span>
                 </button>
               ))}
@@ -129,9 +176,9 @@ export default function FeasibilityReportPage() {
 
       {/* data quality — stated before any finding, not after */}
       <div className="rounded-xl border-2 border-amber-500/40 bg-amber-500/10 p-4">
-        <p className="font-bold text-sm flex items-center gap-2 text-amber-900 dark:text-amber-300">
-          <Info className="w-4 h-4 shrink-0" /> What this report is standing on
-        </p>
+        <h2 className="font-bold text-sm flex items-center gap-2 text-amber-900 dark:text-amber-300">
+          <Info className="w-4 h-4 shrink-0" aria-hidden="true" /> {t("report.standingOn")}
+        </h2>
         <ul className="mt-2 space-y-1.5">
           {report.dataQuality.warnings.map((w, i) => (
             <li key={i} className="text-xs leading-relaxed text-amber-900/90 dark:text-amber-200/90 flex gap-2">
@@ -153,8 +200,8 @@ export default function FeasibilityReportPage() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-primary shrink-0" />
-                  {village.name}, {village.block} block
+                  <MapPin className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
+                  {t("report.blockSuffix", { village: village.name, block: village.block })}
                 </CardTitle>
                 <CardDescription className="mt-1">
                   {village.district}, {village.state}
@@ -171,26 +218,32 @@ export default function FeasibilityReportPage() {
                 }
               >
                 {report.verdict === "CROWDED"
-                  ? "Crowded"
+                  ? t("report.crowded")
                   : report.verdict === "PROMISING"
-                    ? "Room to enter"
-                    : "Data too thin"}
+                    ? t("report.roomToEnter")
+                    : t("report.thinData")}
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-lg leading-relaxed">{report.summary}</p>
+            {/* The feasibility engine still returns finished English sentences rather than message
+                keys with numeric slots, the way the finance kernel does. Until it is converted,
+                saying so is better than letting a Hindi reader assume the analysis was written for
+                them. */}
+            <p className="rounded-md border border-dashed bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+              {t("report.analysisLanguageNote")}
+            </p>
+            <p className="text-lg leading-relaxed" lang="en">
+              {report.summary}
+            </p>
             {report.score != null && (
               <div>
                 <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-muted-foreground">Feasibility score</span>
+                  <span className="text-muted-foreground">{t("report.score")}</span>
                   <span className="font-bold">{report.score} / 100</span>
                 </div>
                 <Progress value={report.score} />
-                <p className="text-[11px] text-muted-foreground mt-1.5">
-                  A composite of saturation, market access and gestation — not a probability of success.
-                  It is a ranking aid, and it moves when the inputs move.
-                </p>
+                <p className="text-[11px] text-muted-foreground mt-1.5">{t("report.scoreNote")}</p>
               </div>
             )}
           </CardContent>
@@ -201,12 +254,10 @@ export default function FeasibilityReportPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary" /> Two independent reads on market room
+            <BarChart3 className="w-5 h-5 text-primary" aria-hidden="true" />{" "}
+            {t("report.marketRoom")}
           </CardTitle>
-          <CardDescription>
-            Supply side against demand side. When they disagree, the report says so rather than
-            averaging them into a number that looks confident.
-          </CardDescription>
+          <CardDescription>{t("report.marketRoomNote")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[220px]">
@@ -223,7 +274,7 @@ export default function FeasibilityReportPage() {
                   axisLine={false}
                 />
                 <Tooltip
-                  formatter={(v) => `${Math.round(Number(v ?? 0))} units`}
+                  formatter={(v) => t("report.units", { count: num(Math.round(Number(v ?? 0))) })}
                   contentStyle={{
                     borderRadius: 8,
                     border: "1px solid var(--color-border)",
@@ -241,11 +292,12 @@ export default function FeasibilityReportPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className="font-medium">
-              Saturation index <strong className="text-lg">{sat.index.toFixed(2)}×</strong> the national rural norm
+              {t("report.satIndex", { index: sat.index.toFixed(2) })}
             </span>
             {sat.estimatesAgree === false && (
-              <span className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5" /> the two methods disagree
+              <span className="text-xs text-amber-800 dark:text-amber-400 flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />{" "}
+                {t("report.methodsDisagree")}
               </span>
             )}
           </div>
@@ -253,21 +305,31 @@ export default function FeasibilityReportPage() {
       </Card>
 
       {/* sections */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <section aria-labelledby="findings">
+        <h2 id="findings" className="text-xl font-bold font-heading mb-3">
+          {t("report.sectionsHeading")}
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
         {report.sections.map((s) => (
           <Card key={s.key} className="flex flex-col">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3">
-                <CardTitle className="text-base">{s.title}</CardTitle>
+                <CardTitle className="text-base" lang="en">
+                  {s.title}
+                </CardTitle>
                 <Badge variant="outline" className="shrink-0 text-[10px]">
-                  PS req. {s.requirement}
+                  {t("report.psReq", { n: s.requirement })}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 space-y-3">
-              <p className="font-semibold text-primary leading-snug">{s.headline}</p>
+              <p className="font-semibold text-primary leading-snug" lang="en">
+                {s.headline}
+              </p>
               {s.detail && (
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.detail}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed" lang="en">
+                  {s.detail}
+                </p>
               )}
               <div className="space-y-2 pt-1">
                 {s.figures.map((f, i) => (
@@ -277,51 +339,50 @@ export default function FeasibilityReportPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+        </div>
+      </section>
 
       {/* threats callout + next step */}
       <Card className="border-2 border-rose-500/30 bg-rose-500/5">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-rose-600" /> Before you borrow against this
+            <ShieldAlert className="w-5 h-5 text-rose-600" aria-hidden="true" />{" "}
+            {t("report.beforeYouBorrow")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm leading-relaxed">
-            A market with room is not the same as a loan you can survive.{" "}
-            {activity && activity.gestationMonths > 0 ? (
-              <>
-                NABARD prices this activity with a{" "}
-                <strong>{activity.gestationMonths}-month gestation</strong> — check what that does to
-                the repayment schedule before you commit.
-              </>
-            ) : (
-              <>Check the repayment schedule against the activity&apos;s own cash flow before you commit.</>
-            )}
+            {activity && activity.gestationMonths > 0
+              ? t("report.beforeYouBorrowGestation", { months: activity.gestationMonths })
+              : t("report.beforeYouBorrowPlain")}
           </p>
           <Link href="/calculator">
             <Button className="rounded-full">
-              Open the Solvency Clock <ArrowRight className="ml-2 w-4 h-4" />
+              {t("report.openClock")} <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
             </Button>
           </Link>
         </CardContent>
       </Card>
 
       <p className="text-[11px] text-muted-foreground leading-relaxed">
-        Gazetteer coverage: {GAZETTEER_COVERAGE.villages} villages across{" "}
-        {GAZETTEER_COVERAGE.districts.join(", ")} ({GAZETTEER_COVERAGE.states.join(", ")}).{" "}
-        {GAZETTEER_COVERAGE.note}
+        {t("report.coverage", {
+          villages: GAZETTEER_COVERAGE.villages,
+          districts: GAZETTEER_COVERAGE.districts.join(", "),
+          states: GAZETTEER_COVERAGE.states.join(", "),
+          note: GAZETTEER_COVERAGE.note,
+        })}
       </p>
     </div>
   );
 }
 
 function FigureRow({ figure }: { figure: Figure }) {
-  const style = CONFIDENCE_STYLE[figure.confidence];
+  const { t } = useT();
+  const className = CONFIDENCE_STYLE[figure.confidence];
   if (figure.confidence === "unavailable") {
     return (
       <div className="rounded-lg border border-dashed p-2.5 text-xs text-muted-foreground">
-        {figure.note ?? "Not available for this combination."}
+        {figure.note ?? t("report.figureUnavailable")}
       </div>
     );
   }
@@ -329,21 +390,22 @@ function FigureRow({ figure }: { figure: Figure }) {
     <div className="rounded-lg border bg-muted/20 p-2.5">
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <span className="text-base font-bold tabular-nums">
-          {figure.unit.startsWith("₹") ? "₹" : ""}
-          {inr(figure.value)}
+          {figure.unit.startsWith("₹") ? money(figure.value) : inr(figure.value)}
           {figure.band ? (
             <span className="text-xs font-normal text-muted-foreground"> ± {inr(figure.band)}</span>
           ) : null}
         </span>
         <span className="text-[11px] text-muted-foreground">{figure.unit.replace(/^₹\s?/, "")}</span>
         <span
-          className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-medium ${style.className}`}
+          className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-medium ${className}`}
         >
-          {style.label}
+          {t(`confidence.${figure.confidence}` as MessageKey)}
         </span>
       </div>
       {figure.note && (
-        <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">{figure.note}</p>
+        <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground" lang="en">
+          {figure.note}
+        </p>
       )}
       {figure.provenance && (
         <div className="mt-2">

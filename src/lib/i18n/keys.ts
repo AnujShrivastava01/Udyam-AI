@@ -223,6 +223,163 @@ export const EN = {
   "source.retrieved": "Retrieved",
   "source.document": "Document",
   "source.unverified": "Not yet re-verified first-hand",
+  // ── calculator page (residual strings that had no key) ────────────────
+  "calc.basis.needBased": "Sized to the activity",
+  "calc.basis.spec": "Specification formula",
+  "calc.activityGroup": "Choose an activity",
+  "calc.marginSlider": "Margin money",
+  "calc.convention.serviced": "serviced",
+  "calc.convention.capitalised": "capitalised",
+  "calc.altConvention":
+    "Under the {convention} convention the same loan would cost {instalment} per quarter and {interest} in total interest. We compute both so neither is a silent assumption.",
+  "calc.income.hint":
+    "Default is {amount} — the average pre-loan household income measured in MoSJE’s own 2020 evaluation of NSFDC.",
+  "calc.tbl.caption": "Repayment schedule, month by month",
+  "calc.tbl.month": "Month",
+  "calc.tbl.opening": "Opening",
+  "calc.tbl.interest": "Interest",
+  "calc.tbl.principal": "Principal",
+  "calc.tbl.payment": "Payment",
+  "calc.tbl.closing": "Closing",
+  "calc.tbl.mor": "moratorium",
+  "calc.tbl.preIncome": "before income",
+  "calc.tbl.legend":
+    "Rows tagged “before income” fall due before the activity earns anything. Rows tagged “moratorium” are inside the moratorium. The tags are there because colour alone is not a label.",
+
+  // ── capital stack ──────────────────────────────────────
+  "stack.badge": "Capital stack",
+  "stack.title.cheaper": "A cheaper structure exists — {amount} cheaper",
+  "stack.title.same": "Single-scheme routing is already the cheapest here",
+  "stack.description":
+    "The specification routes to one scheme by project cost. We solve for the cheapest viable structure across every rail the applicant is eligible for.",
+  "stack.column.spec": "As specified — one scheme",
+  "stack.column.best": "Optimised",
+  "stack.subsidy": "Subsidy (grant)",
+  "stack.own": "Your money",
+  "stack.netCost": "Net cost of capital",
+  "stack.negativeNote": "negative — the grant exceeds the lifetime interest",
+  "stack.savingNote":
+    "lower net cost of capital, because a margin-money subsidy is never repaid while interest always is. A threshold rule cannot find this — it only ever looks at one scheme.",
+  "stack.unverified.title": "This structure relies on scheme terms we have not re-verified",
+  "stack.unverified.detail":
+    "{rails} — terms are drawn from public scheme summaries. Re-fetch the guidelines from the administering ministry before quoting this saving to a beneficiary.",
+  "stack.none.title": "No viable capital structure at this margin",
+  "stack.none.detail": "Every rail we model needs more own contribution than is available.",
+
+  // ── source chip (remaining) ──────────────────────────────
+  "source.effectiveFrom": "Effective from",
+  "source.unverified.detail":
+    "This figure was transcribed during research but has not been re-confirmed against the primary document by the team. Government rates and ceilings change. Re-fetch and date your own copy before quoting it.",
+  // ── cliff explorer (remaining) ─────────────────────────────
+  "cliff.projectCost": "Project cost",
+  "cliff.scheme": "Scheme",
+  "cliff.perQuarter": "Per quarter",
+  "cliff.lifetimeInterest": "Lifetime interest",
+  "cliff.slider": "Project cost",
+  "cliff.deadZoneDetail":
+    "The ₹1.25 lakh cap starts binding at {bindsAt}, not at the ₹1.40 lakh boundary. Here the beneficiary must find {effective} — not 10% — so the structure is not financeable as specified.",
+  "cliff.whyLabel": "Why this matters:",
+  "cliff.tooltipCost": "Project cost {cost}",
+  "cliff.delta.instalment": "Quarterly instalment",
+  "cliff.delta.interest": "Lifetime interest",
+  // ── solvency clock (remaining) ────────────────────────────
+  "clock.payment": "Month {month} · {amount}",
+  "clock.paymentMoratorium": "Month {month} · {amount} (moratorium interest)",
+  "clock.gestationChip": "Gestation {months} months · {activity}",
+  // ── report page (remaining chrome) ──────────────────────────
+  "report.blockSuffix": "{village}, {block} block",
+  "report.scoreNote":
+    "A composite of saturation, market access and gestation — not a probability of success. It is a ranking aid, and it moves when the inputs move.",
+  "report.marketRoom": "Two independent reads on market room",
+  "report.marketRoomNote":
+    "Supply side against demand side. When they disagree, the report says so rather than averaging them into a number that looks confident.",
+  "report.satIndex": "Saturation index {index}× the national rural norm",
+  "report.methodsDisagree": "the two methods disagree",
+  "report.units": "{count} units",
+  "report.psReq": "PS req. {n}",
+  "report.beforeYouBorrow": "Before you borrow against this",
+  "report.beforeYouBorrowGestation":
+    "A market with room is not the same as a loan you can survive. NABARD prices this activity with a {months}-month gestation — check what that does to the repayment schedule before you commit.",
+  "report.beforeYouBorrowPlain":
+    "A market with room is not the same as a loan you can survive. Check the repayment schedule against the activity’s own cash flow before you commit.",
+  "report.openClock": "Open the Solvency Clock",
+  "report.coverage": "Gazetteer coverage: {villages} villages across {districts} ({states}). {note}",
+  "report.figureUnavailable": "Not available for this combination.",
+  "report.analysisLanguageNote":
+    "The analysis text below is generated in English. Every rupee figure, label and heading on this page follows your chosen language; the narrative sentences do not yet.",
+  "report.sectionsHeading": "Findings, requirement by requirement",
+  "report.gestationMo": "gestation {months} mo",
+  // ── onboarding ────────────────────────────────────────
+  "onb.step": "Step {n} of 3",
+  "onb.q1.title": "Where are you located?",
+  "onb.q1.desc": "Select your district and block.",
+  "onb.q2.title": "What is your initial capital?",
+  "onb.q2.desc": "Enter the amount you can invest from your own pocket (margin money).",
+  "onb.q3.title": "What kind of business?",
+  "onb.q3.desc": "Choose a category that best describes your idea.",
+  "onb.district": "District",
+  "onb.districtPlaceholder": "Select district",
+  "onb.block": "Block / Tehsil",
+  "onb.blockPlaceholder": "Select block",
+  "onb.village": "Village (optional)",
+  "onb.villagePlaceholder": "Type a village name",
+  "onb.capital": "Available margin capital",
+  "onb.category": "Business category",
+  "onb.cat.dairy": "Dairy & livestock",
+  "onb.cat.retail": "Retail & kirana",
+  "onb.cat.textiles": "Textiles & tailoring",
+  "onb.cat.food": "Food processing",
+  "onb.cat.handicrafts": "Handicrafts",
+  "onb.cat.services": "Local services",
+  "onb.back": "Back",
+  "onb.continue": "Continue",
+  "onb.analyse": "Analyse feasibility",
+  "onb.working": "Structuring your plan…",
+  "onb.previewTitle": "What {margin} routes to today",
+  "onb.previewBody":
+    "{scheme} would carry a project cost of {projectCost} and a loan of {loan}, at a quarterly instalment of {instalment}. This is the scheme’s arithmetic, not a sanction — no application has been made and nothing has been approved.",
+  "onb.previewNone":
+    "{margin} is below the minimum any of the schemes we model will structure against. Enter a larger amount to see what it routes to.",
+
+  // ── shared disclosure ──────────────────────────────────
+  "sample.title": "Sample data",
+  "sample.detail":
+    "The records on this screen are illustrative, not real accounts. They exist so the interface can be demonstrated end to end.",
+  "clock.beforeIncomeNeutral":
+    "{amount} across {payments} payment(s) falls due at or before the month income starts. That is moratorium interest inside a window the enterprise is already earning through — not an uncovered gap.",
+  // ── borrower loan tracker ─────────────────────────────────
+  "emi.title": "Sample loan",
+  "emi.sampleWhat": "This loan",
+  "emi.sampleDetail":
+    "A worked example on a ₹1,00,000 goat unit, computed live by the finance kernel. It is not an account: no loan has been applied for, disbursed or tracked.",
+  "emi.downloadSchedule": "Download schedule (CSV)",
+  "emi.status.moratorium": "Moratorium active",
+  "emi.status.preIncome": "Repaying before income",
+  "emi.status.earning": "Repaying from earnings",
+  "emi.headline.preIncome": "{months} months until this unit earns",
+  "emi.headline.earning": "Your unit is earning",
+  "emi.body.preIncome":
+    "You still owe {amount} before the first sale. This is the gap — plan for it now, not in month nine.",
+  "emi.body.earning": "Instalments from here are met by the enterprise itself.",
+  "emi.nextPayment": "Next payment",
+  "emi.dueInMonth": "due in month {month}",
+  "emi.interestOnly": "interest only",
+  "emi.paymentsMade": "{done} of {total} payments made",
+  "emi.outstanding": "{amount} outstanding",
+  "emi.tile.sanctioned": "Sanctioned",
+  "emi.tile.repaid": "Repaid so far",
+  "emi.tile.perQuarter": "Per quarter",
+  "emi.scrubber": "Months since disbursement",
+  "emi.scrubberValue": "Month {n} since disbursement",
+  "emi.scrubberNote": "demo control — production reads the SCA ledger",
+  "emi.gapTitle": "This loan was structured to collect before it earns",
+  "emi.seeClock": "See the Solvency Clock",
+  "emi.scheduleTitle": "Repayment schedule",
+  "emi.scheduleNote": "Rows before month {months} fall due before this unit earns anything.",
+  "emi.col.status": "Status",
+  "emi.col.balance": "Balance",
+  "emi.row.paid": "paid",
+  "emi.row.upcoming": "upcoming",
 } as const;
 
 export type MessageKey = keyof typeof EN;

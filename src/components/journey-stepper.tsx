@@ -6,13 +6,35 @@ import { Check, Compass, BarChart2, IndianRupee, Users, Settings, TrendingUp } f
 import { cn } from "@/lib/utils";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 
+/**
+ * `href` is where the step goes; `paths` is what counts as being on it.
+ *
+ * They used to be the same field, and the stepper linked to `paths[0]`. Two of those prefixes are
+ * not routes: /report is only ever /report/[id], and /profile is only /profile/[id]. Analyse and
+ * Grow — two of the six steps in the product's primary navigation — went to a 404 from every page.
+ */
 const STEPS = [
-  { id: "discover", label: "Discover", icon: Compass, paths: ["/onboarding", "/discover", "/"] },
-  { id: "analyse", label: "Analyse", icon: BarChart2, paths: ["/report"] },
-  { id: "finance", label: "Finance", icon: IndianRupee, paths: ["/calculator"] },
-  { id: "connect", label: "Connect", icon: Users, paths: ["/community", "/mentors", "/marketplace"] },
-  { id: "manage", label: "Manage", icon: Settings, paths: ["/dashboard/emi", "/dashboard/ngo"] },
-  { id: "grow", label: "Grow", icon: TrendingUp, paths: ["/profile"] },
+  {
+    id: "discover",
+    icon: Compass,
+    href: "/onboarding",
+    paths: ["/onboarding", "/discover", "/"],
+  },
+  { id: "analyse", icon: BarChart2, href: "/report/goat-20-1", paths: ["/report"] },
+  { id: "finance", icon: IndianRupee, href: "/calculator", paths: ["/calculator"] },
+  {
+    id: "connect",
+    icon: Users,
+    href: "/community",
+    paths: ["/community", "/mentors", "/marketplace"],
+  },
+  {
+    id: "manage",
+    icon: Settings,
+    href: "/dashboard/emi",
+    paths: ["/dashboard/emi", "/dashboard/ngo"],
+  },
+  { id: "grow", icon: TrendingUp, href: "/profile/me", paths: ["/profile"] },
 ];
 
 export function JourneyStepper() {
@@ -27,7 +49,10 @@ export function JourneyStepper() {
   const currentStep = activeIndex === -1 ? 0 : activeIndex;
 
   return (
-    <div className="w-full bg-card border-b px-4 py-2 md:px-8 shadow-sm overflow-x-auto no-scrollbar">
+    <nav
+      aria-label="Journey"
+      className="w-full bg-card border-b px-4 py-2 md:px-8 shadow-sm overflow-x-auto no-scrollbar"
+    >
       <div className="flex items-center justify-between min-w-[600px] max-w-5xl mx-auto">
         {STEPS.map((step, index) => {
           const isActive = index === currentStep;
@@ -35,7 +60,12 @@ export function JourneyStepper() {
           const Icon = step.icon;
 
           return (
-            <Link href={step.paths[0]} key={step.id} className="flex flex-col items-center relative z-10 flex-1 group">
+            <Link
+              href={step.href}
+              key={step.id}
+              aria-current={isActive ? "step" : undefined}
+              className="flex flex-col items-center relative z-10 flex-1 group rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
               {/* Connecting Line (except for the first item) */}
               {index !== 0 && (
                 <div
@@ -56,7 +86,11 @@ export function JourneyStepper() {
                     : "border-muted bg-card text-muted-foreground group-hover:border-primary/50 group-hover:text-primary/70"
                 )}
               >
-                {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                {isCompleted ? (
+                  <Check className="w-5 h-5" aria-hidden="true" />
+                ) : (
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                )}
               </div>
               <span
                 className={cn(
@@ -70,6 +104,6 @@ export function JourneyStepper() {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

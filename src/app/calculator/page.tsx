@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -51,7 +51,7 @@ import {
 import { ACTIVITIES, ACTIVITY_COVERAGE, GESTATION_RANGE_NOTE } from "@/lib/finance/activities";
 import { plan, type MoratoriumConvention } from "@/lib/finance";
 import { useAppStore } from "@/lib/store";
-import { useT, type MessageKey } from "@/lib/i18n";
+import { useT, money, type MessageKey } from "@/lib/i18n";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -164,7 +164,7 @@ export default function CalculatorPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ───────────────────────── inputs ───────────────────────── */}
-        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
+        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-[calc(var(--app-header-h,9.5rem)+1.5rem)]">
           <Card className="border-2 border-primary/20">
             <CardHeader className="bg-primary/5 border-b border-primary/10">
               <CardTitle className="text-lg">{t("calc.margin.title")}</CardTitle>
@@ -184,6 +184,7 @@ export default function CalculatorPage() {
               </div>
               <div className="pt-4">
                 <Slider
+                  aria-label={t("calc.marginSlider")}
                   value={[margin]}
                   min={5_000}
                   max={500_000}
@@ -202,13 +203,16 @@ export default function CalculatorPage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   {t("activity.pickPrompt")}
                 </p>
-                <div className="grid gap-1.5">
+                {/* aria-pressed, not colour alone: the selected activity drives every rupee on
+                    the page, and a screen-reader user had no way to know which one was active. */}
+                <div className="grid gap-1.5" role="group" aria-label={t("calc.activityGroup")}>
                   {ACTIVITIES.map((a) => (
                     <button
                       key={a.id}
                       type="button"
                       onClick={() => setActivityId(a.id)}
-                      className={`text-left rounded-lg border px-3 py-2 transition-colors ${
+                      aria-pressed={activityId === a.id}
+                      className={`text-left rounded-lg border px-3 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                         activityId === a.id
                           ? "border-primary bg-primary/10"
                           : "hover:bg-muted/50"
@@ -259,8 +263,7 @@ export default function CalculatorPage() {
                   className="h-10"
                 />
                 <p className="text-[11px] text-muted-foreground mt-1.5">
-                  Default is ₹86,119 — the average pre-loan household income measured in MoSJE&apos;s
-                  own 2020 evaluation of NSFDC.
+                  {t("calc.income.hint", { amount: money(86_119) })}
                 </p>
               </div>
             </CardContent>
@@ -309,13 +312,14 @@ export default function CalculatorPage() {
                     variant="secondary"
                     className="mb-2 bg-white/20 text-white border-none hover:bg-white/30"
                   >
-                    {s.basis === "need-based" ? "Sized to the activity" : "Specification formula"}
+                    {s.basis === "need-based" ? t("calc.basis.needBased") : t("calc.basis.spec")}
                   </Badge>
                   <h2 className="text-2xl font-bold font-heading">
                     {s.scheme.corporation} {s.scheme.name}
                   </h2>
                   <p className="text-white/80 mt-1 flex items-center gap-2 text-sm">
-                    <ShieldCheck className="w-4 h-4" /> Government backed
+                    <ShieldCheck className="w-4 h-4" aria-hidden="true" />{" "}
+                    {t("scheme.governmentBacked")}
                   </p>
                 </div>
                 <Landmark className="w-10 h-10 opacity-40 shrink-0" />
@@ -346,14 +350,14 @@ export default function CalculatorPage() {
               </div>
 
               <div className="rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed">
-                Under the{" "}
-                <strong>
-                  {convention === "serviced" ? "capitalised" : "serviced"}
-                </strong>{" "}
-                convention the same loan would cost{" "}
-                <strong>₹{inrPlain(result.alternateConvention.instalment)}</strong> per quarter and{" "}
-                <strong>₹{inrPlain(result.alternateConvention.totalInterest)}</strong> in total
-                interest. We compute both so neither is a silent assumption.
+                {t("calc.altConvention", {
+                  convention:
+                    convention === "serviced"
+                      ? t("calc.convention.capitalised")
+                      : t("calc.convention.serviced"),
+                  instalment: `₹${inrPlain(result.alternateConvention.instalment)}`,
+                  interest: `₹${inrPlain(result.alternateConvention.totalInterest)}`,
+                })}
               </div>
 
               {s.moratoriumNote && (
@@ -424,16 +428,28 @@ export default function CalculatorPage() {
 
               {/* amortisation table */}
               <div className="border rounded-xl overflow-hidden">
-                <div className="max-h-[300px] overflow-y-auto">
-                  <Table>
-                    <TableHeader className="bg-muted/50 sticky top-0">
+                <Table containerClassName="max-h-[28rem] overflow-y-auto">
+                    <caption className="sr-only">{t("calc.tbl.caption")}</caption>
+                    <TableHeader className="bg-muted sticky top-0 z-10">
                       <TableRow>
-                        <TableHead className="w-[70px]">Month</TableHead>
-                        <TableHead className="text-right">Opening</TableHead>
-                        <TableHead className="text-right">Interest</TableHead>
-                        <TableHead className="text-right">Principal</TableHead>
-                        <TableHead className="text-right">Payment</TableHead>
-                        <TableHead className="text-right">Closing</TableHead>
+                        <TableHead scope="col" className="w-[70px]">
+                          {t("calc.tbl.month")}
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          {t("calc.tbl.opening")}
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          {t("calc.tbl.interest")}
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          {t("calc.tbl.principal")}
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          {t("calc.tbl.payment")}
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          {t("calc.tbl.closing")}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -449,8 +465,15 @@ export default function CalculatorPage() {
                           >
                             <TableCell className="font-medium">
                               {row.month}
+                              {preIncome && (
+                                <span className="ml-1 rounded bg-rose-500/15 px-1 py-0.5 text-[9px] font-semibold text-rose-800 dark:text-rose-300">
+                                  {t("calc.tbl.preIncome")}
+                                </span>
+                              )}
                               {row.inMoratorium && (
-                                <span className="ml-1 text-[10px] text-amber-600">mor</span>
+                                <span className="ml-1 rounded bg-amber-500/20 px-1 py-0.5 text-[9px] font-semibold text-amber-900 dark:text-amber-300">
+                                  {t("calc.tbl.mor")}
+                                </span>
                               )}
                             </TableCell>
                             <TableCell className="text-right tabular-nums text-muted-foreground">
@@ -468,11 +491,9 @@ export default function CalculatorPage() {
                         );
                       })}
                     </TableBody>
-                  </Table>
-                </div>
+                </Table>
                 <div className="p-3 bg-muted/20 border-t text-xs text-muted-foreground">
-                  Rows shaded red fall due before the activity earns anything. Rows marked
-                  &ldquo;mor&rdquo; are inside the moratorium.
+                  {t("calc.tbl.legend")}
                 </div>
               </div>
 
@@ -519,7 +540,12 @@ export default function CalculatorPage() {
       </div>
 
       {/* the cheapest structure actually available, against the one the spec routes to */}
-      <CapitalStackCard projectCost={s.projectCost} marginAvailable={margin} />
+      <CapitalStackCard
+        projectCost={s.projectCost}
+        marginAvailable={margin}
+        convention={convention}
+        activityClass={activity?.activityClass}
+      />
 
       {/* the cliff — full width, because it is the point */}
       <CliffExplorer />
@@ -573,13 +599,20 @@ function Toggle({
   checked: boolean;
   onChange: (v: boolean) => void;
 }) {
+  // A plain <button> announced as "button" with no state: a screen-reader user could not tell
+  // whether need-based costing was on, and the two toggles change every figure on the page.
+  const id = useId();
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-describedby={`${id}-hint`}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/40"
+      className="flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <span
+        aria-hidden="true"
         className={`mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
           checked ? "bg-primary" : "bg-muted-foreground/30"
         }`}
@@ -592,7 +625,9 @@ function Toggle({
       </span>
       <span className="min-w-0">
         <span className="block text-sm font-medium leading-tight">{label}</span>
-        <span className="block text-[11px] text-muted-foreground mt-0.5">{hint}</span>
+        <span id={`${id}-hint`} className="block text-[11px] text-muted-foreground mt-0.5">
+          {hint}
+        </span>
       </span>
     </button>
   );

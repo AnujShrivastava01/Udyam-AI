@@ -23,7 +23,7 @@ The engine under test is the engine that labels. Scores 100% by construction; in
 | ordinary-term | 100 | 100 | 100% |
 | tier-boundary | 70 | 70 | 100% |
 | dead-zone | 70 | 70 | 100% |
-| cap-binding | 60 | 60 | 100% |
+| above-ceiling | 60 | 60 | 100% |
 | near-ceiling | 40 | 40 | 100% |
 | plantation-exception | 40 | 40 | 100% |
 | capitalised | 40 | 40 | 100% |
@@ -38,7 +38,7 @@ Right caps, right amortisation, wrong on every case where moratorium interest is
 | ordinary-term | 100 | 90 | 90% |
 | tier-boundary | 70 | 54 | 77.1% |
 | dead-zone | 70 | 56 | 80% |
-| cap-binding | 60 | 51 | 85% |
+| above-ceiling | 60 | 51 | 85% |
 | near-ceiling | 40 | 35 | 87.5% |
 | plantation-exception | 40 | 36 | 90% |
 | capitalised | 40 | 0 | 0% |
@@ -53,7 +53,7 @@ PS formula with no caps and straight-line principal — what a faithful reading 
 | ordinary-term | 100 | 0 | 0% |
 | tier-boundary | 70 | 0 | 0% |
 | dead-zone | 70 | 0 | 0% |
-| cap-binding | 60 | 0 | 0% |
+| above-ceiling | 60 | 0 | 0% |
 | near-ceiling | 40 | 0 | 0% |
 | plantation-exception | 40 | 0 | 0% |
 | capitalised | 40 | 0 | 0% |
@@ -68,7 +68,7 @@ Gets the ceilings right, then prices the loan on a flat rate rather than a reduc
 | ordinary-term | 100 | 0 | 0% |
 | tier-boundary | 70 | 0 | 0% |
 | dead-zone | 70 | 0 | 0% |
-| cap-binding | 60 | 0 | 0% |
+| above-ceiling | 60 | 0 | 0% |
 | near-ceiling | 40 | 0 | 0% |
 | plantation-exception | 40 | 0 | 0% |
 | capitalised | 40 | 0 | 0% |

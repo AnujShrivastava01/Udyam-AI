@@ -71,12 +71,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "annualHouseholdIncome must be a non-negative number" }, { status: 400 });
   }
 
-  const p = plan({
-    marginCapital,
-    activityId: body.activityId,
-    useNeedBasedCosting: true,
-    annualHouseholdIncome: body.annualHouseholdIncome,
-  });
+  // The kernel refuses some inputs that pass the checks above — a margin small enough to round to
+  // a zero project cost, or one landing in the one-rupee hole between the two scheme tiers. Those
+  // are 422s, not 500s: the request was well-formed and the answer is "not structurable".
+  let p;
+  try {
+    p = plan({
+      marginCapital,
+      activityId: body.activityId,
+      useNeedBasedCosting: true,
+      annualHouseholdIncome: body.annualHouseholdIncome,
+    });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "cannot structure this input" },
+      { status: 422 },
+    );
+  }
 
   const narration = await narratePlan(p, normaliseLocale(body.locale));
 

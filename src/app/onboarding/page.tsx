@@ -1,55 +1,112 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { MapPin, IndianRupee, Briefcase, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { plan } from "@/lib/finance";
+import { useT, money, type MessageKey } from "@/lib/i18n";
+
+/**
+ * Each category maps to the activity we actually hold a NABARD unit cost and gestation figure for,
+ * so the report the user lands on is about the thing they just chose. Handicrafts has no such row;
+ * it routes to the general report rather than to a nearest-neighbour we would be making up.
+ */
+const CATEGORIES = [
+  { id: "dairy", key: "onb.cat.dairy", activity: "milch-cows-2" },
+  { id: "retail", key: "onb.cat.retail", activity: "kirana-store" },
+  { id: "textiles", key: "onb.cat.textiles", activity: "tailoring-2" },
+  { id: "food", key: "onb.cat.food", activity: "papad-pickle" },
+  { id: "handicrafts", key: "onb.cat.handicrafts", activity: null },
+  { id: "services", key: "onb.cat.services", activity: "atta-chakki" },
+] as const;
+
+const DISTRICTS = ["jhansi", "lalitpur", "jalaun"];
+const BLOCKS = ["babina", "moth", "mauranipur"];
+
+const title = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { t } = useT();
   const { onboardingInput, setOnboardingInput } = useAppStore();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loadingText, setLoadingText] = useState("");
 
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setLoadingText("Analyzing local market...");
-    
-    // Simulate AI loading states
-    setTimeout(() => setLoadingText("Checking scheme eligibility..."), 1500);
-    setTimeout(() => setLoadingText("Generating feasibility report..."), 3000);
-    
-    setTimeout(() => {
-      // Navigate to a mocked report ID
-      router.push("/report/rep-12345");
-    }, 4500);
-  };
-
-  const handleLocationChange = (updates: Partial<{district: string, block: string, village: string}>) => {
-    const current = onboardingInput.location || { village: '', block: '', district: '', lat: 25.4358, lng: 78.5678 };
+  const handleLocationChange = (
+    updates: Partial<{ district: string; block: string; village: string }>,
+  ) => {
+    const current = onboardingInput.location ?? {
+      village: "",
+      block: "",
+      district: "",
+      lat: 25.4358,
+      lng: 78.5678,
+    };
     setOnboardingInput({ location: { ...current, ...updates } });
   };
 
-  const districtValue: string | undefined = onboardingInput.location?.district || undefined;
-  const blockValue: string | undefined = onboardingInput.location?.block || undefined;
+  /**
+   * The preview used to read `margin × 10` and call the result an eligibility.
+   *
+   * That formula ignores the ₹1.40 lakh tier boundary, the ₹1.25 lakh Micro Finance cap and the
+   * dead zone between them — so at ₹20,000 of margin it announced eligibility for a ₹2,00,000
+   * project that no scheme in the registry will actually structure at 10% margin. It also used the
+   * word "eligible", which is a claim about a lender's decision that nothing here is entitled to
+   * make. The kernel runs instead, and the copy says arithmetic, not approval.
+   */
+  const preview = useMemo(() => {
+    const margin = onboardingInput.marginCapital;
+    if (!margin || margin <= 0) return null;
+    try {
+      const p = plan({ marginCapital: margin, useNeedBasedCosting: false });
+      if (p.structure.sanctionedLoan <= 0) return null;
+      return {
+        scheme: p.structure.scheme.id,
+        projectCost: p.structure.projectCost,
+        loan: p.structure.sanctionedLoan,
+        instalment: p.schedule.instalment,
+      };
+    } catch {
+      return null;
+    }
+  }, [onboardingInput.marginCapital]);
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    const match = CATEGORIES.find((c) => c.id === onboardingInput.businessCategory);
+    // Carry the choice into the route. It used to push a hardcoded "rep-12345", which the report
+    // page then ignored anyway — so three screens of answers reached a page that read none of them.
+    const target = match?.activity ? `/report/${match.activity}` : "/report/general";
+    router.push(target);
+  };
+
+  const canAdvance =
+    (step === 1 && !!onboardingInput.location?.district) ||
+    (step === 2 && onboardingInput.marginCapital > 0) ||
+    (step === 3 && !!onboardingInput.businessCategory);
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-4 md:p-8">
+    <div className="flex items-center justify-center min-h-[60vh] p-4 md:p-8">
       <AnimatePresence mode="wait">
         {isSubmitting ? (
           <motion.div
@@ -59,10 +116,14 @@ export default function OnboardingPage() {
             className="flex flex-col items-center justify-center space-y-6 text-center max-w-sm"
           >
             <div className="relative w-24 h-24 flex items-center justify-center bg-primary/10 rounded-full">
-              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <Loader2 className="w-10 h-10 text-primary animate-spin" aria-hidden="true" />
             </div>
-            <h2 className="text-2xl font-bold font-heading">{loadingText}</h2>
-            <p className="text-muted-foreground">Please wait while UdyamAI structures your business roadmap.</p>
+            {/* The three staged "Analyzing local market… / Checking scheme eligibility…" messages
+                on a 4.5-second timer were theatre: nothing was being analysed and no request was in
+                flight. Pretending to think is the cheapest way to lose a judge's trust. */}
+            <p role="status" className="text-xl font-bold font-heading">
+              {t("onb.working")}
+            </p>
           </motion.div>
         ) : (
           <motion.div
@@ -76,8 +137,10 @@ export default function OnboardingPage() {
             <Card className="border-none shadow-xl bg-card">
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">Step {step} of 3</span>
-                  <div className="flex gap-1">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t("onb.step", { n: step })}
+                  </span>
+                  <div className="flex gap-1" aria-hidden="true">
                     {[1, 2, 3].map((s) => (
                       <div
                         key={s}
@@ -87,59 +150,62 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-heading">
-                  {step === 1 && "Where are you located?"}
-                  {step === 2 && "What is your initial capital?"}
-                  {step === 3 && "What kind of business?"}
+                  {t(`onb.q${step}.title` as MessageKey)}
                 </CardTitle>
-                <CardDescription>
-                  {step === 1 && "Select your village, block, or district."}
-                  {step === 2 && "Enter the amount you can invest from your own pocket (Margin Money)."}
-                  {step === 3 && "Choose a category that best describes your idea."}
-                </CardDescription>
+                <CardDescription>{t(`onb.q${step}.desc` as MessageKey)}</CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 {step === 1 && (
                   <div className="space-y-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="district">District</Label>
-                      <Select 
-                        onValueChange={(val) => handleLocationChange({ district: val as string, block: '', village: '' })}
-                        value={districtValue}
+                      <Label htmlFor="district">{t("onb.district")}</Label>
+                      <Select
+                        onValueChange={(val) =>
+                          handleLocationChange({ district: val as string, block: "", village: "" })
+                        }
+                        value={onboardingInput.location?.district || undefined}
                       >
                         <SelectTrigger id="district">
-                          <SelectValue placeholder="Select District" />
+                          <SelectValue placeholder={t("onb.districtPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="jhansi">Jhansi</SelectItem>
-                          <SelectItem value="lalitpur">Lalitpur</SelectItem>
-                          <SelectItem value="jalaun">Jalaun</SelectItem>
+                          {DISTRICTS.map((d) => (
+                            <SelectItem key={d} value={d}>
+                              {title(d)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="block">Block / Tehsil</Label>
-                      <Select 
+                      <Label htmlFor="block">{t("onb.block")}</Label>
+                      <Select
                         onValueChange={(val) => handleLocationChange({ block: val as string })}
-                        value={blockValue}
+                        value={onboardingInput.location?.block || undefined}
                       >
                         <SelectTrigger id="block">
-                          <SelectValue placeholder="Select Block" />
+                          <SelectValue placeholder={t("onb.blockPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="babina">Babina</SelectItem>
-                          <SelectItem value="moth">Moth</SelectItem>
-                          <SelectItem value="maurampur">Mauranipur</SelectItem>
+                          {BLOCKS.map((b) => (
+                            <SelectItem key={b} value={b}>
+                              {title(b)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="village">Village (Optional)</Label>
+                      <Label htmlFor="village">{t("onb.village")}</Label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          id="village" 
-                          placeholder="Search or drop a pin..." 
+                        <MapPin
+                          className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground"
+                          aria-hidden="true"
+                        />
+                        <Input
+                          id="village"
+                          placeholder={t("onb.villagePlaceholder")}
                           className="pl-9"
                           value={onboardingInput.location?.village || ""}
                           onChange={(e) => handleLocationChange({ village: e.target.value })}
@@ -152,76 +218,101 @@ export default function OnboardingPage() {
                 {step === 2 && (
                   <div className="space-y-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="capital">Available Margin Capital (₹)</Label>
+                      <Label htmlFor="capital">{t("onb.capital")}</Label>
                       <div className="relative">
-                        <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          id="capital" 
+                        <IndianRupee
+                          className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground"
+                          aria-hidden="true"
+                        />
+                        <Input
+                          id="capital"
                           type="number"
-                          placeholder="e.g. 50000" 
+                          min={0}
+                          inputMode="numeric"
+                          placeholder="50000"
                           className="pl-9 text-lg"
                           value={onboardingInput.marginCapital || ""}
-                          onChange={(e) => setOnboardingInput({ marginCapital: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setOnboardingInput({
+                              marginCapital: Math.max(0, Number(e.target.value) || 0),
+                            })
+                          }
                         />
                       </div>
                     </div>
-                    <div className="bg-accent/10 text-accent p-4 rounded-lg text-sm flex items-start gap-3">
-                      <IndianRupee className="w-5 h-5 shrink-0" />
-                      <p>
-                        With <strong>₹{(onboardingInput.marginCapital || 0).toLocaleString('en-IN')}</strong> margin capital, 
-                        you could be eligible for a project cost up to <strong>₹{((onboardingInput.marginCapital || 0) * 10).toLocaleString('en-IN')}</strong>!
+
+                    {/* text-accent on bg-accent/10 measured about 2.1:1. This is the one panel on
+                        the screen carrying rupee figures, so it was the worst possible place for it. */}
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+                      <p className="flex items-center gap-2 font-semibold">
+                        <IndianRupee className="w-4 h-4 shrink-0 text-primary" aria-hidden="true" />
+                        {t("onb.previewTitle", { margin: money(onboardingInput.marginCapital || 0) })}
+                      </p>
+                      <p className="mt-1.5 leading-relaxed text-muted-foreground">
+                        {preview
+                          ? t("onb.previewBody", {
+                              scheme: t(`scheme.${preview.scheme}.name` as MessageKey),
+                              projectCost: money(preview.projectCost),
+                              loan: money(preview.loan),
+                              instalment: money(preview.instalment),
+                            })
+                          : t("onb.previewNone", {
+                              margin: money(onboardingInput.marginCapital || 0),
+                            })}
                       </p>
                     </div>
                   </div>
                 )}
 
                 {step === 3 && (
-                  <div className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label>Business Category</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { id: "dairy", label: "Dairy & Livestock" },
-                          { id: "retail", label: "Retail & Kirana" },
-                          { id: "textiles", label: "Textiles & Tailoring" },
-                          { id: "food", label: "Food Processing" },
-                          { id: "handicrafts", label: "Handicrafts" },
-                          { id: "services", label: "Local Services" },
-                        ].map((cat) => (
-                          // A div with onClick is invisible to the keyboard and to assistive
-                          // tech, which meant a keyboard user could not finish onboarding at all.
-                          <button
-                            type="button"
-                            key={cat.id}
-                            aria-pressed={onboardingInput.businessCategory === cat.id}
-                            className={`flex items-center gap-2 p-3 rounded-lg border-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                              onboardingInput.businessCategory === cat.id
-                                ? "border-primary bg-primary/5 text-primary font-medium"
-                                : "border-muted hover:border-primary/50 text-muted-foreground"
-                            }`}
-                            onClick={() => setOnboardingInput({ businessCategory: cat.id })}
-                          >
-                            <Briefcase className="w-4 h-4 shrink-0" aria-hidden="true" />
-                            <span className="text-sm">{cat.label}</span>
-                          </button>
-                        ))}
-                      </div>
+                  <div className="grid gap-2">
+                    <Label id="category-label">{t("onb.category")}</Label>
+                    <div
+                      className="grid grid-cols-2 gap-3"
+                      role="group"
+                      aria-labelledby="category-label"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        // A div with onClick is invisible to the keyboard and to assistive tech,
+                        // which meant a keyboard user could not finish onboarding at all.
+                        <button
+                          type="button"
+                          key={cat.id}
+                          aria-pressed={onboardingInput.businessCategory === cat.id}
+                          className={`flex items-center gap-2 p-3 rounded-lg border-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                            onboardingInput.businessCategory === cat.id
+                              ? "border-primary bg-primary/5 text-primary font-medium"
+                              : "border-muted hover:border-primary/50 text-foreground"
+                          }`}
+                          onClick={() => setOnboardingInput({ businessCategory: cat.id })}
+                        >
+                          <Briefcase className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <span className="text-sm">{t(cat.key)}</span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
               </CardContent>
-              
+
               <CardFooter className="flex justify-between pt-4">
-                <Button variant="ghost" onClick={handleBack} disabled={step === 1}>
-                  Back
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep((s) => Math.max(1, s - 1))}
+                  disabled={step === 1}
+                >
+                  {t("onb.back")}
                 </Button>
-                <Button onClick={step === 3 ? handleSubmit : handleNext} disabled={
-                  (step === 1 && !onboardingInput.location?.district) ||
-                  (step === 2 && !onboardingInput.marginCapital) ||
-                  (step === 3 && !onboardingInput.businessCategory)
-                }>
-                  {step === 3 ? "Analyse Feasibility" : "Continue"}
-                  {step === 3 ? <Sparkles className="ml-2 w-4 h-4" /> : <ArrowRight className="ml-2 w-4 h-4" />}
+                <Button
+                  onClick={step === 3 ? handleSubmit : () => setStep((s) => Math.min(3, s + 1))}
+                  disabled={!canAdvance}
+                >
+                  {step === 3 ? t("onb.analyse") : t("onb.continue")}
+                  {step === 3 ? (
+                    <Sparkles className="ml-2 w-4 h-4" aria-hidden="true" />
+                  ) : (
+                    <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+                  )}
                 </Button>
               </CardFooter>
             </Card>

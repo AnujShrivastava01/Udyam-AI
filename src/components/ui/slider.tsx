@@ -1,14 +1,25 @@
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
 import { cn } from "cn"
 
+/**
+ * `aria-label` here names the THUMB, not the wrapper.
+ *
+ * Base UI puts the real `role="slider"` on a nested `<input type="range">` inside each thumb, so an
+ * aria-label on Root labels a plain div and the control itself stays anonymous — every slider in
+ * this product announced as an unnamed slider. Base UI's own channel for this is the thumb's
+ * `getAriaLabel`, so that is where the label is forwarded. `valueText` fills `aria-valuetext`, which
+ * is what turns "150000" into "₹1,50,000" for a screen reader.
+ */
 function Slider({
   className,
   defaultValue,
   value,
   min = 0,
   max = 100,
+  "aria-label": ariaLabel,
+  valueText,
   ...props
-}: SliderPrimitive.Root.Props) {
+}: SliderPrimitive.Root.Props & { "aria-label"?: string; valueText?: (v: number) => string }) {
   const _values = Array.isArray(value)
     ? value
     : Array.isArray(defaultValue)
@@ -40,6 +51,8 @@ function Slider({
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
             key={index}
+            getAriaLabel={ariaLabel ? () => ariaLabel : undefined}
+            getAriaValueText={valueText ? (_formatted, v) => valueText(v) : undefined}
             className="relative block size-3 shrink-0 rounded-full border border-ring bg-white ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
           />
         ))}
