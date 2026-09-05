@@ -25,6 +25,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { CapitalStackCard } from "@/components/capital-stack";
 import { CliffExplorer } from "@/components/cliff-explorer";
 import { SolvencyClock } from "@/components/solvency-clock";
 import { SourceChip } from "@/components/source-chip";
@@ -462,6 +463,9 @@ export default function CalculatorPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* the cheapest structure actually available, against the one the spec routes to */}
+      <CapitalStackCard projectCost={s.projectCost} marginAvailable={margin} />
 
       {/* the cliff — full width, because it is the point */}
       <CliffExplorer />
