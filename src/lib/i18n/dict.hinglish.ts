@@ -347,4 +347,9 @@ export const HINGLISH: Dictionary = {
   "map.toBank": "Nazdeeki bank shakha tak",
   "map.note":
     "10 km ka ghera wo aabadi hai jisse sambhavit demand guna ki jaati hai. Aabadi figures abhi placeholder hain; coordinates gaon ke apne hain. Map data © OpenStreetMap contributors.",
+  "mentors.title": "Kiske paas jayein",
+  "mentors.subtitle":
+    "Asli sansthaein jo yeh kaam karti hain, zyadatar muft. Koi gadhe hue advisor nahi, koi rating nahi.",
+  "mentors.free": "Muft",
+  "mentors.districtNote": "{district} ke liye. Ye sabhi poore desh mein hain, har zile mein ek daftar.",
 };

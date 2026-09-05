@@ -439,6 +439,12 @@ export const EN = {
   "map.toBank": "To the nearest bank branch",
   "map.note":
     "The 10 km ring is the population that addressable demand is multiplied against. Population figures in this gazetteer are seeded placeholders pending the WorldPop ingest; the coordinates are the villages’ own. Map data © OpenStreetMap contributors.",
+  // ── institutions / mentors ────────────────────────────────────────────────
+  "mentors.title": "Who to actually go to",
+  "mentors.subtitle":
+    "Real bodies that do this work, most of them free. No invented advisors, no ratings, no fees we cannot verify.",
+  "mentors.free": "Free",
+  "mentors.districtNote": "Shown for {district}. All of these operate nationally, one office per district.",
 } as const;
 
 export type MessageKey = keyof typeof EN;
