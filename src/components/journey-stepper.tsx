@@ -95,8 +95,24 @@ export function JourneyStepper() {
         {STEPS.map((step, index) => {
           const status = stateOf(index);
           const reached = status !== "pending";
+          // The connecting line used to run solid to the current step, which drew a completed
+          // path through five screens the user had never opened. A segment is only drawn once
+          // both of the steps it joins have been reached.
           const linkedBack = index > 0 && reached && stateOf(index - 1) !== "pending";
-          const isDisabled = index > activeIndex;
+
+          /**
+           * Don't let the user skip ahead into a screen that needs earlier answers — but do let
+           * them go anywhere they have already been.
+           *
+           * This was `index > activeIndex`, which also disabled every step BEHIND the current one
+           * in the forward direction: finish Finance, walk back to Discover, and Finance was no
+           * longer clickable. It disagreed with the Prev/Next bar too, whose Next links straight
+           * to `activeIndex + 1` — a step the strip was refusing to open.
+           *
+           * Reached steps are always open, the immediate next one is open so the journey can
+           * progress, and anything further that has never been visited stays shut.
+           */
+          const isDisabled = status === "pending" && index > activeIndex + 1;
           const Icon = step.icon;
 
           return (
