@@ -12,6 +12,26 @@
  *
  * Same firewall as everywhere else: numbers are spoken from the kernel's own values, and any
  * number the user speaks is read back before it is acted on.
+ *
+ * ── VERIFIED AGAINST THE LIVE API, 2026-09-05 ──────────────────────────────────────────────
+ * This file was originally written from documentation and never executed. Three things in it were
+ * wrong, and all three were hard 400s — the module could not have worked as shipped:
+ *
+ *   1. `speaker: "meera"` is not a speaker any more. bulbul:v3 serves aditya, ritu, ashutosh,
+ *      priya, neha, rahul, pooja, rohan, simran, kavya, … — the error lists them all, which is
+ *      the fastest way to re-check when this drifts again.
+ *   2. `bulbul:v1` and `bulbul:v2` are both deprecated. The error names the replacement outright:
+ *      "Model 'bulbul:v2' has been deprecated. Please use 'bulbul:v3' instead."
+ *   3. Speech-to-text is **multipart/form-data with a `file` part**, not the JSON base64 body this
+ *      module was sending. JSON gets `body.file : Field required`. `saarika:v2` is also deprecated;
+ *      saarika:v2.5 and saaras:v3 both serve.
+ *
+ * Round-trip proof, live: synthesising "Aapko har quarter nau hazaar rupaye dene honge" and feeding
+ * the WAV straight back to STT returns "आपको हर क्वार्टर ₹9000 देने होंगे।" — the figure survives
+ * the loop, which is the property the numeric firewall exists to protect.
+ *
+ * Every model and speaker below is env-overridable, because this contract has now drifted twice.
+ * ───────────────────────────────────────────────────────────────────────────────────────────
  */
 
 import type { Locale } from "@/lib/i18n/keys";
@@ -26,11 +46,20 @@ export function toSarvamLanguage(locale: Locale): SarvamLanguage {
 
 const BASE = process.env.SARVAM_BASE_URL ?? "https://api.sarvam.ai";
 
+/** Speaker and models, all overridable — see the drift note above. */
+const TTS_MODEL = process.env.SARVAM_TTS_MODEL ?? "bulbul:v3";
+const TTS_SPEAKER = process.env.SARVAM_TTS_SPEAKER ?? "ritu";
+const STT_MODEL = process.env.SARVAM_STT_MODEL ?? "saarika:v2.5";
+
 export function isSarvamConfigured(): boolean {
   return Boolean(process.env.SARVAM_API_KEY);
 }
 
-async function call<T>(
+function authHeader(): Record<string, string> {
+  return { "api-subscription-key": process.env.SARVAM_API_KEY! };
+}
+
+async function callJson<T>(
   path: string,
   body: unknown,
   pick: (data: Record<string, unknown>) => T | undefined,
@@ -41,16 +70,14 @@ async function call<T>(
   try {
     const res = await fetch(`${BASE}${path}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-subscription-key": process.env.SARVAM_API_KEY!,
-      },
+      headers: { "Content-Type": "application/json", ...authHeader() },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
       const text = await res.text();
-      // Never echo the key back into a log line.
-      return { ok: false, reason: `${res.status} ${text.slice(0, 200)}` };
+      // Never echo the key back into a log line. Sarvam's 400s name the valid values, so the
+      // body is worth keeping — it is how you find out a model was deprecated under you.
+      return { ok: false, reason: `${res.status} ${text.slice(0, 300)}` };
     }
     const data = (await res.json()) as Record<string, unknown>;
     const value = pick(data);
@@ -65,37 +92,61 @@ export async function sarvamSynthesise(
   text: string,
   locale: Locale,
 ): Promise<VoiceResult<string>> {
-  return call(
+  return callJson(
     "/text-to-speech",
     {
       inputs: [text],
       target_language_code: toSarvamLanguage(locale),
-      speaker: "meera",
+      speaker: TTS_SPEAKER,
+      model: TTS_MODEL,
       pitch: 0,
       pace: 0.95, // slightly slower — these are financial figures, not chat
       loudness: 1.2,
-      speech_sample_rate: 8000, // phone-grade; this is going down a rural connection
+      // Phone-grade would be 8000; this is going to a browser, where the extra bytes are cheap
+      // and the difference in intelligibility on a rupee figure is not.
+      speech_sample_rate: 22050,
       enable_preprocessing: true,
-      model: "bulbul:v1",
     },
     (d) => (d.audios as string[] | undefined)?.[0],
   );
 }
 
-/** Speech to text. `audioBase64` should be WAV. */
+/**
+ * Speech to text.
+ *
+ * Takes base64 so the interface matches Bhashini's, and posts it as a file part — this endpoint
+ * does not accept a JSON body.
+ */
 export async function sarvamTranscribe(
   audioBase64: string,
   locale: Locale,
 ): Promise<VoiceResult<string>> {
-  return call(
-    "/speech-to-text",
-    {
-      audio: audioBase64,
-      language_code: toSarvamLanguage(locale),
-      model: "saarika:v2",
-    },
-    (d) => d.transcript as string | undefined,
-  );
+  if (!isSarvamConfigured()) {
+    return { ok: false, reason: "SARVAM_API_KEY is not set" };
+  }
+  try {
+    const bytes = Buffer.from(audioBase64, "base64");
+    const form = new FormData();
+    form.append("file", new Blob([new Uint8Array(bytes)], { type: "audio/wav" }), "audio.wav");
+    form.append("language_code", toSarvamLanguage(locale));
+    form.append("model", STT_MODEL);
+
+    const res = await fetch(`${BASE}/speech-to-text`, {
+      method: "POST",
+      headers: authHeader(), // no Content-Type: fetch sets the multipart boundary itself
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      return { ok: false, reason: `${res.status} ${text.slice(0, 300)}` };
+    }
+    const data = (await res.json()) as { transcript?: string };
+    return data.transcript
+      ? { ok: true, value: data.transcript }
+      : { ok: false, reason: "empty transcript" };
+  } catch (e) {
+    return { ok: false, reason: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 /**
@@ -106,7 +157,7 @@ export async function sarvamTranscribe(
  * respect "do not invent a number"; every one of them is checked.
  */
 export async function sarvamNarrate(prompt: string): Promise<VoiceResult<string>> {
-  return call(
+  return callJson(
     "/v1/chat/completions",
     {
       model: process.env.SARVAM_CHAT_MODEL ?? "sarvam-m",
@@ -123,6 +174,7 @@ export async function sarvamNarrate(prompt: string): Promise<VoiceResult<string>
 
 export const SARVAM_STATUS = {
   configured: isSarvamConfigured,
+  models: { tts: TTS_MODEL, speaker: TTS_SPEAKER, stt: STT_MODEL },
   note:
     "Sarvam needs one key from dashboard.sarvam.ai — free starting credit, no billing account. " +
     "Without it speech is unavailable and the product falls back to text; no figure changes.",

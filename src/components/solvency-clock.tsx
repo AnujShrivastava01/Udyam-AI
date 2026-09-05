@@ -9,6 +9,7 @@ import type { Activity } from "@/lib/finance/activities";
 import type { ScheduleRow } from "@/lib/finance/amortise";
 import { VERDICT_META, type SolvencyResult } from "@/lib/finance/solvency";
 import { SourceChip } from "@/components/source-chip";
+import { SpeakVerdict } from "@/components/speak-verdict";
 import { useT, money, type MessageKey } from "@/lib/i18n";
 
 const TONE: Record<
@@ -47,6 +48,11 @@ export interface SolvencyClockProps {
   activity: Activity | null;
   /** How many months of the timeline to draw. */
   horizonMonths?: number;
+  /**
+   * Kernel inputs, so the verdict can be spoken. Omitted, the Listen button is not rendered —
+   * the card still works, it just cannot offer audio.
+   */
+  voice?: { marginCapital: number; activityId?: string; annualHouseholdIncome?: number };
 }
 
 /**
@@ -61,8 +67,9 @@ export function SolvencyClock({
   solvency,
   activity,
   horizonMonths,
+  voice,
 }: SolvencyClockProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const gestation = activity?.gestationMonths ?? null;
   const lastMonth = schedule.length ? schedule[schedule.length - 1].month : 36;
   const horizon = horizonMonths ?? Math.min(lastMonth, Math.max(24, (gestation ?? 0) + 9));
@@ -103,6 +110,17 @@ export function SolvencyClock({
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             {t(solvency.detailMsg.key, solvency.detailMsg.params)}
           </p>
+          {/* This card carries the product's whole argument in a picture and two paragraphs. For
+              a user who reads neither script, that is nothing at all. */}
+          {voice && (
+            <SpeakVerdict
+              key={`${locale}-${voice.marginCapital}-${voice.activityId ?? ""}`}
+              className="mt-3"
+              marginCapital={voice.marginCapital}
+              activityId={voice.activityId}
+              annualHouseholdIncome={voice.annualHouseholdIncome}
+            />
+          )}
         </div>
 
         {/* The timeline is a picture of what the headline, the detail paragraph and the three

@@ -150,7 +150,7 @@ figures for the same loan.
 | Web | The full report; what an officer and a mentor use |
 | **WhatsApp** | The people this is for do not install apps. They already have WhatsApp, often on a shared handset. |
 | Officer console | The adoption path — 37 SCAs opening a CSV, not 13 lakh beneficiaries downloading something |
-| Voice *(built, not wired)* | For users who cannot read either script. The provider layer and the Hindi/Hinglish number-to-words renderer exist and are tested; no screen calls them yet. |
+| **Voice out** | For users who cannot read either script. Live on the Solvency Clock — the verdict, spoken, in the selected language, captioned. Voice IN is not wired: a spoken amount that cannot be read confidently returns null and asks again. |
 
 WhatsApp carries its own copy because chat register is shorter and warmer than UI register — but
 every figure still comes from the kernel, and a test asserts no chat template in any language
@@ -177,9 +177,10 @@ Done: keyboard-focusable controls with visible focus, semantic colour never carr
 
 Not done, and worth being explicit about:
 
-- **Voice in and out.** The most important accessibility gap. Many users cannot read either
-  script. The provider abstraction and number-to-words renderer are built and tested under
-  `src/lib/voice/`; what is missing is a key and a microphone control on the calculator.
+- **Voice IN.** Speech out is live on the Solvency Clock. Speech in needs a microphone control
+  and a confirmation loop — `confirmationPrompt` exists for exactly this and must never be
+  skipped, because a borrower cannot proof-read speech and a misheard margin silently changes
+  every figure downstream.
 - **Icon-based navigation** for non-literate users — currently text-led throughout.
 - **Screen-reader pass.** The charts have no textual equivalent yet; the Solvency Clock in
   particular carries the core argument visually and needs a described alternative.

@@ -220,8 +220,11 @@ correct answer today, and adding it before it is needed would trade determinism 
    item outstanding.
 2. **Grounded retrieval** over scheme guideline PDFs and NABARD unit-cost tables, with citation
    enforcement — the model may only assert what a retrieved row supports.
-3. **Voice** via Bhashini ASR/TTS, with the numeric firewall extended to spoken output: numbers
-   read back for confirmation, never spoken by the model alone.
+3. **Voice IN.** Speech OUT shipped: `/api/voice/speak` runs the kernel, builds the sentence from
+   its own figures via `speakAmount`, and returns the audio with the exact words spoken. The route
+   takes kernel INPUTS, never a string to read out — so it cannot be used as a free text-to-speech
+   proxy, and no model output or client text ever reaches the synthesiser. Speech IN still needs a
+   microphone control and the `confirmationPrompt` read-back loop.
 4. **Round-trip numeric extraction** on translated output — re-parse the rendered Indic string and
    assert every numeral matches the source JSON, turning "multilingual" from a checkbox into a
    measured 0%-corruption guarantee.

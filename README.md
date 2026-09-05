@@ -158,10 +158,12 @@ and refuses to rank, which is a designed behaviour rather than an unhandled case
 
 **Not built yet**
 
-- Voice is *wired but not switched on*: `src/lib/voice/` carries the provider abstraction
-  (Sarvam, Bhashini), the per-locale number-to-words renderer and its tests, but no screen calls
-  it and no provider key is configured. Adding `SARVAM_API_KEY` and a mic control is the
-  remaining work, not the module.
+- Voice **input**. Speech OUT is live — the Solvency Clock has a Listen button that speaks the
+  verdict through Sarvam in whichever of the three languages is selected, with the spoken words
+  shown as a caption underneath. Speech IN is not wired to any field: `parseSpokenAmount` reads
+  digits and scale words in all three languages but deliberately holds no Devanagari numeral
+  table (see the note in `src/lib/voice/bhashini.ts`), so a spoken Hindi amount returns null and
+  asks again rather than guessing.
 - Real WorldPop / SHRUG / LGD ingest — the gazetteer is 4 seeded villages
 - Grounded retrieval over scheme PDFs with citation enforcement
 

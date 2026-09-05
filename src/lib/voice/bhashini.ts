@@ -33,12 +33,19 @@ export function toBhashiniLanguage(locale: Locale): BhashiniLanguage {
   return locale === "en" ? "en" : "hi";
 }
 
-export interface VoiceResult<T> {
-  ok: boolean;
-  value?: T;
+/**
+ * A discriminated union, so `if (!r.ok) return` actually narrows.
+ *
+ * This was `{ ok: boolean; value?: T; reason?: string }`, which type-checks every construction
+ * site and narrows at none of them: after an `ok` guard, `value` was still `T | undefined`, so
+ * callers reached for `!` and the compiler stopped helping. On the union below, a success must
+ * carry a value and a failure must carry a reason — both are enforced where the result is built,
+ * which is the only place that knows.
+ */
+export type VoiceResult<T> =
+  | { ok: true; value: T }
   /** Why it is unavailable, in words a developer can act on. */
-  reason?: string;
-}
+  | { ok: false; reason: string };
 
 export function isVoiceConfigured(): boolean {
   return Boolean(process.env.BHASHINI_USER_ID && process.env.BHASHINI_API_KEY);
@@ -112,39 +119,114 @@ export function spellDigits(value: number | string, locale: Locale): string {
 /**
  * Pull a rupee amount out of spoken input.
  *
- * People say "ek lakh", "1 lakh", "एक लाख", "50 hazaar". Returns null when it cannot be read
- * confidently — the caller must then ask again rather than guess, because guessing a loan amount
- * is exactly the failure this product exists to prevent.
+ * ── WHY THIS IS FUSSY ────────────────────────────────────────────────────────────────────────
+ * The previous implementation took the FIRST number-and-scale it matched and returned it, which
+ * produced two silent errors on ordinary input:
+ *
+ *   "46 hazaar 467 rupaye"  ->  46000   (the 467 was thrown away)
+ *   "\u20b946,467"                ->  46      (\d+ stopped at the comma)
+ *
+ * The second is a factor of a thousand, on a rupee figure, with no error raised. In a product
+ * whose entire claim is that its numbers are traceable, a parser that quietly returns \u20b946 when the
+ * user said forty-six thousand four hundred and sixty-seven is worse than no parser at all.
+ *
+ * This version tokenises the whole string and accumulates over every group, the way a person
+ * reads a number: units and tens build a running value, "hundred" scales it, and "thousand",
+ * "lakh" and "crore" flush it into the total.
+ *
+ * ── WHAT IT DELIBERATELY DOES NOT DO ─────────────────────────────────────────────────────────
+ * It does not carry a full Devanagari numeral table. Real ASR output looks like this, live from
+ * Sarvam on 2026-09-05:
+ *
+ *   "\u0906\u092a\u0915\u094b \u091b\u093f\u092f\u093e\u0932\u0940\u0938 \u0939\u091c\u093c\u093e\u0930 \u091a\u093e\u0930 \u0938\u094c \u0938\u0921\u093c\u0938\u0920 \u0930\u0941\u092a\u092f\u0947 ..."
+ *
+ * Hindi numerals 0\u201399 are irregular \u2014 46 is \u091b\u093f\u092f\u093e\u0932\u0940\u0938 and 67 is \u0938\u0921\u093c\u0938\u0920, neither derivable from
+ * their parts. A hand-typed hundred-row table is exactly the kind of thing that carries a typo
+ * into a loan amount, and there is no way to verify one here. So the vocabulary covers what can be
+ * stated with confidence, and everything else returns null.
+ *
+ * null means "ask again". It never means zero, and the caller must never treat it as a value.
+ * Any amount that does parse must still be read back with `confirmationPrompt` before it is acted
+ * on \u2014 a borrower cannot proof-read speech, and a misheard margin changes every figure downstream.
  */
+const WORD_VALUE: Record<string, number> = {
+  // Hinglish / Latin, 0\u201320 plus tens \u2014 the forms `speakAmount` itself emits and the ones people
+  // actually say for money.
+  zero: 0, ek: 1, do: 2, teen: 3, char: 4, chaar: 4, paanch: 5, panch: 5, chah: 6, chhah: 6,
+  saat: 7, aath: 8, nau: 9, das: 10, gyarah: 11, barah: 12, terah: 13, chaudah: 14, pandrah: 15,
+  solah: 16, satrah: 17, atharah: 18, unnees: 19, bees: 20, tees: 30, chalees: 40, pachas: 50,
+  saath: 60, sattar: 70, assi: 80, nabbe: 90,
+
+  // Devanagari, same range.
+  "\u0936\u0942\u0928\u094d\u092f": 0, "\u090f\u0915": 1, "\u0926\u094b": 2, "\u0924\u0940\u0928": 3, "\u091a\u093e\u0930": 4, "\u092a\u093e\u0901\u091a": 5, "\u092a\u093e\u0902\u091a": 5, "\u091b\u0939": 6,
+  "\u0938\u093e\u0924": 7, "\u0906\u0920": 8, "\u0928\u094c": 9, "\u0926\u0938": 10, "\u0917\u094d\u092f\u093e\u0930\u0939": 11, "\u092c\u093e\u0930\u0939": 12, "\u0924\u0947\u0930\u0939": 13, "\u091a\u094c\u0926\u0939": 14,
+  "\u092a\u0902\u0926\u094d\u0930\u0939": 15, "\u0938\u094b\u0932\u0939": 16, "\u0938\u0924\u094d\u0930\u0939": 17, "\u0905\u0920\u093e\u0930\u0939": 18, "\u0909\u0928\u094d\u0928\u0940\u0938": 19, "\u092c\u0940\u0938": 20, "\u0924\u0940\u0938": 30,
+  "\u091a\u093e\u0932\u0940\u0938": 40, "\u092a\u091a\u093e\u0938": 50, "\u0938\u093e\u0920": 60, "\u0938\u0924\u094d\u0924\u0930": 70, "\u0905\u0938\u094d\u0938\u0940": 80, "\u0928\u092c\u094d\u092c\u0947": 90,
+
+  // English, compositional and therefore safe to write out.
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17,
+  eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60,
+  seventy: 70, eighty: 80, ninety: 90,
+};
+
+/** Scales that multiply what came before them. */
+const SCALE_VALUE: Record<string, number> = {
+  sau: 100, "\u0938\u094c": 100, hundred: 100,
+  hazaar: 1_000, hazar: 1_000, hajaar: 1_000, "\u0939\u091c\u093c\u093e\u0930": 1_000, "\u0939\u091c\u093e\u0930": 1_000, thousand: 1_000,
+  lakh: 100_000, lac: 100_000, "\u0932\u093e\u0916": 100_000,
+  crore: 10_000_000, karod: 10_000_000, "\u0915\u0930\u094b\u0921\u093c": 10_000_000,
+};
+
+const DEVANAGARI_DIGITS = "\u0966\u0967\u0968\u0969\u096a\u096b\u096c\u096d\u096e\u096f";
+
 export function parseSpokenAmount(text: string): number | null {
-  const t = text.toLowerCase().trim();
+  const normalised = text
+    .toLowerCase()
+    .replace(/[\u0966-\u096f]/g, (d) => String(DEVANAGARI_DIGITS.indexOf(d)))
+    // Digit-group separators, Indian or Western: 46,467 and 1,00,000 are ONE number. Only commas
+    // sitting between digits are removed, so "do lakh, teen hazaar" still tokenises as two groups.
+    .replace(/(\d),(?=\d)/g, "$1")
+    .replace(/[\u20b9$,]/g, " ");
 
-  const WORD_NUM: Record<string, number> = {
-    ek: 1, "एक": 1, do: 2, "दो": 2, teen: 3, "तीन": 3, char: 4, "चार": 4,
-    paanch: 5, panch: 5, "पाँच": 5, "पांच": 5, chah: 6, "छह": 6,
-    saat: 7, "सात": 7, aath: 8, "आठ": 8, nau: 9, "नौ": 9, das: 10, "दस": 10,
-    bees: 20, "बीस": 20, pachas: 50, "पचास": 50,
-  };
+  const tokens = normalised.split(/[^0-9a-z.\u0900-\u097f]+/).filter(Boolean);
 
-  const scale = (unit: string) =>
-    /lakh|लाख/.test(unit) ? 100_000 : /hazaar|hazar|हज़ार|हजार|thousand/.test(unit) ? 1_000 : 1;
+  let total = 0;
+  let current = 0;
+  let sawNumber = false;
 
-  // "1 lakh" / "50 hazaar" / "1.5 lakh"
-  const numeric = t.match(/(\d+(?:\.\d+)?)\s*(lakh|लाख|hazaar|hazar|हज़ार|हजार|thousand)?/);
-  if (numeric) {
-    const base = parseFloat(numeric[1]);
-    const mult = numeric[2] ? scale(numeric[2]) : 1;
-    const value = base * mult;
-    if (Number.isFinite(value) && value > 0) return Math.round(value);
+  for (const token of tokens) {
+    const scale = SCALE_VALUE[token];
+    if (scale != null) {
+      if (!sawNumber) return null; // a scale word with nothing in front of it: "lakh rupaye"
+      if (scale >= 1_000) {
+        total += (current || 1) * scale;
+        current = 0;
+      } else {
+        current = (current || 1) * scale;
+      }
+      continue;
+    }
+
+    const word = WORD_VALUE[token];
+    if (word != null) {
+      current += word;
+      sawNumber = true;
+      continue;
+    }
+
+    if (/^\d+(?:\.\d+)?$/.test(token)) {
+      current += parseFloat(token);
+      sawNumber = true;
+      continue;
+    }
+
+    // Anything else is ordinary speech around the number \u2014 "rupaye", "chahiye", "mujhe".
   }
 
-  // "ek lakh" / "एक लाख"
-  const worded = t.match(/([a-zऀ-ॿ]+)\s*(lakh|लाख|hazaar|hazar|हज़ार|हजार)/);
-  if (worded && WORD_NUM[worded[1]] != null) {
-    return Math.round(WORD_NUM[worded[1]] * scale(worded[2]));
-  }
-
-  return null;
+  if (!sawNumber) return null;
+  const value = total + current;
+  return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
 }
 
 // ── the gateway ─────────────────────────────────────────────────────────────

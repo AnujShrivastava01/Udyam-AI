@@ -124,10 +124,41 @@ describe("degradation", () => {
   it("returns a reason instead of throwing when unconfigured", async () => {
     const s = await speak("test", "hi");
     expect(s.ok).toBe(false);
-    expect(s.reason).toMatch(/SARVAM_API_KEY|BHASHINI/);
+    if (!s.ok) expect(s.reason).toMatch(/SARVAM_API_KEY|BHASHINI/);
 
     const l = await listen("", "hi");
     expect(l.ok).toBe(false);
-    expect(l.reason).toMatch(/SARVAM_API_KEY|BHASHINI/);
+    if (!l.ok) expect(l.reason).toMatch(/SARVAM_API_KEY|BHASHINI/);
+  });
+});
+
+describe("parseSpokenAmount: the two silent misreads (regression)", () => {
+  it("keeps the remainder after a scale word", () => {
+    // Returned 46000 — the first-match regex took "46 hazaar" and discarded "467".
+    expect(parseSpokenAmount("46 hazaar 467 rupaye")).toBe(46_467);
+    expect(parseSpokenAmount("do lakh teen hazaar")).toBe(203_000);
+  });
+
+  it("does not stop at a digit-group separator", () => {
+    // Returned 46. A factor of a thousand, on a rupee figure, with no error raised — the worst
+    // shape a bug can take in this product.
+    expect(parseSpokenAmount("₹46,467")).toBe(46_467);
+    expect(parseSpokenAmount("1,00,000")).toBe(100_000);
+  });
+
+  it("reads hundreds compositionally, in both scripts", () => {
+    expect(parseSpokenAmount("char sau")).toBe(400);
+    expect(parseSpokenAmount("चार सौ")).toBe(400);
+    expect(parseSpokenAmount("twenty five thousand")).toBe(25_000);
+  });
+
+  it("returns null rather than guessing at Devanagari numerals it does not hold", () => {
+    // Live Sarvam ASR output. Hindi numerals 0-99 are irregular and this module deliberately
+    // carries no hand-typed table for them, because a typo there becomes a wrong loan amount.
+    // null means ask again — it must never be read as zero.
+    expect(
+      parseSpokenAmount("आपको छियालीस हज़ार चार सौ सड़सठ रुपये"),
+    ).toBeNull();
+    expect(parseSpokenAmount("lakh rupaye")).toBeNull();
   });
 });

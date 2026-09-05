@@ -284,7 +284,16 @@ export default function CalculatorPage() {
             </div>
           )}
 
-          <SolvencyClock schedule={schedule.schedule} solvency={solvency} activity={activity} />
+          <SolvencyClock
+            schedule={schedule.schedule}
+            solvency={solvency}
+            activity={activity}
+            voice={{
+              marginCapital: margin,
+              activityId,
+              annualHouseholdIncome: householdIncome > 0 ? householdIncome : undefined,
+            }}
+          />
 
           {/* the structure */}
           <motion.div
