@@ -103,6 +103,36 @@ export function structure(input: StructureInput): Structure {
     });
   }
 
+  // --- 1a. nothing to structure ----------------------------------------------------------
+  // A cleared margin field is an ordinary thing for a user to do, not an exceptional one. Return a
+  // well-formed zero structure with the BELOW_MINIMUM flag the type has always declared, so the UI
+  // can say "enter an amount" instead of the kernel throwing mid-render.
+  if (!Number.isFinite(projectCost) || projectCost <= 0) {
+    const scheme = SCHEMES["nsfdc-micro-finance"];
+    return {
+      basis,
+      projectCost: 0,
+      indicativeLoan: 0,
+      sanctionedLoan: 0,
+      requiredMargin: 0,
+      effectiveMarginPct: 0,
+      scheme,
+      moratoriumMonths: scheme.moratoriumMonths,
+      flags: [
+        {
+          code: "BELOW_MINIMUM",
+          level: "info",
+          title: "Nothing to structure yet",
+          detail:
+            basis === "margin-inversion"
+              ? "Enter the amount of your own money to see what it can fund."
+              : "This activity has no costed requirement, so there is nothing to structure.",
+        },
+      ],
+      trace,
+    };
+  }
+
   // --- 2. tier ceiling ------------------------------------------------------------------
   const ceiling = SCHEMES["nsfdc-term-loan"].maxProjectCost;
   if (projectCost > ceiling) {

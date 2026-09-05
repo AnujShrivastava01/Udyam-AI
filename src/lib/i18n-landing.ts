@@ -28,7 +28,7 @@ const dictionary = {
     "landing.cta.explore": "Explore Market Data",
     
     // Trusted By
-    "landing.trusted.title": "TRUSTED BY LEADING GRASSROOTS ORGANIZATIONS",
+    "landing.trusted.title": "BUILT ON PUBLISHED GUIDELINES FROM",
 
     // Bento Grid Features
     "landing.feature1.title": "Hyper-local Market Intelligence",
@@ -67,7 +67,7 @@ const dictionary = {
     "landing.cta.explore": "बाज़ार डेटा एक्सप्लोर करें",
     
     // Trusted By
-    "landing.trusted.title": "प्रमुख जमीनी संगठनों द्वारा विश्वसनीय",
+    "landing.trusted.title": "इन विभागों के प्रकाशित दिशानिर्देशों पर आधारित",
 
     // Bento Grid Features
     "landing.feature1.title": "हाइपर-लोकल मार्केट इंटेलिजेंस",
@@ -81,7 +81,7 @@ const dictionary = {
   }
 };
 
-type DictionaryKeys = keyof typeof dictionary.en;
+export type DictionaryKeys = keyof typeof dictionary.en;
 
 export function useTranslation() {
   const { language } = useAppStore();

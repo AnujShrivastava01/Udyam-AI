@@ -1,12 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Target, ShieldCheck, Mail, IndianRupee, Store, TrendingUp } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import { SampleDataBanner } from "@/components/sample-data-banner";
 
 export default function ProfilePage() {
   const { onboardingInput } = useAppStore();
@@ -14,6 +15,12 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
+      <SampleDataBanner
+        className="mb-6"
+        what="This profile"
+        detail="Loan history, KYC status and scores on this page are placeholders that show the shape of the screen. Nothing here reflects a real person or a real application."
+      />
+
       {/* Profile Header */}
       <div className="relative mb-16 mt-8">
         <div className="h-48 w-full bg-gradient-to-r from-primary/80 to-accent/80 rounded-3xl overflow-hidden shadow-inner absolute top-0 left-0 -z-10">
@@ -30,7 +37,7 @@ export default function ProfilePage() {
               </Badge>
               <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50">Funded</Badge>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground">Rajesh's Enterprise</h1>
+            <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground">Rajesh&apos;s Enterprise</h1>
             <p className="text-muted-foreground flex items-center gap-2 mt-1">
               <MapPin className="w-4 h-4" /> {onboardingInput.location?.district || "Bundelkhand, UP"}
             </p>

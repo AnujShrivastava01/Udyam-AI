@@ -331,7 +331,11 @@ export function buildFeasibilityReport(
           value: sat.observedSector,
           band: Math.round(sat.observedSector * 0.4),
           unit: "establishments",
-          confidence: "estimated",
+          // Derived from village.blockEstablishments, which is a seeded placeholder. Every sibling
+          // figure built on seeded fields already reports "seeded"; this one claimed "estimated"
+          // and carried an Economic Census citation, which is exactly the mislabel principle 3
+          // exists to prevent.
+          confidence: village.seed ? "seeded" : "estimated",
           provenance: ECONOMIC_CENSUS,
           note: "Modelled from block establishment count and an assumed sector share.",
         },

@@ -85,7 +85,10 @@ export function recommendActivities(
         affordable,
         p.structure.requiredMargin,
         marginCapital,
-        activity,
+        // The kernel already computed the real gap. Recomputing it here as
+        // `gestationMonths - 6` hardcoded the MICRO-FINANCE moratorium and was therefore wrong on
+        // every Term Loan (6 months) and every plantation case (12 months).
+        p.solvency.gapMonths,
         feasibility.saturation.label,
       ),
       preIncomeObligation: p.solvency.preIncomeObligation,
@@ -121,7 +124,7 @@ function bindingConstraintFor(
   affordable: boolean,
   requiredMargin: number,
   marginCapital: number,
-  activity: Activity,
+  gapMonths: number | null,
   saturationLabel: string,
 ): Message {
   // Numbers are formatted here, once, and passed as slots. The template that receives them may be
@@ -137,7 +140,8 @@ function bindingConstraintFor(
   }
   if (verdict === "UNAFFORDABLE") return msg("constraint.overIncomeCap");
   if (verdict === "GESTATION_GAP") {
-    return msg("constraint.gestationGap", { months: activity.gestationMonths - 6 });
+    // solvency.ts only emits GESTATION_GAP when gapMonths is non-null, so this slot is safe.
+    return msg("constraint.gestationGap", { months: gapMonths ?? 0 });
   }
   if (verdict === "DSCR_FAIL") return msg("constraint.thinCoverage");
   if (verdict === "INSUFFICIENT_DATA") return msg("constraint.noGestationData");

@@ -17,7 +17,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { generateCases } from "./cases";
-import { groundTruth, SOLVERS } from "./solvers";
+import { groundTruth } from "./solvers";
 import { renderLeaderboard, runBenchmark } from "./score";
 
 const COUNT = Number(process.env.BENCH_COUNT ?? 500);

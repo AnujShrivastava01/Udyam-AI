@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EXCLUSIONS, RAILS, RAIL_BY_ID, optimiseStack } from "./stack";
+import { EXCLUSIONS, RAILS, optimiseStack } from "./stack";
 
 describe("rail catalogue", () => {
   it("marks which rails are verified and which are not", () => {
@@ -112,5 +112,34 @@ describe("optimisation", () => {
     const r = optimiseStack({ projectCost: 100_000, marginAvailable: 10_000 });
     expect(r.specRouted!.components[0].rail.id).toBe("nsfdc-micro-finance");
     expect(r.specRouted!.feasible).toBe(true);
+  });
+});
+
+describe("rail project-cost bands (regression)", () => {
+  it("always produces a spec route with at least one component", () => {
+    // The term-loan rail's minAmount was set to 140_001 — the tier's PROJECT-COST boundary rather
+    // than a draw minimum — so buildStack skipped it whenever 90% of project cost fell below that.
+    // A ₹1.5 lakh project produced a zero-component stack, and the UI rendered "your money
+    // ₹1,50,000 / net cost ₹0" while claiming single-scheme routing was cheapest.
+    for (let pc = 20_000; pc <= 3_000_000; pc += 10_000) {
+      const r = optimiseStack({ projectCost: pc, marginAvailable: pc });
+      expect(r.specRouted, `no spec route at ₹${pc}`).not.toBeNull();
+      expect(r.specRouted!.components.length, `zero-component spec route at ₹${pc}`).toBeGreaterThan(0);
+    }
+  });
+
+  it("covers the exact band that used to fail", () => {
+    for (const pc of [140_010, 145_000, 150_000, 152_000, 155_550]) {
+      const r = optimiseStack({ projectCost: pc, marginAvailable: pc });
+      expect(r.specRouted!.components[0].rail.id).toBe("nsfdc-term-loan");
+      expect(r.specRouted!.ownContribution).toBeLessThan(pc);
+    }
+  });
+
+  it("never lets a rail fund a project outside its own tier band", () => {
+    const micro = optimiseStack({ projectCost: 2_000_000, marginAvailable: 2_000_000 });
+    for (const c of micro.candidates) {
+      expect(c.components.every((x) => x.rail.id !== "nsfdc-micro-finance")).toBe(true);
+    }
   });
 });

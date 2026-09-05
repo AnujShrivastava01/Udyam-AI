@@ -71,6 +71,39 @@ export function plan(input: PlanInput): Plan {
     activityClass: activity?.activityClass,
   });
 
+  // Nothing sanctioned means nothing to amortise. Short-circuit BOTH schedules rather than
+  // letting amortise throw — a zero loan is a valid state of the form, not an error.
+  if (s.sanctionedLoan <= 0) {
+    const empty: AmortiseResult = {
+      instalment: 0,
+      instalmentCount: 0,
+      periodicRate: s.scheme.annualRatePct / 100 / (12 / s.scheme.restMonths),
+      moratoriumInterest: 0,
+      amortisedPrincipal: 0,
+      amortisationInterest: 0,
+      totalInterest: 0,
+      totalOutflow: 0,
+      schedule: [],
+    };
+    return {
+      input,
+      activity,
+      structure: s,
+      schedule: empty,
+      // assessSolvency tolerates an empty schedule: peak debt service is 0 and dscr is null.
+      solvency: assessSolvency({
+        schedule: [],
+        gestationMonths: activity ? activity.gestationMonths : null,
+      }),
+      convention,
+      alternateConvention: {
+        convention: convention === "serviced" ? "capitalised" : "serviced",
+        instalment: 0,
+        totalInterest: 0,
+      },
+    };
+  }
+
   const amortiseArgs = {
     principal: s.sanctionedLoan,
     annualRatePct: s.scheme.annualRatePct,
@@ -116,6 +149,23 @@ export function quoteAtProjectCost(
   convention: MoratoriumConvention = "serviced",
 ) {
   const s = structure({ marginCapital: projectCost * 0.1, neededProjectCost: projectCost });
+  if (s.sanctionedLoan <= 0) {
+    // Same guard as plan(): the cliff explorer sweeps a range and must not throw at its floor.
+    return {
+      structure: s,
+      schedule: {
+        instalment: 0,
+        instalmentCount: 0,
+        periodicRate: 0,
+        moratoriumInterest: 0,
+        amortisedPrincipal: 0,
+        amortisationInterest: 0,
+        totalInterest: 0,
+        totalOutflow: 0,
+        schedule: [],
+      } as AmortiseResult,
+    };
+  }
   const schedule = amortise({
     principal: s.sanctionedLoan,
     annualRatePct: s.scheme.annualRatePct,

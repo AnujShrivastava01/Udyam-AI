@@ -13,7 +13,7 @@ import { amortise, levelInstalment } from "./amortise";
 import { MFS_CAP_BINDS_AT, SCHEMES } from "./schemes";
 import { cliffAt, routeScheme, structure } from "./structure";
 import { assessSolvency } from "./solvency";
-import { plan } from "./index";
+import { plan, quoteAtProjectCost } from "./index";
 
 /** Tolerance of one paisa — these are rupee figures, not floating-point approximations. */
 const near = (actual: number, expected: number, tol = 0.02) =>
@@ -310,5 +310,34 @@ describe("kernel purity", () => {
     expect(p.convention).toBe("serviced");
     expect(p.alternateConvention.convention).toBe("capitalised");
     expect(p.alternateConvention.instalment).toBeGreaterThan(p.schedule.instalment);
+  });
+});
+
+describe("degenerate inputs (regressions)", () => {
+  it("returns a zero structure instead of throwing when the margin is cleared", () => {
+    // Clearing the margin field is an ordinary user action. It used to reach amortise(), throw
+    // "principal must be positive" mid-render, and white-screen the calculator.
+    const s = structure({ marginCapital: 0 });
+    expect(s.projectCost).toBe(0);
+    expect(s.sanctionedLoan).toBe(0);
+    expect(s.flags.some((f) => f.code === "BELOW_MINIMUM")).toBe(true);
+  });
+
+  it("plan() survives a zero margin and returns an empty schedule", () => {
+    const p = plan({ marginCapital: 0 });
+    expect(p.schedule.instalment).toBe(0);
+    expect(p.schedule.schedule).toEqual([]);
+    expect(p.solvency).toBeDefined();
+  });
+
+  it("quoteAtProjectCost survives the floor of the cliff sweep", () => {
+    expect(() => quoteAtProjectCost(0)).not.toThrow();
+    expect(quoteAtProjectCost(0).schedule.instalment).toBe(0);
+  });
+
+  it("rejects NaN rather than returning a plausible wrong number", () => {
+    const s = structure({ marginCapital: Number.NaN });
+    expect(s.sanctionedLoan).toBe(0);
+    expect(s.flags.some((f) => f.code === "BELOW_MINIMUM")).toBe(true);
   });
 });

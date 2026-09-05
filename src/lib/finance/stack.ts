@@ -47,8 +47,11 @@ export interface Rail {
   administrator: string;
   /** Largest amount this rail can contribute, in rupees. */
   maxAmount: number;
-  /** Smallest sensible draw; below this the paperwork is not worth it. */
+  /** Smallest sensible DRAW from this rail; below this the paperwork is not worth it. */
   minAmount: number;
+  /** Project-cost band this rail covers. A rail is skipped outside its band. */
+  minProjectCost: number;
+  maxProjectCost: number;
   annualRatePct: number;
   tenureMonths: number;
   moratoriumMonths: number;
@@ -78,6 +81,8 @@ export const RAILS: Rail[] = [
     administrator: "NSFDC",
     maxAmount: SCHEMES["nsfdc-micro-finance"].maxLoan,
     minAmount: 10_000,
+    minProjectCost: SCHEMES["nsfdc-micro-finance"].minProjectCost,
+    maxProjectCost: SCHEMES["nsfdc-micro-finance"].maxProjectCost,
     annualRatePct: SCHEMES["nsfdc-micro-finance"].annualRatePct,
     tenureMonths: SCHEMES["nsfdc-micro-finance"].tenureMonths,
     moratoriumMonths: SCHEMES["nsfdc-micro-finance"].moratoriumMonths,
@@ -91,7 +96,13 @@ export const RAILS: Rail[] = [
     name: SCHEMES["nsfdc-term-loan"].name,
     administrator: "NSFDC",
     maxAmount: SCHEMES["nsfdc-term-loan"].maxLoan,
-    minAmount: 140_001,
+    // 10,000 is the smallest sensible DRAW. This was previously 140_001 — the tier's project-cost
+    // boundary — which made buildStack skip the rail entirely whenever 90% of project cost fell
+    // below it. A ₹1.5 lakh project then produced a stack with ZERO components, and the UI
+    // rendered "your money ₹1,50,000, net cost ₹0" and claimed single-scheme routing was cheapest.
+    minAmount: 10_000,
+    minProjectCost: SCHEMES["nsfdc-term-loan"].minProjectCost,
+    maxProjectCost: SCHEMES["nsfdc-term-loan"].maxProjectCost,
     annualRatePct: SCHEMES["nsfdc-term-loan"].annualRatePct,
     tenureMonths: SCHEMES["nsfdc-term-loan"].tenureMonths,
     moratoriumMonths: SCHEMES["nsfdc-term-loan"].moratoriumMonths,
@@ -110,6 +121,8 @@ export const RAILS: Rail[] = [
     tenureMonths: 84,
     moratoriumMonths: 6,
     // The reason PMEGP can beat a cheaper interest rate: part of the project cost is a grant.
+    minProjectCost: 0,
+    maxProjectCost: Number.POSITIVE_INFINITY,
     subsidyOfProjectCost: 0.35,
     // 5% own + 35% subsidy + 60% loan. Not 90% — the subsidy does not close the gap.
     maxShareOfProjectCost: 0.6,
@@ -123,6 +136,8 @@ export const RAILS: Rail[] = [
     administrator: "Scheduled banks / SIDBI",
     maxAmount: 500_000,
     minAmount: 50_001,
+    minProjectCost: 0,
+    maxProjectCost: Number.POSITIVE_INFINITY,
     annualRatePct: 10.5,
     tenureMonths: 60,
     moratoriumMonths: 3,
@@ -137,6 +152,8 @@ export const RAILS: Rail[] = [
     administrator: "Scheduled banks / SIDBI",
     maxAmount: 1_000_000,
     minAmount: 500_001,
+    minProjectCost: 0,
+    maxProjectCost: Number.POSITIVE_INFINITY,
     annualRatePct: 11.5,
     tenureMonths: 60,
     moratoriumMonths: 3,
@@ -249,6 +266,8 @@ function buildStack(
 
   for (const rail of combo) {
     if (remaining <= 0) break;
+    // A rail whose project-cost band does not cover this project cannot contribute at all.
+    if (projectCost < rail.minProjectCost || projectCost > rail.maxProjectCost) continue;
     const capByShare = rail.maxShareOfProjectCost * projectCost;
     const amount = r2(Math.min(remaining, rail.maxAmount, capByShare));
     if (amount < rail.minAmount) continue;

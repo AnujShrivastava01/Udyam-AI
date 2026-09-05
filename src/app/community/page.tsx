@@ -2,18 +2,19 @@
 
 import { useAppStore } from "@/lib/store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, MessageSquare, ThumbsUp, Share2, BadgeCheck, Send, PlusCircle } from "lucide-react";
+import { MessageSquare, ThumbsUp, Share2, BadgeCheck, Send, PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { SampleDataBanner } from "@/components/sample-data-banner";
 import { useState } from "react";
 
 const MOCK_POSTS = [
   {
     id: 1,
-    author: { name: "Rajesh Kumar", role: "entrepreneur", verified: false, initials: "RK", avatar: "" },
+    author: { name: "Rajesh Kumar (illustrative)", role: "entrepreneur", verified: false, initials: "RK", avatar: "" },
     content: "Just secured my loan under the Mudra scheme! Thanks to everyone here who helped me with the documentation process. The new dairy farm setup starts next week.",
     time: "2 hours ago",
     likes: 24,
@@ -22,7 +23,7 @@ const MOCK_POSTS = [
   },
   {
     id: 2,
-    author: { name: "Bundelkhand Vikas NGO", role: "ngo", verified: true, initials: "BV", avatar: "" },
+    author: { name: "Sample NGO (illustrative)", role: "ngo", verified: false, initials: "SN", avatar: "" },
     content: "We are organizing a free veterinary camp this Sunday at Moth block. All dairy farmers are welcome to bring their cattle for checkups.",
     time: "5 hours ago",
     likes: 89,
@@ -31,8 +32,12 @@ const MOCK_POSTS = [
   },
   {
     id: 3,
-    author: { name: "State Bank of India", role: "financial-institution", verified: true, initials: "SBI", avatar: "" },
-    content: "Attention Micro-Entrepreneurs: Term loan interest rates have been revised. Check your eligibility in the app to see how this affects your EMI.",
+    author: { name: "Sample Lender (illustrative)", role: "financial-institution", verified: false, initials: "SL", avatar: "" },
+    // Deliberately makes no claim about rates, revisions or eligibility. A named real bank saying
+    // "rates have been revised" is a false statement about that bank whether or not it is badged,
+    // and "check your eligibility" is the exact class of claim verifyNoUnsupportedClaims strips
+    // from generated text — it must not be shipped as static JSX that no verifier ever sees.
+    content: "Sample post. In a real deployment this feed carries notices from the State Channelizing Agency; nothing here is an actual notice.",
     time: "1 day ago",
     likes: 156,
     comments: 45,
@@ -41,7 +46,7 @@ const MOCK_POSTS = [
 ];
 
 export default function CommunityPage() {
-  const { onboardingInput, userRole } = useAppStore();
+  const { onboardingInput } = useAppStore();
   const [newPost, setNewPost] = useState("");
   
   const currentCategory = onboardingInput.businessCategory || "Dairy";
@@ -49,7 +54,13 @@ export default function CommunityPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
-      
+
+      <SampleDataBanner
+        className="mb-6"
+        what="This feed"
+        detail="Posts, group names and counterparties on this page are written by hand to show the shape of the feature. No post here is from a real person, NGO or bank."
+      />
+
       {/* Header Area */}
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 md:p-8 rounded-3xl border shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
@@ -57,15 +68,11 @@ export default function CommunityPage() {
           <h1 className="text-3xl md:text-4xl font-bold font-heading">
             <span className="capitalize">{currentCategory}</span> Entrepreneurs — <span className="capitalize text-primary">{location}</span>
           </h1>
-          <p className="text-muted-foreground mt-2">Connect, share, and grow with 1,200+ local businesses, NGOs, and mentors.</p>
+          <p className="text-muted-foreground mt-2">Connect with local businesses, NGOs and mentors in your block.</p>
         </div>
-        <div className="flex gap-4">
-          <div className="bg-card p-4 rounded-xl border text-center min-w-[100px] shadow-sm">
-            <Users className="w-6 h-6 mx-auto text-primary mb-1" />
-            <span className="text-xl font-bold">1.2k</span>
-            <p className="text-[10px] text-muted-foreground uppercase font-bold">Members</p>
-          </div>
-        </div>
+        {/* A member count was shown here. It was invented, and an invented traction number on a
+            government submission is not worth the pixel it sits on. It returns when there is a
+            real one to show. */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -186,7 +193,7 @@ export default function CommunityPage() {
                   <span className="font-bold">Need 50L A2 Milk Daily</span>
                   <Badge variant="destructive" className="text-[10px]">2d left</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">Posted by: FreshFoods Inc.</p>
+                <p className="text-xs text-muted-foreground mb-3">Posted by: Sample buyer (illustrative)</p>
                 <Button size="sm" variant="outline" className="w-full text-xs border-accent text-accent hover:bg-accent hover:text-white">Submit Offer</Button>
               </div>
               <div className="bg-card p-3 rounded-lg border text-sm shadow-sm">
@@ -194,7 +201,7 @@ export default function CommunityPage() {
                   <span className="font-bold">Looking for Cattle Feed Supplier</span>
                   <Badge variant="destructive" className="text-[10px]">5h left</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">Posted by: Local Cooperative</p>
+                <p className="text-xs text-muted-foreground mb-3">Posted by: Sample cooperative (illustrative)</p>
                 <Button size="sm" variant="outline" className="w-full text-xs border-accent text-accent hover:bg-accent hover:text-white">Submit Offer</Button>
               </div>
               <Link href="/marketplace">

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Check, Compass, BarChart2, IndianRupee, Users, Settings, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n-landing";
+import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 
 const STEPS = [
   { id: "discover", label: "Discover", icon: Compass, paths: ["/onboarding", "/discover", "/"] },
@@ -64,7 +64,7 @@ export function JourneyStepper() {
                   isActive ? "text-foreground font-semibold" : "text-muted-foreground group-hover:text-foreground"
                 )}
               >
-                {t(`step.${step.id}` as any)}
+                {t(`step.${step.id}` as DictionaryKeys)}
               </span>
             </Link>
           );

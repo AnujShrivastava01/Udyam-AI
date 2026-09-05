@@ -7,10 +7,13 @@ import { handleMessage } from "@/lib/whatsapp/conversation";
  * Whapi webhook.
  *
  * Configure the callback URL in the Whapi panel as:
- *   https://<your-tunnel>/api/whatsapp/webhook?secret=<WHATSAPP_WEBHOOK_SECRET>
+ *   https://<your-tunnel>/api/whatsapp/webhook
+ * and add a custom header:
+ *   x-webhook-secret: <WHATSAPP_WEBHOOK_SECRET>
  *
  * The secret is checked on every callback. Without it this endpoint is an open relay that anyone
- * who guesses the path can drive messages through.
+ * who guesses the path can drive messages through. It is deliberately NOT accepted from the query
+ * string — see `authorised`.
  */
 
 export const runtime = "nodejs";
@@ -29,9 +32,16 @@ interface WhapiMessage {
 function authorised(req: NextRequest): boolean {
   const expected = process.env.WHATSAPP_WEBHOOK_SECRET;
   if (!expected) return false;
-  const provided =
-    req.nextUrl.searchParams.get("secret") ?? req.headers.get("x-webhook-secret") ?? "";
-  return provided === expected;
+
+  // HEADER ONLY. The secret used to be accepted from ?secret= as well, which writes it in
+  // cleartext into request logs, the Next dev trace, browser history and any proxy in between —
+  // it had already leaked into .next/dev/trace on this machine. A query-string secret is a secret
+  // you have to assume is public.
+  const provided = req.headers.get("x-webhook-secret") ?? "";
+  if (provided.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
 }
 
 export async function GET(req: NextRequest) {

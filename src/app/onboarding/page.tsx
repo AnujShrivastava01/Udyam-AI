@@ -188,18 +188,22 @@ export default function OnboardingPage() {
                           { id: "handicrafts", label: "Handicrafts" },
                           { id: "services", label: "Local Services" },
                         ].map((cat) => (
-                          <div
+                          // A div with onClick is invisible to the keyboard and to assistive
+                          // tech, which meant a keyboard user could not finish onboarding at all.
+                          <button
+                            type="button"
                             key={cat.id}
-                            className={`flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                            aria-pressed={onboardingInput.businessCategory === cat.id}
+                            className={`flex items-center gap-2 p-3 rounded-lg border-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                               onboardingInput.businessCategory === cat.id
                                 ? "border-primary bg-primary/5 text-primary font-medium"
                                 : "border-muted hover:border-primary/50 text-muted-foreground"
                             }`}
                             onClick={() => setOnboardingInput({ businessCategory: cat.id })}
                           >
-                            <Briefcase className="w-4 h-4" />
+                            <Briefcase className="w-4 h-4 shrink-0" aria-hidden="true" />
                             <span className="text-sm">{cat.label}</span>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </div>

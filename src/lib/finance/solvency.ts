@@ -12,7 +12,6 @@
  */
 
 import type { ScheduleRow } from "./amortise";
-import type { Activity } from "./activities";
 import { RBI_REPAYMENT_CAP_OF_INCOME } from "./schemes";
 import { msg, type Message } from "@/lib/i18n/keys";
 import { renderMessage } from "@/lib/i18n/render";

@@ -82,17 +82,63 @@ export default function CalculatorPage() {
     setOnboardingInput({ marginCapital: margin });
   }, [margin, setOnboardingInput]);
 
-  const result = useMemo(
-    () =>
-      plan({
+  // The kernel is guarded here as well as internally. A cleared input is an ordinary user action,
+  // and it must never be able to take the page down mid-render.
+  const result = useMemo(() => {
+    try {
+      return plan({
         marginCapital: margin,
         activityId,
         useNeedBasedCosting: needBased,
         annualHouseholdIncome: householdIncome > 0 ? householdIncome : undefined,
         convention,
-      }),
-    [margin, activityId, needBased, householdIncome, convention],
-  );
+      });
+    } catch (e) {
+      console.error("[calculator] kernel refused these inputs:", e);
+      return null;
+    }
+  }, [margin, activityId, needBased, householdIncome, convention]);
+
+  // Empty state first, so everything below can rely on a real plan rather than guarding each use.
+  if (!result || result.structure.sanctionedLoan <= 0) {
+    return (
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-24">
+        <header className="space-y-2">
+          <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
+            <Calculator className="w-8 h-8 text-primary" /> {t("calc.title")}
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-3xl">{t("calc.subtitle")}</p>
+        </header>
+
+        <Card className="border-2 border-dashed">
+          <CardContent className="py-14 text-center space-y-4">
+            <IndianRupee className="w-10 h-10 mx-auto text-muted-foreground" aria-hidden="true" />
+            <p className="text-lg font-medium">
+              {result?.structure.flags[0]?.detail ?? t("calc.margin.hint")}
+            </p>
+            <div className="max-w-xs mx-auto text-left">
+              <label
+                htmlFor="margin-capital-empty"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                {t("calc.margin.title")}
+              </label>
+              <Input
+                id="margin-capital-empty"
+                type="number"
+                min={0}
+                inputMode="numeric"
+                autoFocus
+                value={margin || ""}
+                onChange={(e) => setMargin(Math.max(0, Number(e.target.value) || 0))}
+                className="mt-1.5 h-12 text-xl font-bold"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const { structure: s, schedule, solvency, activity } = result;
 
@@ -126,7 +172,11 @@ export default function CalculatorPage() {
               <div className="pt-4 relative">
                 <IndianRupee className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
+                  id="margin-capital"
                   type="number"
+                  min={0}
+                  inputMode="numeric"
+                  aria-label={t("calc.margin.title")}
                   value={margin}
                   onChange={(e) => setMargin(Math.max(0, Number(e.target.value) || 0))}
                   className="pl-10 text-xl font-bold h-12"
@@ -199,7 +249,11 @@ export default function CalculatorPage() {
                   {t("calc.income.label")}
                 </p>
                 <Input
+                  id="household-income"
                   type="number"
+                  min={0}
+                  inputMode="numeric"
+                  aria-label={t("calc.income.label")}
                   value={householdIncome}
                   onChange={(e) => setHouseholdIncome(Math.max(0, Number(e.target.value) || 0))}
                   className="h-10"

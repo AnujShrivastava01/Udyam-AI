@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, MapPin, BarChart2, IndianRupee, ShieldCheck, Zap, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useTranslation } from "@/lib/i18n-landing";
+import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 
 export default function LandingPage() {
   const { t } = useTranslation();
@@ -160,9 +160,13 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale">
             {/* Minimal SVG Logos */}
+            {/* These are the bodies whose PUBLISHED figures the engine actually reads — NABARD
+                unit costs and gestation periods, NSFDC scheme terms, MoSPI survey data. SIDBI and
+                NRLM were listed here and are not sources we use; naming a body you do not draw
+                from reads as endorsement, which is a claim we have no right to make. */}
             <div className="flex items-center gap-2 font-heading font-bold text-xl"><ShieldCheck className="w-6 h-6"/> NABARD</div>
-            <div className="flex items-center gap-2 font-heading font-bold text-xl"><Zap className="w-6 h-6"/> SIDBI</div>
-            <div className="flex items-center gap-2 font-heading font-bold text-xl"><Activity className="w-6 h-6"/> NRLM</div>
+            <div className="flex items-center gap-2 font-heading font-bold text-xl"><Zap className="w-6 h-6"/> NSFDC</div>
+            <div className="flex items-center gap-2 font-heading font-bold text-xl"><Activity className="w-6 h-6"/> MoSPI</div>
           </div>
         </div>
       </section>
@@ -186,10 +190,10 @@ export default function LandingPage() {
                   <MapPin className="w-6 h-6" />
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold font-heading mb-4 leading-tight">
-                  {t("landing.feature1.title" as any)}
+                  {t("landing.feature1.title" as DictionaryKeys)}
                 </h3>
                 <p className="text-muted-foreground text-lg leading-relaxed">
-                  {t("landing.feature1.desc" as any)}
+                  {t("landing.feature1.desc" as DictionaryKeys)}
                 </p>
               </div>
               
@@ -214,10 +218,10 @@ export default function LandingPage() {
                   <BarChart2 className="w-6 h-6" />
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold font-heading mb-4 leading-tight">
-                  {t("landing.feature2.title" as any)}
+                  {t("landing.feature2.title" as DictionaryKeys)}
                 </h3>
                 <p className="text-primary-foreground/80 text-lg leading-relaxed mt-auto">
-                  {t("landing.feature2.desc" as any)}
+                  {t("landing.feature2.desc" as DictionaryKeys)}
                 </p>
               </div>
             </motion.div>
@@ -235,10 +239,10 @@ export default function LandingPage() {
                   <IndianRupee className="w-6 h-6" />
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold font-heading mb-4 leading-tight">
-                  {t("landing.feature3.title" as any)}
+                  {t("landing.feature3.title" as DictionaryKeys)}
                 </h3>
                 <p className="text-muted-foreground text-lg leading-relaxed max-w-xl">
-                  {t("landing.feature3.desc" as any)}
+                  {t("landing.feature3.desc" as DictionaryKeys)}
                 </p>
               </div>
 

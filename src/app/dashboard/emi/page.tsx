@@ -28,6 +28,7 @@ import {
 import { ACTIVITIES, ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { plan } from "@/lib/finance";
 import { useT } from "@/lib/i18n";
+import { SampleDataBanner } from "@/components/sample-data-banner";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
@@ -72,9 +73,14 @@ export default function LoanTrackerPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6 pb-24">
+      <SampleDataBanner
+        what="This loan"
+        detail="A worked example on a ₹1,00,000 goat unit, computed live by the finance kernel. It is not an account: no loan has been applied for, disbursed or tracked."
+      />
+
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold font-heading">My loan</h1>
+          <h1 className="text-3xl md:text-4xl font-bold font-heading">Sample loan</h1>
           <p className="text-muted-foreground mt-1.5">
             {activity.name} · {s.scheme.corporation} {s.scheme.name}
           </p>

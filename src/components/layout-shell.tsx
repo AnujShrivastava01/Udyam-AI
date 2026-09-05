@@ -3,7 +3,7 @@
 import { useAppStore } from "@/lib/store";
 import { useTranslation } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
-import { Leaf, Menu, User, Bell, Settings } from "lucide-react";
+import { Leaf, User, Bell, Settings } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
@@ -15,6 +15,13 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+
+  // The store is not persisted, so the server cannot know the locale — a client effect is the
+  // only route. Without it the document claims lang="en" while rendering Devanagari, which
+  // misleads screen readers and breaks hyphenation and voice selection.
+  useEffect(() => {
+    document.documentElement.lang = language === "hi" ? "hi" : "en";
+  }, [language]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,7 +59,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Three languages, all visible. A cycling toggle hides the options from exactly the
                 user who most needs to find their own language. */}
-            <div className="hidden sm:flex items-center rounded-full border bg-muted/30 p-0.5">
+            {/* Was `hidden sm:flex`, which removed the ONLY language control below 640px — on a product
+                whose users are most likely to be on a small phone and least likely to read English.
+                It now wraps instead of hiding. */}
+            <div className="flex items-center rounded-full border bg-muted/30 p-0.5 shrink-0">
               {([
                 { id: "en", label: "EN" },
                 { id: "hi", label: "हिन्दी" },
@@ -79,9 +89,9 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full"></span>
             </Button>
             
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="w-5 h-5" />
-            </Button>
+            {/* The hamburger opened nothing. An inert affordance in the header is worse than no
+                affordance: it teaches the user that tapping does nothing. Removed until it has a
+                menu; the bottom nav already carries mobile navigation. */}
 
             <div className="hidden md:flex items-center gap-2 border-l pl-4 ml-2">
               <div className="flex flex-col items-end">
