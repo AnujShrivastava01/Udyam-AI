@@ -3,7 +3,7 @@
 import { useAppStore } from "@/lib/store";
 import { useTranslation } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
-import { Leaf, Menu, User, Bell, Settings } from "lucide-react";
+import { Leaf, Menu, X, User, Bell, Settings } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +24,11 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const isLandingPage = pathname === "/";
 
@@ -79,8 +85,13 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full"></span>
             </Button>
             
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="w-5 h-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
 
             <div className="hidden md:flex items-center gap-2 border-l pl-4 ml-2">
@@ -96,6 +107,50 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
         </div>
         {/* Stepper only shown globally below header, but hidden on Landing Page for a cleaner look */}
         {!isLandingPage && <JourneyStepper />}
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="absolute top-14 left-0 w-full bg-background border-b shadow-lg md:hidden flex flex-col p-4 gap-6 animate-in slide-in-from-top-2 duration-200 z-40">
+            <div className="flex flex-col gap-3">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Language / भाषा
+              </span>
+              <div className="grid grid-cols-1 gap-2">
+                {([
+                  { id: "en", label: "English" },
+                  { id: "hi", label: "हिन्दी (Hindi)" },
+                  { id: "hinglish", label: "Hinglish" },
+                ] as const).map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => {
+                      setLanguage(l.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={cn(
+                      "text-left px-4 py-3 rounded-lg text-sm transition-colors border",
+                      language === l.id 
+                        ? "bg-primary/10 border-primary/30 text-primary font-medium" 
+                        : "bg-muted/30 border-transparent hover:bg-muted text-foreground"
+                    )}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="border-t pt-4 flex items-center justify-between">
+               <div className="flex flex-col">
+                  <span className="text-sm font-medium">{t("user.name")}</span>
+                  <span className="text-xs text-muted-foreground capitalize">{userRole.replace('-', ' ')}</span>
+               </div>
+               <div className="w-10 h-10 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-lg">
+                 R
+               </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content area */}

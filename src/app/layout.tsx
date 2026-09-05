@@ -14,9 +14,18 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  themeColor: "#0d9488",
+};
+
 export const metadata: Metadata = {
   title: "UdyamAI | Smart India Hackathon #26091",
   description: "AI-Driven Hyper-Local Business Advisory and Financial Structuring Assistant for Rural Micro-Entrepreneurs",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
