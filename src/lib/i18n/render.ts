@@ -53,7 +53,14 @@ export function renderMessage(
   params?: Record<string, string | number>,
 ): string {
   const dict = DICTS[locale] ?? DICTS.en;
+  // locale -> English -> the key itself. A string missing from one language shows English, which
+  // is a translation gap; falling through to the key means it is missing EVERYWHERE, which is a
+  // bug, and the user sees a machine identifier like "agent.listening" on screen. That is quiet
+  // in production and easy to ship, so it is made loud in development instead.
   const template = dict[key] ?? DICTS.en[key] ?? key;
+  if (process.env.NODE_ENV !== "production" && dict[key] == null && DICTS.en[key] == null) {
+    console.warn(`[i18n] no string for "${key}" in any dictionary — the raw key will render`);
+  }
   if (!params) return template;
   return template.replace(/\{(\w+)\}/g, (whole, name: string) =>
     name in params ? String(params[name]) : whole,

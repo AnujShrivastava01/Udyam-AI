@@ -320,9 +320,9 @@ export const HINGLISH: Dictionary = {
   "ai.facts.gestation": "Gestation period",
   "ai.facts.verdict": "Nateeja",
   "onb.districtHint": "Hamare paas sirf {states} ke gaon ka data hai.",
-  "agent.open": "App se baat karein",
-  "agent.title": "Mujhse baat kijiye",
-  "agent.hint": "Bas boliye. Hindi, Hinglish ya English.",
+  "agent.open": "Saathi se baat karein",
+  "agent.title": "Saathi",
+  "agent.hint": "Aapka awaaz sahayak — bas boliye, Hindi, Hinglish ya English mein.",
   "agent.examples":
     "Bolkar dekhiye: “mera district Gwalior hai”, “mujhe bakri palni hai”, “mere paas pachas hazaar rupaye hain”, “paise ka plan kholiye”, “meri kist kitni hai”, ya “yeh samjhaiye”.",
   "agent.speak": "Dabakar boliye",

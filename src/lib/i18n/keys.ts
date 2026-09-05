@@ -411,9 +411,9 @@ export const EN = {
   "ai.facts.verdict": "Verdict",
   "onb.districtHint": "We hold village data for {states} only.",
   // ── voice agent ──────────────────────────────────────────
-  "agent.open": "Talk to the app",
-  "agent.title": "Talk to me",
-  "agent.hint": "Just talk. Hindi, Hinglish or English.",
+  "agent.open": "Talk to Saathi",
+  "agent.title": "Saathi",
+  "agent.hint": "Your voice assistant \u2014 just talk, in Hindi, Hinglish or English.",
   "agent.examples":
     "Try: “my district is Gwalior”, “I want to keep goats”, “I have fifty thousand rupees”, “open the money plan”, “how much is my instalment”, or “explain this”.",
   "agent.speak": "Hold and speak",
