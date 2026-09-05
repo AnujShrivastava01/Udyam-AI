@@ -95,24 +95,31 @@ export function JourneyStepper() {
         {STEPS.map((step, index) => {
           const status = stateOf(index);
           const reached = status !== "pending";
-          // The connecting line used to run solid to the current step, which drew a completed
-          // path through five screens the user had never opened. A segment is only drawn once
-          // both of the steps it joins have been reached.
           const linkedBack = index > 0 && reached && stateOf(index - 1) !== "pending";
+          const isDisabled = index > activeIndex;
           const Icon = step.icon;
 
           return (
             <Link
-              href={step.href}
+              href={isDisabled ? "#" : step.href}
               key={step.id}
               aria-current={status === "current" ? "step" : undefined}
-              className="flex flex-col items-center relative z-10 flex-1 group rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className={cn(
+                "flex flex-col items-center relative z-10 flex-1 group rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                isDisabled && "opacity-70 cursor-not-allowed"
+              )}
+              onClick={(e) => {
+                if (isDisabled) e.preventDefault();
+              }}
             >
+              {/* Connecting Line */}
               {index !== 0 && (
                 <div
                   className={cn(
-                    "absolute top-4 md:top-5 -left-1/2 w-full h-[2px] -z-10 transition-colors",
-                    linkedBack ? "bg-primary" : "bg-muted group-hover:bg-primary/30",
+                    "absolute top-4 md:top-5 h-[2px] -z-10 transition-colors",
+                    "left-[calc(-50%+20px)] w-[calc(100%-40px)] md:left-[calc(-50%+24px)] md:w-[calc(100%-48px)]",
+                    linkedBack ? "bg-primary" : "bg-muted",
+                    !isDisabled && "group-hover:bg-primary/30"
                   )}
                 />
               )}
@@ -126,7 +133,8 @@ export function JourneyStepper() {
                       ? "border-primary bg-primary/10 text-primary hover:bg-primary/20 hover:scale-105"
                       : status === "visited"
                         ? "border-primary/40 bg-card text-primary/70 hover:border-primary/60"
-                        : "border-muted bg-card text-muted-foreground group-hover:border-primary/50 group-hover:text-primary/70",
+                        : "border-muted bg-card text-muted-foreground",
+                  !isDisabled && status === "pending" && "group-hover:border-primary/50 group-hover:text-primary/70"
                 )}
               >
                 <Icon className="w-4 h-4 md:w-5 md:h-5" aria-hidden="true" />
@@ -153,8 +161,9 @@ export function JourneyStepper() {
                   status === "current"
                     ? "text-foreground font-bold"
                     : status === "pending"
-                      ? "text-muted-foreground group-hover:text-foreground"
-                      : "text-foreground/80 group-hover:text-foreground",
+                      ? "text-muted-foreground"
+                      : "text-foreground/80",
+                  !isDisabled && "group-hover:text-foreground"
                 )}
               >
                 {t(`step.${step.id}` as DictionaryKeys)}
