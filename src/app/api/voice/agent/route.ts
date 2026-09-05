@@ -7,6 +7,7 @@ import { generateJson } from "@/lib/ai/vertex";
 import { callerKey, throttled } from "@/lib/api/throttle";
 import { activeProvider, listen, speak, verdictAsSpeech, confirmationPrompt } from "@/lib/voice";
 import { agentPrompt, validateAction, type AgentAction } from "@/lib/voice/agent";
+import { fastPath } from "@/lib/voice/fastpath";
 import { replyFor, UNKNOWN_REPLY, NO_PLAN_REPLY } from "@/lib/voice/replies";
 
 /**
@@ -83,11 +84,25 @@ export async function POST(req: NextRequest) {
 
   // ── 2. what they meant ────────────────────────────────────────────────────
   const awaitingConfirmation = ctx.pendingAmount != null;
-  const raw = await generateJson(agentPrompt(transcript, locale, awaitingConfirmation), {
-    temperature: 0,
-    maxOutputTokens: 200,
-  });
-  let action: AgentAction = validateAction(raw, transcript);
+
+  // A local classifier first. It answers the turns whose slot resolves deterministically —
+  // confirmations, "explain", noise, a district or block from a closed list, a page, an amount
+  // parseSpokenAmount is willing to read — in microseconds and without a paid call. Everything
+  // else, and anything below its confidence floor, goes to Gemini exactly as before.
+  const fast = fastPath(transcript, awaitingConfirmation);
+  let resolvedBy: "local" | "gemini" = "local";
+  let action: AgentAction;
+
+  if (fast) {
+    action = fast.action;
+  } else {
+    resolvedBy = "gemini";
+    const raw = await generateJson(agentPrompt(transcript, locale, awaitingConfirmation), {
+      temperature: 0,
+      maxOutputTokens: 200,
+    });
+    action = validateAction(raw, transcript);
+  }
 
   // A confirmation only means something when one was actually pending.
   if (action.kind === "confirm" && !awaitingConfirmation) {
@@ -180,6 +195,9 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     transcript,
     action,
+    // Which half of the cascade answered. Useful in a demo, and the only way to see how much
+    // traffic the local model is actually carrying.
+    resolvedBy,
     reply,
     audio: audio.ok ? audio.value : null,
     mimeType: "audio/wav",
