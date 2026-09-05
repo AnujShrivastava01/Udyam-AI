@@ -37,7 +37,7 @@ const STEPS: {
     isDone: (e) =>
       !!e.onboardingInput.location?.district &&
       !!e.onboardingInput.businessCategory &&
-      e.onboardingInput.marginCapital > 0,
+      (e.onboardingInput.marginCapital ?? 0) > 0,
   },
   { id: "analyse", icon: BarChart2, href: "/report/goat-20-1", paths: ["/report"] },
   { id: "finance", icon: IndianRupee, href: "/calculator", paths: ["/calculator"] },

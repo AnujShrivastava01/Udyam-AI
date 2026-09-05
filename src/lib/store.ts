@@ -5,8 +5,18 @@ export type UserRole = 'entrepreneur' | 'ngo' | 'financial-institution' | 'mento
 export type Language = 'hi' | 'en' | 'hinglish';
 
 interface OnboardingInput {
-  location: { village: string; block: string; district: string; lat: number; lng: number } | null;
-  marginCapital: number;
+  location: { village: string; block: string; district: string } | null;
+  /**
+   * null until the user actually types a figure.
+   *
+   * This was `number` defaulting to 100000, which no consumer could tell apart from an amount the
+   * user had entered. `location` and `businessCategory` were given falsy defaults; the one field
+   * carrying RUPEES was not. Downstream, that default enabled onboarding's Continue button before
+   * the question was answered, pre-filled the capital field so the placeholder never showed, and
+   * let the journey stepper tick Discover as done. Every one of those was the app asserting
+   * something about the user's finances that the user had never said.
+   */
+  marginCapital: number | null;
   businessCategory: string;
 }
 
@@ -47,7 +57,7 @@ export const useAppStore = create<AppState>()(
       language: 'hinglish', // rural users read Roman-script Hinglish faster than either pure language
       onboardingInput: {
         location: null,
-        marginCapital: 100000,
+        marginCapital: null,
         businessCategory: '',
       },
       visitedSteps: [],
@@ -66,7 +76,9 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'siddhi.session',
-      version: 1,
+      // 2: marginCapital became nullable. Bumping drops persisted sessions carrying the old
+      // 100000 default, which would otherwise be rehydrated as if the user had typed it.
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => ({

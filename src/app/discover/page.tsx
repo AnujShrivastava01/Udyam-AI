@@ -28,15 +28,38 @@ import { VERDICT_META } from "@/lib/finance/solvency";
 import { recommendActivities, type Recommendation } from "@/lib/market/recommend";
 import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
 import { useT, money, type MessageKey } from "@/lib/i18n";
+import { useAppStore } from "@/lib/store";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
 export default function DiscoverPage() {
   const { t } = useT();
-  const [villageId, setVillageId] = useState(VILLAGES[0].id);
-  const [margin, setMargin] = useState(100_000);
+  const onboardingInput = useAppStore((s) => s.onboardingInput);
+
+  /**
+   * Start from what the user told onboarding.
+   *
+   * This page read none of it: the village was VILLAGES[0] under a heading that says "Your
+   * village", and the margin was a hardcoded 1,00,000 under "Margin money you have". A user who
+   * had just answered all three onboarding questions was shown someone else's district and told
+   * they held a lakh of capital they had never mentioned.
+   */
+  // null means "the user has not chosen on this page", so the store still leads. A useState
+  // initialiser would have frozen the pre-rehydration value and thrown the session away.
+  const [villagePick, setVillagePick] = useState<string | null>(null);
+  const [marginPick, setMarginPick] = useState<number | null>(null);
   const [income, setIncome] = useState(86_119);
+
+  const villageId =
+    villagePick ??
+    VILLAGES.find(
+      (v) => v.district.toLowerCase() === (onboardingInput.location?.district ?? "").toLowerCase(),
+    )?.id ??
+    VILLAGES[0].id;
+  const margin = marginPick ?? onboardingInput.marginCapital ?? 100_000;
+  const setVillageId = setVillagePick;
+  const setMargin = setMarginPick;
 
   const village = VILLAGE_BY_ID.get(villageId)!;
   const result = useMemo(
@@ -121,6 +144,12 @@ export default function DiscoverPage() {
                 aria-label={t("calc.income.label")}
                 className="h-10"
               />
+              {/* Every recommendation, refusal and ranked score on this page is computed from this
+                  field. The calculator discloses the same default; this page printed it bare, so a
+                  benchmark constant read as the user's own declared income. */}
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                {t("calc.income.hint", { amount: money(86_119) })}
+              </p>
             </div>
           </div>
         </CardContent>

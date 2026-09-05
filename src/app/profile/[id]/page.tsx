@@ -6,12 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Target, ShieldCheck, Mail, IndianRupee, Store, TrendingUp } from "lucide-react";
-import { useAppStore } from "@/lib/store";
 import { SampleDataBanner } from "@/components/sample-data-banner";
 
+/**
+ * A sample profile, and nothing on it is the viewer's.
+ *
+ * This page used to splice the visitor's OWN business category and district into a hardcoded
+ * persona called "Rajesh's Enterprise", beside a green "Funded" badge. That mix is the dangerous
+ * part: two values a reader recognises as their own answers, sitting in the same header row as a
+ * funding status nobody has, on the page the journey stepper calls the final step. The banner
+ * above enumerates "loan history, KYC status and scores" — a funding badge is in none of those
+ * three, and proximity beats disclosure anyway.
+ *
+ * The header now reads entirely as the sample persona. The store is not consulted at all here.
+ */
 export default function ProfilePage() {
-  const { onboardingInput } = useAppStore();
-  const category = onboardingInput.businessCategory || 'Dairy & Livestock';
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
@@ -33,13 +42,19 @@ export default function ProfilePage() {
           <div className="flex-1 pb-2">
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 border-none">
-                {category}
+                Dairy &amp; Livestock
               </Badge>
-              <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50">Funded</Badge>
+              {/* A green "Funded" badge stood here unconditionally. There is no funding,
+                  application or disbursement state anywhere in this app, so it could not be made
+                  truthful by wiring it to something — the only correct value for an account-status
+                  chip on a product where no loan has ever been applied for is no chip. */}
+              <Badge variant="outline" className="text-muted-foreground">
+                Sample profile
+              </Badge>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground">Rajesh&apos;s Enterprise</h1>
             <p className="text-muted-foreground flex items-center gap-2 mt-1">
-              <MapPin className="w-4 h-4" /> {onboardingInput.location?.district || "Bundelkhand, UP"}
+              <MapPin className="w-4 h-4" aria-hidden="true" /> Bundelkhand, UP
             </p>
           </div>
           <div className="pb-2 w-full md:w-auto flex gap-3">

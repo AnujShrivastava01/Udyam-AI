@@ -10,7 +10,6 @@
  * contradictory numbers.
  */
 
-import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { plan } from "@/lib/finance";
 import type { SolvencyVerdict } from "@/lib/finance/solvency";
 
@@ -89,7 +88,6 @@ export function triage(application: Application): TriagedApplication {
     application.routedTo != null && application.routedTo !== p.structure.scheme.id;
   if (routingMismatch) issues.push("Scheme routing disagrees with the rules");
 
-  const activity = ACTIVITY_BY_ID.get(application.statedActivityId);
   const affordable = application.marginCapital >= p.structure.requiredMargin;
   if (!affordable) issues.push("Margin shortfall against the costed project");
 
@@ -107,7 +105,7 @@ export function triage(application: Application): TriagedApplication {
   return {
     application,
     status,
-    reason: primaryReason(status, p.solvency.verdict, routingMismatch, affordable, activity?.gestationMonths),
+    reason: primaryReason(status, p.solvency.verdict, routingMismatch, affordable, p.solvency.gapMonths),
     issues,
     flagCodes,
     solvency: p.solvency.verdict,
@@ -124,13 +122,24 @@ function primaryReason(
   verdict: SolvencyVerdict,
   routingMismatch: boolean,
   affordable: boolean,
-  gestationMonths?: number,
+  /**
+   * The kernel's own answer: gestationMonths − firstInstalmentMonth.
+   *
+   * This used to take gestationMonths and subtract a hardcoded 6 here. Six is the Term Loan
+   * moratorium; Micro Finance grants three, and the plantation exception grants twelve — so the
+   * officer's queue reported a gap that was wrong on every file outside one tier. `solvency`
+   * already computes it correctly and the row already carries the solvency result.
+   */
+  gapMonths?: number | null,
 ): string {
   if (!affordable) return "Applicant cannot fund the margin this activity actually needs.";
   if (verdict === "UNAFFORDABLE") return "Repayment would exceed half the declared household income.";
   if (routingMismatch) return "Routed to the wrong scheme tier for its project cost.";
-  if (verdict === "GESTATION_GAP")
-    return `Repayment begins roughly ${(gestationMonths ?? 0) - 6} months before this unit earns.`;
+  if (verdict === "GESTATION_GAP") {
+    return gapMonths != null
+      ? `Repayment begins ${gapMonths} months before this unit earns.`
+      : "Repayment begins before this unit earns.";
+  }
   if (verdict === "DSCR_FAIL") return "Earns, but without enough headroom for a bad season.";
   if (status === "CLEAR") return "Structure, cash flow and margin all check out.";
   return "Needs an officer's eye before sanction.";

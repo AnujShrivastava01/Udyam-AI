@@ -55,13 +55,11 @@ export default function OnboardingPage() {
   const handleLocationChange = (
     updates: Partial<{ district: string; block: string; village: string }>,
   ) => {
-    const current = onboardingInput.location ?? {
-      village: "",
-      block: "",
-      district: "",
-      lat: 25.4358,
-      lng: 78.5678,
-    };
+    // lat/lng used to be stamped here as 25.4358/78.5678 for every district — Jhansi town's
+    // coordinates, recorded even when the user picked Lalitpur or Jalaun. Four decimal places is
+    // ~11 metres of implied precision on a figure that was never measured, and nothing in the app
+    // ever read it. A fabricated coordinate is not made harmless by going unused.
+    const current = onboardingInput.location ?? { village: "", block: "", district: "" };
     setOnboardingInput({ location: { ...current, ...updates } });
   };
 
@@ -76,7 +74,7 @@ export default function OnboardingPage() {
    */
   const preview = useMemo(() => {
     const margin = onboardingInput.marginCapital;
-    if (!margin || margin <= 0) return null;
+    if (margin == null || margin <= 0) return null;
     try {
       const p = plan({ marginCapital: margin, useNeedBasedCosting: false });
       if (p.structure.sanctionedLoan <= 0) return null;
@@ -102,7 +100,9 @@ export default function OnboardingPage() {
 
   const canAdvance =
     (step === 1 && !!onboardingInput.location?.district) ||
-    (step === 2 && onboardingInput.marginCapital > 0) ||
+    // Was `marginCapital > 0`, true from mount because of the store default — so Continue was
+    // already enabled on a question the user had not answered.
+    (step === 2 && (onboardingInput.marginCapital ?? 0) > 0) ||
     (step === 3 && !!onboardingInput.businessCategory);
 
   return (
@@ -231,36 +231,43 @@ export default function OnboardingPage() {
                           inputMode="numeric"
                           placeholder="50000"
                           className="pl-9 text-lg"
-                          value={onboardingInput.marginCapital || ""}
-                          onChange={(e) =>
+                          value={onboardingInput.marginCapital ?? ""}
+                          onChange={(e) => {
+                            const raw = e.target.value.trim();
+                            // Empty means unknown, not zero. Clearing the field must put the
+                            // question back, not answer it with 0.
                             setOnboardingInput({
-                              marginCapital: Math.max(0, Number(e.target.value) || 0),
-                            })
-                          }
+                              marginCapital: raw === "" ? null : Math.max(0, Number(raw) || 0),
+                            });
+                          }}
                         />
                       </div>
                     </div>
 
                     {/* text-accent on bg-accent/10 measured about 2.1:1. This is the one panel on
-                        the screen carrying rupee figures, so it was the worst possible place for it. */}
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
-                      <p className="flex items-center gap-2 font-semibold">
-                        <IndianRupee className="w-4 h-4 shrink-0 text-primary" aria-hidden="true" />
-                        {t("onb.previewTitle", { margin: money(onboardingInput.marginCapital || 0) })}
-                      </p>
-                      <p className="mt-1.5 leading-relaxed text-muted-foreground">
-                        {preview
-                          ? t("onb.previewBody", {
-                              scheme: t(`scheme.${preview.scheme}.name` as MessageKey),
-                              projectCost: money(preview.projectCost),
-                              loan: money(preview.loan),
-                              instalment: money(preview.instalment),
-                            })
-                          : t("onb.previewNone", {
-                              margin: money(onboardingInput.marginCapital || 0),
-                            })}
-                      </p>
-                    </div>
+                        the screen carrying rupee figures, so it was the worst possible place for it.
+                        It is also not rendered at all until there is a figure to render — with a
+                        null margin it would have printed ₹0, which is a different false number. */}
+                    {onboardingInput.marginCapital != null && (
+                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+                        <p className="flex items-center gap-2 font-semibold">
+                          <IndianRupee className="w-4 h-4 shrink-0 text-primary" aria-hidden="true" />
+                          {t("onb.previewTitle", { margin: money(onboardingInput.marginCapital) })}
+                        </p>
+                        <p className="mt-1.5 leading-relaxed text-muted-foreground">
+                          {preview
+                            ? t("onb.previewBody", {
+                                scheme: t(`scheme.${preview.scheme}.name` as MessageKey),
+                                projectCost: money(preview.projectCost),
+                                loan: money(preview.loan),
+                                instalment: money(preview.instalment),
+                              })
+                            : t("onb.previewNone", {
+                                margin: money(onboardingInput.marginCapital),
+                              })}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 

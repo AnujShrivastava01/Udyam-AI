@@ -62,7 +62,18 @@ const FLAG_STYLE: Record<string, string> = {
 export default function CalculatorPage() {
   const { onboardingInput, setOnboardingInput } = useAppStore();
   const { t } = useT();
-  const [margin, setMargin] = useState(onboardingInput.marginCapital || 100_000);
+  /**
+   * An explicit local example, not a claim about the user.
+   *
+   * `marginPick` is null until this page's own controls are touched, so the persisted session
+   * leads — which matters because the store rehydrates AFTER mount, and a useState initialiser
+   * would have captured the pre-rehydration default and discarded whatever the user had entered.
+   * A null store value means the question was never answered and must not be promoted into a
+   * figure, so the example default is applied here and written back to nothing.
+   */
+  const [marginPick, setMarginPick] = useState<number | null>(null);
+  const margin = marginPick ?? onboardingInput.marginCapital ?? 100_000;
+  const setMargin = setMarginPick;
   const [activityId, setActivityId] = useState<string | undefined>("goat-20-1");
   const [needBased, setNeedBased] = useState(true);
   const [convention, setConvention] = useState<MoratoriumConvention>("serviced");
@@ -71,10 +82,15 @@ export default function CalculatorPage() {
   // Dragging the slider fired this on every tick, and the store drives LayoutShell — so one drag
   // re-rendered the header, the stepper and the bottom nav a few hundred times. The store only
   // needs the value the user settled on.
+  //
+  // It also fired on MOUNT, writing this page's example default into the store as though the user
+  // had entered it — which then ticked Discover in the stepper and pre-filled onboarding. Nothing
+  // is written until the user actually moves the control.
   useEffect(() => {
-    const id = setTimeout(() => setOnboardingInput({ marginCapital: margin }), 250);
+    if (marginPick == null) return;
+    const id = setTimeout(() => setOnboardingInput({ marginCapital: marginPick }), 250);
     return () => clearTimeout(id);
-  }, [margin, setOnboardingInput]);
+  }, [marginPick, setOnboardingInput]);
 
   // The kernel is guarded here as well as internally. A cleared input is an ordinary user action,
   // and it must never be able to take the page down mid-render.

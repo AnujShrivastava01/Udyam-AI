@@ -39,7 +39,7 @@ const dictionary = {
 
     // Hero panel (live engine output)
     "hero.panel.caption": "Live output from the engine on this page",
-    "hero.panel.case": "₹1,00,000 goat unit · NSFDC Micro Finance",
+    "hero.panel.case": "Goat rearing · ₹1,00,000 project cost · NSFDC Micro Finance",
     "hero.panel.preIncome": "falls due before the first rupee of income",
     "hero.panel.gestation": "Gestation (NABARD)",
     "hero.panel.moratorium": "Moratorium (NSFDC)",
@@ -112,7 +112,7 @@ const dictionary = {
 
     // Hero panel (live engine output)
     "hero.panel.caption": "इसी पेज पर चल रहे इंजन का सीधा परिणाम",
-    "hero.panel.case": "₹1,00,000 की बकरी इकाई · NSFDC माइक्रो फाइनेंस",
+    "hero.panel.case": "बकरी पालन · ₹1,00,000 परियोजना लागत · NSFDC माइक्रो फाइनेंस",
     "hero.panel.preIncome": "पहली कमाई से पहले ही चुकाने पड़ते हैं",
     "hero.panel.gestation": "गेस्टेशन अवधि (NABARD)",
     "hero.panel.moratorium": "मोहलत अवधि (NSFDC)",
@@ -185,7 +185,7 @@ const dictionary = {
 
     // Hero panel (live engine output)
     "hero.panel.caption": "Isi page par chal rahe engine ka seedha output",
-    "hero.panel.case": "₹1,00,000 ki bakri unit · NSFDC Micro Finance",
+    "hero.panel.case": "Bakri palan · ₹1,00,000 project cost · NSFDC Micro Finance",
     "hero.panel.preIncome": "pehli kamai se pehle hi chukane padte hain",
     "hero.panel.gestation": "Gestation period (NABARD)",
     "hero.panel.moratorium": "Moratorium (NSFDC)",

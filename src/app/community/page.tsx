@@ -49,8 +49,13 @@ export default function CommunityPage() {
   const { onboardingInput } = useAppStore();
   const [newPost, setNewPost] = useState("");
   
-  const currentCategory = onboardingInput.businessCategory || "Dairy";
-  const location = onboardingInput.location?.district || "Bundelkhand";
+  // These were `businessCategory || "Dairy"` and `district || "Bundelkhand"`. For anyone who has
+  // not finished onboarding — which includes every first-time visitor — the page told them they
+  // were in the Dairy community in Bundelkhand, a region that is not even one of the three
+  // districts onboarding offers. The heading now names the user's own answers or says nothing.
+  const currentCategory = onboardingInput.businessCategory;
+  const location = onboardingInput.location?.district;
+  const knowsUser = Boolean(currentCategory && location);
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
@@ -66,9 +71,20 @@ export default function CommunityPage() {
         <div>
           <Badge variant="outline" className="mb-2 bg-background">Community Hub</Badge>
           <h1 className="text-3xl md:text-4xl font-bold font-heading">
-            <span className="capitalize">{currentCategory}</span> Entrepreneurs — <span className="capitalize text-primary">{location}</span>
+            {knowsUser ? (
+              <>
+                <span className="capitalize">{currentCategory}</span> Entrepreneurs —{" "}
+                <span className="capitalize text-primary">{location}</span>
+              </>
+            ) : (
+              "Community Hub"
+            )}
           </h1>
-          <p className="text-muted-foreground mt-2">Connect with local businesses, NGOs and mentors in your block.</p>
+          <p className="text-muted-foreground mt-2">
+            {knowsUser
+              ? "Connect with local businesses, NGOs and mentors in your block."
+              : "Finish onboarding and this becomes your own block’s hub."}
+          </p>
         </div>
         {/* A member count was shown here. It was invented, and an invented traction number on a
             government submission is not worth the pixel it sits on. It returns when there is a
@@ -81,18 +97,27 @@ export default function CommunityPage() {
         <div className="lg:col-span-3 space-y-6 hidden lg:block">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Your Groups</CardTitle>
+              {/* Was "Your Groups", with "Local Dairy Farmers" styled as the joined row and a
+                  "Join More Groups" button that had no onClick. There is no membership state in
+                  this app at all — the store holds userRole, language, onboardingInput and
+                  visitedSteps. Telling a first-time visitor which groups they belong to is an
+                  invention about them, not about the data. */}
+              <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Example groups
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="flex items-center gap-3 p-2 rounded-md bg-muted/50 cursor-pointer font-medium">
+              <div className="flex items-center gap-3 p-2 rounded-md text-muted-foreground">
                 <div className="w-8 h-8 rounded bg-primary/20 text-primary flex items-center justify-center">🐮</div>
                 Local Dairy Farmers
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer text-muted-foreground">
+              <div className="flex items-center gap-3 p-2 rounded-md text-muted-foreground">
                 <div className="w-8 h-8 rounded bg-accent/20 text-accent flex items-center justify-center">💰</div>
                 Mudra Loan Seekers
               </div>
-              <Button variant="ghost" className="w-full text-xs mt-2 justify-start"><PlusCircle className="w-4 h-4 mr-2"/> Join More Groups</Button>
+              <Button variant="ghost" className="w-full text-xs mt-2 justify-start" disabled>
+                <PlusCircle className="w-4 h-4 mr-2" aria-hidden="true" /> Joining is not built yet
+              </Button>
             </CardContent>
           </Card>
           
