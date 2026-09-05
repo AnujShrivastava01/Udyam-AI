@@ -27,11 +27,13 @@ import { Slider } from "@/components/ui/slider";
 import { VERDICT_META } from "@/lib/finance/solvency";
 import { recommendActivities, type Recommendation } from "@/lib/market/recommend";
 import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
+import { useT, type MessageKey } from "@/lib/i18n";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
 export default function DiscoverPage() {
+  const { t } = useT();
   const [villageId, setVillageId] = useState(VILLAGES[0].id);
   const [margin, setMargin] = useState(100_000);
   const [income, setIncome] = useState(86_119);
@@ -46,11 +48,10 @@ export default function DiscoverPage() {
     <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6 pb-24">
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
-          <Compass className="w-8 h-8 text-primary" /> What should you actually start?
+          <Compass className="w-8 h-8 text-primary" /> {t("discover.title")}
         </h1>
         <p className="text-muted-foreground text-lg max-w-3xl">
-          One recommendation, with the binding constraint named — not a menu of plausible options
-          for you to guess between.
+          {t("discover.subtitle")}
         </p>
       </header>
 
@@ -59,7 +60,7 @@ export default function DiscoverPage() {
         <CardContent className="pt-6 grid gap-5 md:grid-cols-3">
           <div className="md:col-span-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Your village
+              {t("discover.yourVillage")}
             </p>
             <div className="grid gap-1.5">
               {VILLAGES.map((v) => (
@@ -86,7 +87,7 @@ export default function DiscoverPage() {
           <div className="md:col-span-2 space-y-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Margin money you have
+                {t("discover.marginLabel")}
               </p>
               <div className="relative">
                 <IndianRupee className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -108,7 +109,7 @@ export default function DiscoverPage() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Annual household income
+                {t("calc.income.label")}
               </p>
               <Input
                 type="number"
@@ -126,7 +127,7 @@ export default function DiscoverPage() {
         <Card className="border-2 border-amber-500/40 bg-amber-500/10">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2 text-amber-900 dark:text-amber-300">
-              <Ban className="w-5 h-5" /> We are not going to recommend anything here
+<Ban className="w-5 h-5" /> {t("discover.refusalTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -148,20 +149,22 @@ export default function DiscoverPage() {
                 variant="outline"
                 className="w-fit border-emerald-500/40 text-emerald-800 dark:text-emerald-300 mb-1"
               >
-                Our recommendation
+                {t("discover.ourRecommendation")}
               </Badge>
-              <CardTitle className="text-2xl font-heading">{result.top.activity.name}</CardTitle>
+              <CardTitle className="text-2xl font-heading">
+                {t(`activity.${result.top.activity.id}.name` as MessageKey)}
+              </CardTitle>
               <CardDescription className="text-base">
-                {result.top.bindingConstraint}
+                {t(result.top.bindingConstraint.key, result.top.bindingConstraint.params)}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Stat label="Project cost" value={`₹${inr(result.top.projectCost)}`} />
-                <Stat label="Your share" value={`₹${inr(result.top.requiredMargin)}`} />
-                <Stat label="Per quarter" value={`₹${inr(result.top.quarterlyInstalment)}`} />
+                <Stat label={t("calc.projectCost")} value={`₹${inr(result.top.projectCost)}`} />
+                <Stat label={t("calc.yourShare")} value={`₹${inr(result.top.requiredMargin)}`} />
+                <Stat label={t("discover.perQuarter")} value={`₹${inr(result.top.quarterlyInstalment)}`} />
                 <Stat
-                  label="Earns from month"
+                  label={t("discover.earnsFromMonth")}
                   value={
                     result.top.activity.gestationMonths === 0
                       ? "1"
@@ -172,12 +175,12 @@ export default function DiscoverPage() {
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link href="/calculator">
                   <Button className="rounded-full">
-                    See the repayment schedule <ArrowRight className="ml-2 w-4 h-4" />
+                    {t("discover.seeSchedule")} <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
                 <Link href={`/report/${villageId}`}>
                   <Button variant="outline" className="rounded-full">
-                    Full feasibility report
+                    {t("discover.fullReport")}
                   </Button>
                 </Link>
               </div>
@@ -189,7 +192,7 @@ export default function DiscoverPage() {
       {/* the rest, including what we advise against */}
       <div>
         <h2 className="text-lg font-bold font-heading mb-3">
-          Everything else we looked at, and why it ranked where it did
+          {t("discover.othersTitle")}
         </h2>
         <div className="space-y-2">
           {result.ranked
@@ -212,6 +215,7 @@ export default function DiscoverPage() {
 }
 
 function RankedRow({ rec }: { rec: Recommendation }) {
+  const { t } = useT();
   const meta = VERDICT_META[rec.solvency];
   return (
     <div
@@ -226,9 +230,11 @@ function RankedRow({ rec }: { rec: Recommendation }) {
           ) : (
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           )}
-          {rec.activity.name}
+          {t(`activity.${rec.activity.id}.name` as MessageKey)}
         </p>
-        <p className="text-sm text-muted-foreground mt-0.5">{rec.bindingConstraint}</p>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          {t(rec.bindingConstraint.key, rec.bindingConstraint.params)}
+        </p>
       </div>
 
       {rec.preIncomeObligation > 0 && (
@@ -236,7 +242,7 @@ function RankedRow({ rec }: { rec: Recommendation }) {
           <p className="text-sm font-bold text-rose-600 flex items-center gap-1 justify-end">
             <TrendingDown className="w-3.5 h-3.5" />₹{inr(rec.preIncomeObligation)}
           </p>
-          <p className="text-[10px] text-muted-foreground">due before income</p>
+<p className="text-[10px] text-muted-foreground">{t("discover.dueBeforeIncome")}</p>
         </div>
       )}
 
@@ -250,7 +256,7 @@ function RankedRow({ rec }: { rec: Recommendation }) {
               : "border-border text-muted-foreground"
         }
       >
-        {meta.label}
+        {t(`solvency.${rec.solvency}.label` as MessageKey)}
       </Badge>
 
       <span className="text-sm font-bold tabular-nums w-10 text-right">{rec.score}</span>

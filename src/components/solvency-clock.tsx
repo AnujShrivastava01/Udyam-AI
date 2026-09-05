@@ -9,6 +9,7 @@ import type { Activity } from "@/lib/finance/activities";
 import type { ScheduleRow } from "@/lib/finance/amortise";
 import { VERDICT_META, type SolvencyResult } from "@/lib/finance/solvency";
 import { SourceChip } from "@/components/source-chip";
+import { useT, type MessageKey } from "@/lib/i18n";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
@@ -64,6 +65,7 @@ export function SolvencyClock({
   activity,
   horizonMonths,
 }: SolvencyClockProps) {
+  const { t } = useT();
   const gestation = activity?.gestationMonths ?? null;
   const lastMonth = schedule.length ? schedule[schedule.length - 1].month : 36;
   const horizon = horizonMonths ?? Math.min(lastMonth, Math.max(24, (gestation ?? 0) + 9));
@@ -84,22 +86,26 @@ export function SolvencyClock({
           <div className="min-w-0">
             <CardTitle className="text-lg flex items-center gap-2">
               <Icon className={`w-5 h-5 shrink-0 ${tone.text}`} />
-              The Solvency Clock
+              {t("clock.title")}
             </CardTitle>
             <CardDescription className="mt-1">
-              When the enterprise earns, against when the scheme collects.
+              {t("clock.subtitle")}
             </CardDescription>
           </div>
           <Badge variant="outline" className={`${tone.text} ${tone.ring} shrink-0 whitespace-nowrap`}>
-            {VERDICT_META[solvency.verdict].label}
+            {t(`solvency.${solvency.verdict}.label` as MessageKey)}
           </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="pt-6 space-y-6">
         <div>
-          <p className={`text-xl font-bold font-heading ${tone.text}`}>{solvency.headline}</p>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{solvency.detail}</p>
+          <p className={`text-xl font-bold font-heading ${tone.text}`}>
+            {t(solvency.headlineMsg.key, solvency.headlineMsg.params)}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            {t(solvency.detailMsg.key, solvency.detailMsg.params)}
+          </p>
         </div>
 
         {gestation != null && (
@@ -107,7 +113,7 @@ export function SolvencyClock({
             {/* income track */}
             <div className="flex items-center gap-3">
               <span className="w-20 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground text-right">
-                Income
+                {t("clock.income")}
               </span>
               <div className="relative h-7 flex-1 rounded-md bg-muted/50 overflow-hidden border">
                 <div
@@ -122,12 +128,12 @@ export function SolvencyClock({
                   style={{ left: `${gestationPct}%` }}
                 >
                   <span className="text-[10px] font-bold text-emerald-950 px-2 truncate">
-                    earning
+                    {t("clock.earning")}
                   </span>
                 </motion.div>
                 {gestationPct > 12 && (
                   <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-[10px] font-bold text-rose-900 dark:text-rose-200">
-                    no income · gestation {gestation} months
+                    {t("clock.noIncome", { months: gestation })}
                   </span>
                 )}
               </div>
@@ -136,7 +142,7 @@ export function SolvencyClock({
             {/* obligations track */}
             <div className="flex items-center gap-3">
               <span className="w-20 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground text-right">
-                Repayment
+                {t("clock.repayment")}
               </span>
               <div className="relative h-7 flex-1 rounded-md bg-muted/50 overflow-hidden border">
                 {visible.map((row) => {
@@ -170,7 +176,7 @@ export function SolvencyClock({
                     {m}
                   </span>
                 ))}
-                <span className="absolute right-0 text-[10px] text-muted-foreground">months</span>
+<span className="absolute right-0 text-[10px] text-muted-foreground">{t("clock.months")}</span>
               </div>
             </div>
           </div>
@@ -179,17 +185,17 @@ export function SolvencyClock({
         {solvency.preIncomeObligation > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <Stat
-              label="Due before first income"
+              label={t("clock.dueBeforeIncome")}
               value={`₹${inr(solvency.preIncomeObligation)}`}
               tone="bad"
             />
             <Stat
-              label="Payments in that window"
+              label={t("clock.paymentsInWindow")}
               value={String(solvency.preIncomePayments)}
               tone="bad"
             />
             <Stat
-              label="Uncovered months"
+              label={t("clock.uncoveredMonths")}
               value={solvency.gapMonths != null ? `${solvency.gapMonths}` : "—"}
               tone="bad"
             />

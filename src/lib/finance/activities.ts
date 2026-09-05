@@ -27,7 +27,17 @@ export type ActivityClass =
   | "construction"
   | "retail"
   | "services"
-  | "manufacturing";
+  | "manufacturing"
+  | "agri";
+
+/**
+ * How much we actually know about a row's cost and gestation.
+ *
+ *  - `nabard-unit-cost` transcribed from a NABARD regional Unit Cost table, gestation column included.
+ *  - `indicative`       a planning figure for activities whose NABARD row we have not parsed yet.
+ *                       Structurally right, not yet sourced. The UI must say so.
+ */
+export type SourceTier = "nabard-unit-cost" | "indicative";
 
 export interface Activity {
   id: string;
@@ -46,6 +56,7 @@ export interface Activity {
   repaymentYears?: number;
   /** Indicative annual net surplus once the unit is running, in rupees. Used for DSCR only. */
   annualSurplus?: number;
+  tier: SourceTier;
   provenance: Provenance;
 }
 
@@ -53,6 +64,14 @@ const NABARD_JH: Provenance = {
   source: "NABARD Jharkhand Regional Office — Unit Cost 2023-24",
   url: "https://www.nabard.org/",
   retrievedAt: "2026-09-04",
+  needsVerification: true,
+};
+
+const INDICATIVE: Provenance = {
+  source:
+    "Indicative planning figure — NABARD/KVIC model project profiles for this activity have NOT yet been parsed",
+  url: "https://www.nabard.org/",
+  retrievedAt: "2026-09-05",
   needsVerification: true,
 };
 
@@ -64,6 +83,7 @@ export const ACTIVITIES: Activity[] = [
     activityClass: "livestock",
     unitCost: 57_000,
     gestationMonths: 18,
+    tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
   {
@@ -73,6 +93,7 @@ export const ACTIVITIES: Activity[] = [
     activityClass: "livestock",
     unitCost: 100_000,
     gestationMonths: 18,
+    tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
   {
@@ -82,6 +103,7 @@ export const ACTIVITIES: Activity[] = [
     activityClass: "dairy",
     unitCost: 97_500,
     gestationMonths: 27,
+    tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
   {
@@ -92,6 +114,7 @@ export const ACTIVITIES: Activity[] = [
     unitCost: 152_000,
     // NABARD records a 6–12 month band; we hold the conservative end and say so in the UI.
     gestationMonths: 12,
+    tier: "nabard-unit-cost",
     provenance: NABARD_JH,
   },
   {
@@ -101,7 +124,81 @@ export const ACTIVITIES: Activity[] = [
     activityClass: "dairy",
     unitCost: 230_000,
     gestationMonths: 0, // NABARD records gestation as NIL — the animal is already in milk.
+    tier: "nabard-unit-cost",
     provenance: NABARD_JH,
+  },
+
+  // ── Non-farm trades ───────────────────────────────────────────────────────────────────────
+  // These matter because the problem statement names "Dairy, Retail, Textiles" and because they
+  // are where the gestation argument cuts the other way: a shop earns in week one. Costs below
+  // are INDICATIVE and labelled as such until the unit-cost parse lands.
+  {
+    id: "tailoring-2",
+    name: "Tailoring unit — 2 machines",
+    unit: "2 machines, 1 overlock, starting cloth stock",
+    activityClass: "manufacturing",
+    unitCost: 75_000,
+    gestationMonths: 0,
+    annualSurplus: 96_000,
+    tier: "indicative",
+    provenance: INDICATIVE,
+  },
+  {
+    id: "kirana-store",
+    name: "Kirana / general store",
+    unit: "Shop fit-out plus opening stock",
+    activityClass: "retail",
+    unitCost: 120_000,
+    gestationMonths: 0,
+    annualSurplus: 132_000,
+    tier: "indicative",
+    provenance: INDICATIVE,
+  },
+  {
+    id: "papad-pickle",
+    name: "Papad & pickle unit",
+    unit: "Food processing unit with drying and packing",
+    activityClass: "manufacturing",
+    // Deliberately at the tier boundary: this is the activity that lands a borrower in the
+    // ₹1.40 lakh cliff, and it makes the cliff explorer concrete rather than abstract.
+    unitCost: 140_000,
+    gestationMonths: 2,
+    annualSurplus: 150_000,
+    tier: "indicative",
+    provenance: INDICATIVE,
+  },
+  {
+    id: "mushroom",
+    name: "Mushroom cultivation",
+    unit: "Low-cost shed, 100 bags per cycle",
+    activityClass: "agri",
+    unitCost: 95_000,
+    gestationMonths: 3,
+    annualSurplus: 108_000,
+    tier: "indicative",
+    provenance: INDICATIVE,
+  },
+  {
+    id: "bee-keeping-20",
+    name: "Bee-keeping — 20 boxes",
+    unit: "20 colonies with boxes and extraction kit",
+    activityClass: "livestock",
+    unitCost: 110_000,
+    gestationMonths: 9,
+    annualSurplus: 90_000,
+    tier: "indicative",
+    provenance: INDICATIVE,
+  },
+  {
+    id: "atta-chakki",
+    name: "Flour mill (atta chakki)",
+    unit: "Motorised mill with installation",
+    activityClass: "manufacturing",
+    unitCost: 185_000,
+    gestationMonths: 0,
+    annualSurplus: 168_000,
+    tier: "indicative",
+    provenance: INDICATIVE,
   },
 ];
 
@@ -126,9 +223,12 @@ export function fastestToIncome(within?: { maxUnitCost?: number }): Activity[] {
 /** Honest coverage reporting — the UI shows this rather than implying national coverage. */
 export const ACTIVITY_COVERAGE = {
   rows: ACTIVITIES.length,
+  verified: ACTIVITIES.filter((a) => a.tier === "nabard-unit-cost").length,
+  indicative: ACTIVITIES.filter((a) => a.tier === "indicative").length,
   states: ["Jharkhand"],
   note:
-    "Seed dataset transcribed from one NABARD regional Unit Cost table. National coverage requires " +
-    "parsing every state's PDF; until then, activities outside this list have no gestation figure " +
-    "and the solvency check will decline to run rather than guess.",
+    "5 rows are transcribed from a NABARD regional Unit Cost table, gestation column included. " +
+    "The rest are indicative planning figures whose NABARD/KVIC profiles we have not parsed yet — " +
+    "they are badged as such wherever they appear. Activities outside this list get no gestation " +
+    "figure at all, and the solvency check declines to run rather than guess.",
 };

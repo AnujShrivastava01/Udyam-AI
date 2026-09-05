@@ -13,6 +13,7 @@
 import { ACTIVITIES, type Activity } from "@/lib/finance/activities";
 import { plan } from "@/lib/finance";
 import type { SolvencyVerdict } from "@/lib/finance/solvency";
+import { msg, type Message } from "@/lib/i18n/keys";
 
 import { buildFeasibilityReport } from "./feasibility";
 import type { Village } from "./villages";
@@ -23,8 +24,9 @@ export interface Recommendation {
   score: number;
   feasibilityScore: number | null;
   solvency: SolvencyVerdict;
-  /** The one thing that decides this row, in plain words. */
-  bindingConstraint: string;
+  /** The one thing that decides this row. A message key + params, never prose — so it can be
+   *  rendered in Hindi or Hinglish without the engine knowing any language. */
+  bindingConstraint: Message;
   /** Money the borrower must find before the unit earns, in rupees. */
   preIncomeObligation: number;
   quarterlyInstalment: number;
@@ -121,27 +123,24 @@ function bindingConstraintFor(
   marginCapital: number,
   activity: Activity,
   saturationLabel: string,
-): string {
+): Message {
+  // Numbers are formatted here, once, and passed as slots. The template that receives them may be
+  // in any language; it can never alter the figure.
   const inr = (n: number) =>
-    new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
+    `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n))}`;
 
   if (!affordable) {
-    return `Needs ₹${inr(requiredMargin)} of your own money; you have ₹${inr(marginCapital)}.`;
+    return msg("constraint.marginShort", {
+      required: inr(requiredMargin),
+      available: inr(marginCapital),
+    });
   }
-  if (verdict === "UNAFFORDABLE") {
-    return "Repayment would exceed half your household income — over RBI's limit.";
-  }
+  if (verdict === "UNAFFORDABLE") return msg("constraint.overIncomeCap");
   if (verdict === "GESTATION_GAP") {
-    return `Instalments start ${activity.gestationMonths - 6} months before this unit earns anything.`;
+    return msg("constraint.gestationGap", { months: activity.gestationMonths - 6 });
   }
-  if (verdict === "DSCR_FAIL") {
-    return "Earns, but with too little headroom to survive a bad season.";
-  }
-  if (verdict === "INSUFFICIENT_DATA") {
-    return "We do not hold a gestation figure for this activity.";
-  }
-  if (saturationLabel === "crowded") {
-    return "Cash flow works, but the block is already above the national norm for this sector.";
-  }
-  return "Income starts before repayment does, and the margin is within reach.";
+  if (verdict === "DSCR_FAIL") return msg("constraint.thinCoverage");
+  if (verdict === "INSUFFICIENT_DATA") return msg("constraint.noGestationData");
+  if (saturationLabel === "crowded") return msg("constraint.crowded");
+  return msg("constraint.clear");
 }

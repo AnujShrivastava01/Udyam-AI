@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Check, Compass, BarChart2, IndianRupee, Users, Settings, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n-landing";
 
 const STEPS = [
   { id: "discover", label: "Discover", icon: Compass, paths: ["/onboarding", "/discover", "/"] },

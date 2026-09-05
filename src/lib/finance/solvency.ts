@@ -14,6 +14,8 @@
 import type { ScheduleRow } from "./amortise";
 import type { Activity } from "./activities";
 import { RBI_REPAYMENT_CAP_OF_INCOME } from "./schemes";
+import { msg, type Message } from "@/lib/i18n/keys";
+import { renderMessage } from "@/lib/i18n/render";
 
 export type SolvencyVerdict =
   | "FEASIBLE"
@@ -36,8 +38,12 @@ export interface SolvencyInput {
 
 export interface SolvencyResult {
   verdict: SolvencyVerdict;
+  /** English rendering, for logs, tests and the WhatsApp English path. */
   headline: string;
   detail: string;
+  /** The same two sentences as message keys + slots, so any locale can render them. */
+  headlineMsg: Message;
+  detailMsg: Message;
   /** Payments falling due at or before the activity's first income. */
   preIncomeObligation: number;
   /** How many of those payments there are. */
@@ -55,6 +61,16 @@ export interface SolvencyResult {
 }
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Build the English strings and the localisable messages from one source of truth. */
+function say(headlineMsg: Message, detailMsg: Message) {
+  return {
+    headlineMsg,
+    detailMsg,
+    headline: renderMessage("en", headlineMsg.key, headlineMsg.params),
+    detail: renderMessage("en", detailMsg.key, detailMsg.params),
+  };
+}
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
@@ -111,11 +127,14 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
     return {
       ...base,
       verdict: "UNAFFORDABLE",
-      headline: `Repayment would take ${(incomeShare * 100).toFixed(0)}% of household income`,
-      detail:
-        `Peak annual debt service is ₹${inr(peak)} against a household income of ₹${inr(annualHouseholdIncome!)}. ` +
-        `RBI's microfinance framework caps repayment obligations at ${RBI_REPAYMENT_CAP_OF_INCOME * 100}% of household ` +
-        `income. This structure is over that line before the business has proved anything.`,
+      ...say(
+        msg("solvency.unaffordable.headline", { share: `${(incomeShare * 100).toFixed(0)}%` }),
+        msg("solvency.unaffordable.detail", {
+          debtService: `₹${inr(peak)}`,
+          income: `₹${inr(annualHouseholdIncome!)}`,
+          cap: `${RBI_REPAYMENT_CAP_OF_INCOME * 100}%`,
+        }),
+      ),
     };
   }
 
@@ -124,11 +143,7 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
     return {
       ...base,
       verdict: "INSUFFICIENT_DATA",
-      headline: "No gestation figure for this activity",
-      detail:
-        "We hold NABARD unit-cost norms only for the activities in our seed dataset. Rather than " +
-        "estimate when this one starts earning, we decline to give a solvency verdict. The " +
-        "repayment schedule above is still exact.",
+      ...say(msg("solvency.noData.headline"), msg("solvency.noData.detail")),
     };
   }
 
@@ -151,12 +166,16 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
     return {
       ...withGap,
       verdict: "GESTATION_GAP",
-      headline: `₹${inr(preIncomeObligation)} falls due before the first rupee of income`,
-      detail:
-        `NABARD prices this activity with a ${gestationMonths}-month gestation, but the first instalment is due ` +
-        `at month ${firstInstalmentMonth}. That leaves ${gapMonths} months — ${preIncomeRows.length} payment` +
-        `${preIncomeRows.length === 1 ? "" : "s"} totalling ₹${inr(preIncomeObligation)} — that must be funded from ` +
-        `somewhere other than the enterprise. This is the gap that sends borrowers to a moneylender.`,
+      ...say(
+        msg("solvency.gap.headline", { amount: `₹${inr(preIncomeObligation)}` }),
+        msg("solvency.gap.detail", {
+          gestation: gestationMonths,
+          firstMonth: firstInstalmentMonth ?? 0,
+          gapMonths,
+          payments: preIncomeRows.length,
+          amount: `₹${inr(preIncomeObligation)}`,
+        }),
+      ),
     };
   }
 
@@ -165,22 +184,28 @@ export function assessSolvency(input: SolvencyInput): SolvencyResult {
     return {
       ...withGap,
       verdict: "DSCR_FAIL",
-      headline: `Debt-service coverage of ${dscr.toFixed(2)}× is below the ${minDscr}× a lender expects`,
-      detail:
-        `Projected annual surplus of ₹${inr(annualSurplus!)} against peak annual debt service of ₹${inr(peak)}. ` +
-        `The unit earns, but not with enough headroom to absorb a bad season.`,
+      ...say(
+        msg("solvency.dscr.headline", { dscr: `${dscr.toFixed(2)}×`, min: `${minDscr}×` }),
+        msg("solvency.dscr.detail", {
+          surplus: `₹${inr(annualSurplus!)}`,
+          debtService: `₹${inr(peak)}`,
+        }),
+      ),
     };
   }
 
   return {
     ...withGap,
     verdict: "FEASIBLE",
-    headline: "Income begins before the first instalment falls due",
-    detail:
+    ...say(
+      msg("solvency.feasible.headline"),
       gestationMonths === 0
-        ? "NABARD records no gestation for this unit — it earns from the first month, so every instalment is met from the enterprise itself."
-        : `Gestation is ${gestationMonths} months and the first instalment falls at month ${firstInstalmentMonth}. ` +
-          `The enterprise is earning before it is asked to repay.`,
+        ? msg("solvency.feasible.immediate")
+        : msg("solvency.feasible.detail", {
+            gestation: gestationMonths,
+            firstMonth: firstInstalmentMonth ?? 0,
+          }),
+    ),
   };
 }
 

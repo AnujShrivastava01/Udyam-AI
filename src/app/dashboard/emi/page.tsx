@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { ACTIVITIES, ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { plan } from "@/lib/finance";
+import { useT } from "@/lib/i18n";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
@@ -38,6 +39,7 @@ const inr = (n: number) =>
  * officer must never be able to see contradictory figures for the same loan.
  */
 export default function LoanTrackerPage() {
+  const { t } = useT();
   const [activityId] = useState("goat-20-1");
   // Months elapsed since disbursement. In production this comes from the SCA's ledger.
   const [monthsElapsed, setMonthsElapsed] = useState(9);
@@ -186,7 +188,7 @@ export default function LoanTrackerPage() {
               This loan was structured to collect before it earns
             </CardTitle>
             <CardDescription className="leading-relaxed">
-              {solvency.detail}
+              {t(solvency.detailMsg.key, solvency.detailMsg.params)}
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -80,17 +80,30 @@ describe("conversation flow", () => {
     expect(out).toMatch(/cows/i); // the zero-gestation dairy unit
   });
 
-  it("offers NO alternative when the borrower cannot afford one", () => {
-    // At ₹10,000 the only gestation-free unit needs ₹23,000 of margin. Suggesting it anyway would
-    // be worse than saying nothing — the whole point is to stop dangling options people cannot take.
+  it("finds a cheap zero-gestation trade for a small-margin borrower", () => {
+    // With the non-farm trades in the catalog, ₹10,000 of margin now reaches a tailoring unit
+    // (₹75,000, earns from month one) instead of leaving the borrower with livestock only.
     handleMessage(PHONE, "hi");
     handleMessage(PHONE, "1");
     handleMessage(PHONE, "1");
     handleMessage(PHONE, "10000");
-    const out = handleMessage(PHONE, "2").messages.join("\n");
+    const out = handleMessage(PHONE, "2").messages.join("\n"); // goat — gapped
 
     expect(out).toMatch(/before you earn a single rupee/i); // the warning still lands
-    expect(out).not.toMatch(/Better option/i); // but no unaffordable suggestion
+    expect(out).toMatch(/Better option/i);
+    expect(out).toMatch(/Tailoring/i);
+  });
+
+  it("offers NO alternative when the borrower can afford nothing at all", () => {
+    // Below the cheapest margin requirement the honest answer is silence, not the least-bad
+    // option. Dangling something unaffordable is the harm this product exists to avoid.
+    handleMessage(PHONE, "hi");
+    handleMessage(PHONE, "1");
+    handleMessage(PHONE, "1");
+    handleMessage(PHONE, "4000");
+    const out = handleMessage(PHONE, "2").messages.join("\n");
+
+    expect(out).not.toMatch(/Better option/i);
   });
 
   it("lets the recommender choose when the user sends 0", () => {

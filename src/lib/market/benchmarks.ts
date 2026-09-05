@@ -66,7 +66,7 @@ export const CATEGORY_SPEND: CategorySpend[] = [
     id: "egg-fish-meat",
     label: "Egg, fish and meat",
     perCapitaMonthly: 185,
-    serves: ["poultry", "livestock"],
+    serves: ["poultry", "livestock", "agri"],
     // NOTE: this figure is the weakest in the table — see COVERAGE below.
   },
   {
@@ -99,12 +99,18 @@ export function categoryForActivityClass(activityClass: string): CategorySpend |
  */
 export const ESTABLISHMENT_DENSITY: Record<
   string,
-  { per1000: number; label: string }
+  { per1000: number; label: string; proxy?: string }
 > = {
   retail: { per1000: 9.29, label: "Retail trade" },
   livestock: { per1000: 12.63, label: "Livestock" },
   dairy: { per1000: 12.63, label: "Livestock (incl. dairy)" },
   poultry: { per1000: 12.63, label: "Livestock (incl. poultry)" },
+  // We hold verified per-1,000 densities only for retail trade and livestock. The classes below
+  // reuse the retail figure as a stated PROXY rather than inventing a number for each — and the
+  // report says which ones are proxied, so nobody mistakes it for a measurement.
+  manufacturing: { per1000: 9.29, label: "Manufacturing", proxy: "Retail trade" },
+  services: { per1000: 9.29, label: "Services", proxy: "Retail trade" },
+  agri: { per1000: 9.29, label: "Agri-allied", proxy: "Retail trade" },
 };
 
 /**

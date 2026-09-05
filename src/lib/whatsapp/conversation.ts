@@ -14,6 +14,7 @@ import { plan } from "@/lib/finance";
 import { recommendActivities } from "@/lib/market/recommend";
 import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
 import type { Locale } from "@/lib/i18n/keys";
+import { renderMessage } from "@/lib/i18n/render";
 import { wa } from "./client";
 
 export type Step = "LANG" | "VILLAGE" | "MARGIN" | "ACTIVITY" | "DONE";
@@ -262,7 +263,7 @@ function verdict(locale: Locale, villageId: string, margin: number, activityId: 
   } else if (p.solvency.verdict === "FEASIBLE") {
     out.push(C.okVerdict[locale]);
   } else {
-    out.push(p.solvency.headline);
+    out.push(renderMessage(locale, p.solvency.headlineMsg.key, p.solvency.headlineMsg.params));
   }
 
   // 2. the numbers
@@ -286,7 +287,7 @@ function verdict(locale: Locale, villageId: string, margin: number, activityId: 
         fill(C.suggestion[locale], {
           village: village.name,
           activity: rec.top.activity.name,
-          reason: rec.top.bindingConstraint,
+          reason: renderMessage(locale, rec.top.bindingConstraint.key, rec.top.bindingConstraint.params),
           instalment: money(rec.top.quarterlyInstalment),
         }),
       );

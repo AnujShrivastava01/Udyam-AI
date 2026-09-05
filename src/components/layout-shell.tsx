@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
 import { Leaf, Menu, User, Bell, Settings } from "lucide-react";
 import Link from "next/link";
@@ -50,14 +50,29 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           </div>
           
           <div className="flex items-center gap-3 sm:gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="hidden sm:flex text-xs font-medium"
-              onClick={() => setLanguage(language === 'hi' ? 'en' : 'hi')}
-            >
-              {t("lang.toggle")}
-            </Button>
+            {/* Three languages, all visible. A cycling toggle hides the options from exactly the
+                user who most needs to find their own language. */}
+            <div className="hidden sm:flex items-center rounded-full border bg-muted/30 p-0.5">
+              {([
+                { id: "en", label: "EN" },
+                { id: "hi", label: "हिन्दी" },
+                { id: "hinglish", label: "Hinglish" },
+              ] as const).map((l) => (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => setLanguage(l.id)}
+                  aria-pressed={language === l.id}
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                    language === l.id
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
             
             <Button variant="ghost" size="icon" className="text-muted-foreground relative">
               <Bell className="w-5 h-5" />

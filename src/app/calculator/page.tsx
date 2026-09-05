@@ -50,6 +50,7 @@ import {
 import { ACTIVITIES, ACTIVITY_COVERAGE, GESTATION_RANGE_NOTE } from "@/lib/finance/activities";
 import { plan, type MoratoriumConvention } from "@/lib/finance";
 import { useAppStore } from "@/lib/store";
+import { useT, type MessageKey } from "@/lib/i18n";
 
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -69,6 +70,7 @@ const FLAG_STYLE: Record<string, string> = {
 
 export default function CalculatorPage() {
   const { onboardingInput, setOnboardingInput } = useAppStore();
+  const { t } = useT();
   const [margin, setMargin] = useState(onboardingInput.marginCapital || 100_000);
   const [activityId, setActivityId] = useState<string | undefined>("goat-20-1");
   const [needBased, setNeedBased] = useState(true);
@@ -106,10 +108,10 @@ export default function CalculatorPage() {
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 pb-24">
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold font-heading flex items-center gap-3">
-          <Calculator className="w-8 h-8 text-primary" /> Smart Financial Planner
+          <Calculator className="w-8 h-8 text-primary" /> {t("calc.title")}
         </h1>
         <p className="text-muted-foreground text-lg max-w-3xl">
-          It doesn&apos;t tell you what you can borrow. It tells you what you can repay.
+          {t("calc.subtitle")}
         </p>
       </header>
 
@@ -118,8 +120,8 @@ export default function CalculatorPage() {
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
           <Card className="border-2 border-primary/20">
             <CardHeader className="bg-primary/5 border-b border-primary/10">
-              <CardTitle className="text-lg">Your margin money</CardTitle>
-              <CardDescription>The cash you actually have today.</CardDescription>
+              <CardTitle className="text-lg">{t("calc.margin.title")}</CardTitle>
+              <CardDescription>{t("calc.margin.hint")}</CardDescription>
               <div className="pt-4 relative">
                 <IndianRupee className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -147,7 +149,7 @@ export default function CalculatorPage() {
             <CardContent className="pt-6 space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  What do you want to start?
+                  {t("activity.pickPrompt")}
                 </p>
                 <div className="grid gap-1.5">
                   {ACTIVITIES.map((a) => (
@@ -161,10 +163,14 @@ export default function CalculatorPage() {
                           : "hover:bg-muted/50"
                       }`}
                     >
-                      <span className="block text-sm font-medium">{a.name}</span>
+                      <span className="block text-sm font-medium">
+                        {t(`activity.${a.id}.name` as MessageKey)}
+                      </span>
                       <span className="block text-xs text-muted-foreground">
-                        {inr(a.unitCost)} · earns from month{" "}
-                        {a.gestationMonths === 0 ? "1" : a.gestationMonths}
+                        {inr(a.unitCost)} ·{" "}
+                        {a.gestationMonths === 0
+                          ? t("activity.earnsImmediately")
+                          : t("activity.earnsFrom", { month: a.gestationMonths })}
                       </span>
                     </button>
                   ))}
@@ -175,21 +181,21 @@ export default function CalculatorPage() {
               </div>
 
               <Toggle
-                label="Cost the project from what the activity needs"
-                hint="Off = the specification's formula: project cost = margin ÷ 10%"
+                label={t("calc.needBased.label")}
+                hint={t("calc.needBased.hint")}
                 checked={needBased}
                 onChange={setNeedBased}
               />
               <Toggle
-                label="Interest serviced during moratorium"
-                hint="Off = interest capitalised into principal"
+                label={t("calc.serviced.label")}
+                hint={t("calc.serviced.hint")}
                 checked={convention === "serviced"}
                 onChange={(v) => setConvention(v ? "serviced" : "capitalised")}
               />
 
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Annual household income
+                  {t("calc.income.label")}
                 </p>
                 <Input
                   type="number"
@@ -261,15 +267,15 @@ export default function CalculatorPage() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-                <Metric label="Project cost" value={inr(s.projectCost)} />
-                <Metric label="Sanctioned loan" value={inr(s.sanctionedLoan)} />
+                <Metric label={t("calc.projectCost")} value={inr(s.projectCost)} />
+                <Metric label={t("calc.sanctionedLoan")} value={inr(s.sanctionedLoan)} />
                 <Metric
-                  label="Your share"
+                  label={t("calc.yourShare")}
                   value={`${(s.effectiveMarginPct * 100).toFixed(2)}%`}
                   accent={s.effectiveMarginPct > 0.1001}
                 />
                 <Metric
-                  label="Moratorium"
+                  label={t("calc.moratorium")}
                   value={`${s.moratoriumMonths} mo`}
                   icon={<Clock className="w-3 h-3" />}
                 />
@@ -278,10 +284,10 @@ export default function CalculatorPage() {
 
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Figure label="Quarterly instalment" value={inr(schedule.instalment)} strong />
-                <Figure label="Instalments" value={String(schedule.instalmentCount)} />
-                <Figure label="Total interest" value={inr(schedule.totalInterest)} />
-                <Figure label="Total outflow" value={inr(schedule.totalOutflow)} />
+                <Figure label={t("calc.quarterly")} value={inr(schedule.instalment)} strong />
+                <Figure label={t("calc.instalments")} value={String(schedule.instalmentCount)} />
+                <Figure label={t("calc.totalInterest")} value={inr(schedule.totalInterest)} />
+                <Figure label={t("calc.totalOutflow")} value={inr(schedule.totalOutflow)} />
               </div>
 
               <div className="rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed">
@@ -304,7 +310,7 @@ export default function CalculatorPage() {
               {/* schedule chart */}
               <div>
                 <h3 className="font-bold font-heading flex items-center gap-2 mb-3">
-                  <TrendingDown className="w-5 h-5 text-primary" /> Repayment schedule
+                  <TrendingDown className="w-5 h-5 text-primary" /> {t("calc.schedule")}
                 </h3>
                 <div className="h-[240px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -417,7 +423,7 @@ export default function CalculatorPage() {
 
               {/* the trace */}
               <div>
-                <h3 className="font-bold font-heading mb-3">How this was decided</h3>
+                <h3 className="font-bold font-heading mb-3">{t("calc.howDecided")}</h3>
                 <ol className="space-y-2">
                   {s.trace.map((t, i) => (
                     <li key={i} className="flex gap-3 text-sm">
@@ -448,7 +454,7 @@ export default function CalculatorPage() {
               <div className="flex justify-end pt-2">
                 <Link href={`/report/${activityId ?? "general"}`}>
                   <Button size="lg" className="rounded-full px-8">
-                    See the full feasibility report <ArrowRight className="ml-2 w-5 h-5" />
+                    {t("calc.seeReport")} <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
               </div>
