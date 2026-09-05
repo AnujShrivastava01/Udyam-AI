@@ -42,7 +42,8 @@ Open <http://localhost:3000>. No API keys are required to see the core product �
 feasibility engines are pure and run locally.
 
 ```bash
-npm test          # 66 tests
+npm test          # 95 tests
+npm run bench     # regenerate SIDDHI-Bench
 npx tsc --noEmit  # typecheck
 npm run build     # production build
 ```
@@ -64,9 +65,18 @@ Two moments worth trying:
 1. On `/calculator`, drag the cliff slider across ₹1,40,000. The quarterly instalment **falls
    49.9%** while lifetime interest **rises 187.7%** — the cheaper headline rate is the heavier
    cash-flow burden, and a threshold rule cannot express that.
-2. On `/discover`, set the margin to ₹10,000 and pick goat rearing. It warns you, then steers you
+2. On `/calculator`, look at the **capital stack** — the specification's single-scheme route costs
+   ₹10,473 in net capital; the optimiser finds PMEGP at **−₹6,928**, negative because the grant
+   exceeds the lifetime interest.
+3. On `/discover`, set the margin to ₹10,000 and pick goat rearing. It warns you, then steers you
    to a tailoring unit that earns from month one. Drop the margin to ₹4,000 and it offers nothing
    at all, because nothing is affordable — silence beats a suggestion the borrower cannot take.
+
+And the claim, reproducible in one command — `npm run bench`:
+
+> The specification implemented literally gets the scheme tier right 100% of the time, the
+> sanctioned loan right only where no cap binds (71.8%), and the quarterly instalment right
+> **0%** of the time. The deterministic kernel scores 100% by construction.
 
 ---
 
@@ -91,6 +101,7 @@ ourselves to, and it is enforced by `verifyNumericFidelity` — see [AIAGENT.md]
 | `src/lib/whatsapp` | 552 | Advisory flow over WhatsApp |
 | `src/lib/officer` | 245 | SCA sanction triage |
 | `src/lib/ai` | 252 | Gemini narration + the numeric-fidelity verifier |
+| `src/lib/bench` | ~700 | SIDDHI-Bench: case generation, ground truth, solvers, scoring |
 
 Design rationale: [DESIGN.md](./DESIGN.md) · AI architecture: [AIAGENT.md](./AIAGENT.md) ·
 Data honesty: [DATA_PROVENANCE.md](./DATA_PROVENANCE.md)
@@ -141,13 +152,15 @@ and refuses to rank, which is a designed behaviour rather than an unhandled case
 - Feasibility engine with saturation computed two independent ways
 - Recommender with a refusal path; SCA officer console; loan tracker
 - Three languages end to end; WhatsApp channel; AI narration with a numeric firewall
+- **SIDDHI-Bench** — 500-case public benchmark; see [bench/](./bench/README.md)
+- **Multi-scheme capital stacking** across NSFDC, PMEGP and MUDRA, with the exclusions that
+  bar double-subsidy encoded explicitly
 
 **Not built yet**
 
-- **SIDDHI-Bench** — the public loan-math benchmark that is the project's falsifiable claim
-- Multi-scheme capital stacking across NSFDC + PMEGP + Mudra
 - Voice in and out (Bhashini ASR/TTS)
 - Real WorldPop / SHRUG / LGD ingest — the gazetteer is 4 seeded villages
+- Grounded retrieval over scheme PDFs with citation enforcement
 
 **Known limitations**
 
@@ -159,8 +172,10 @@ and refuses to rank, which is a designed behaviour rather than an unhandled case
   block's total establishment density against the national average. The UI says so.
 - WhatsApp runs through Whapi, which drives a real WhatsApp session. Fast to demo, carries a ban
   risk on the number, and is **not** a government deployment path — that is Meta's Cloud API.
-- Vertex AI narration requires `roles/aiplatform.user` on the service account. Without it the
-  product falls back to the deterministic template, which is the designed behaviour.
+- Vertex AI narration requires a **paid** Google Cloud billing account. Publisher models are not
+  served to a project on a free trial, and the failure presents as a 404 rather than a billing
+  error — see AIAGENT.md. Without it the product falls back to the deterministic template, which
+  is the designed behaviour and changes no figure a borrower sees.
 
 ---
 

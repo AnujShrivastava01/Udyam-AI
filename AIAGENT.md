@@ -157,8 +157,22 @@ applied 67 corrections. Placeholder integrity was verified at zero mismatches ac
 | Max tokens | `300` | Two or three sentences is the whole job |
 | Runtime | `nodejs`, `maxDuration: 30` | Kernel is synchronous; only the model call is I/O |
 
-Credentials live in `/secrets` and `.env.local`, both gitignored. **Required IAM role:**
-`roles/aiplatform.user`. Without it Vertex returns 403 and the product falls back to templates.
+Credentials live in `/secrets` and `.env.local`, both gitignored.
+
+**A deployment note that cost us several hours, recorded so it costs you none.** Vertex AI
+publisher models — the Gemini family — are not served to a project on a Google Cloud **free
+trial** billing account. The failure is silent and misleading: the API enables normally, the
+service account's `aiplatform.endpoints.predict` permission checks out, and
+`projects/<p>/locations/<region>` responds — but every publisher model returns
+`404 NOT_FOUND … or your project does not have access to it`, in every region, on both `v1` and
+`v1beta1`.
+
+It reads like a missing IAM role or a wrong model id. It is neither. The billing account must be
+upgraded from trial to paid; the trial credit still applies. Diagnose it by checking whether the
+platform endpoint responds while publisher models 404 — that asymmetry is the signature.
+
+Until then the product falls back to the deterministic template, which is the designed behaviour
+and costs a borrower nothing.
 
 ---
 

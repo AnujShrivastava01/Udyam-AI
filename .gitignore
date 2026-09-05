@@ -45,3 +45,8 @@ next-env.d.ts
 
 # Service-account keys — never commit
 /secrets/
+
+# Belt-and-braces: service-account keys must never sit in the repo root
+dexwork-*.json
+*-service-account*.json
+gcp-*.json
