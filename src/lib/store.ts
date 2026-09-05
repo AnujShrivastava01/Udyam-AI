@@ -14,9 +14,18 @@ interface AppState {
   userRole: UserRole;
   language: Language;
   onboardingInput: OnboardingInput;
+  /**
+   * Journey steps the user has actually opened.
+   *
+   * The stepper used to infer progress from array position — `index < currentStep` — so opening
+   * the last step from the bottom nav drew green ticks on all five before it. The app had no
+   * record of where the user had been, so it guessed, and the guess flattered.
+   */
+  visitedSteps: string[];
   setRole: (role: UserRole) => void;
   setLanguage: (lang: Language) => void;
   setOnboardingInput: (input: Partial<OnboardingInput>) => void;
+  markStepVisited: (id: string) => void;
 }
 
 /**
@@ -41,12 +50,19 @@ export const useAppStore = create<AppState>()(
         marginCapital: 100000,
         businessCategory: '',
       },
+      visitedSteps: [],
       setRole: (role) => set({ userRole: role }),
       setLanguage: (lang) => set({ language: lang }),
       setOnboardingInput: (input) =>
         set((state) => ({
           onboardingInput: { ...state.onboardingInput, ...input },
         })),
+      markStepVisited: (id) =>
+        set((state) =>
+          state.visitedSteps.includes(id)
+            ? state
+            : { visitedSteps: [...state.visitedSteps, id] },
+        ),
     }),
     {
       name: 'siddhi.session',
@@ -57,6 +73,7 @@ export const useAppStore = create<AppState>()(
         userRole: s.userRole,
         language: s.language,
         onboardingInput: s.onboardingInput,
+        visitedSteps: s.visitedSteps,
       }),
     },
   ),

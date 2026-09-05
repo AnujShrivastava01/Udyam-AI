@@ -34,7 +34,8 @@ const dictionary = {
     "step.connect": "Connect",
     "step.manage": "Manage",
     "step.grow": "Grow",
-    "step.completed": "completed",
+    "step.done": "completed",
+    "step.visited": "visited",
 
     // Hero panel (live engine output)
     "hero.panel.caption": "Live output from the engine on this page",
@@ -106,7 +107,8 @@ const dictionary = {
     "step.connect": "जुड़ें",
     "step.manage": "प्रबंधन",
     "step.grow": "विकास",
-    "step.completed": "पूरा हुआ",
+    "step.done": "पूरा हुआ",
+    "step.visited": "देखा गया",
 
     // Hero panel (live engine output)
     "hero.panel.caption": "इसी पेज पर चल रहे इंजन का सीधा परिणाम",
@@ -178,7 +180,8 @@ const dictionary = {
     "step.connect": "Judein",
     "step.manage": "Prabandhan",
     "step.grow": "Vikas",
-    "step.completed": "pura hua",
+    "step.done": "pura hua",
+    "step.visited": "dekha gaya",
 
     // Hero panel (live engine output)
     "hero.panel.caption": "Isi page par chal rahe engine ka seedha output",
