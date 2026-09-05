@@ -25,6 +25,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { CliffExplorer } from "@/components/cliff-explorer";
 import { SolvencyClock } from "@/components/solvency-clock";
 import { SourceChip } from "@/components/source-chip";
 import { Badge } from "@/components/ui/badge";
@@ -455,6 +456,9 @@ export default function CalculatorPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* the cliff — full width, because it is the point */}
+      <CliffExplorer />
     </div>
   );
 }

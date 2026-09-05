@@ -106,6 +106,28 @@ export function plan(input: PlanInput): Plan {
 }
 
 /**
+ * Structure and schedule a loan directly from a project cost.
+ *
+ * Used by the cliff explorer, where the point is to sweep project cost across the tier boundary
+ * and watch the scheme — and therefore the instalment — change underneath it.
+ */
+export function quoteAtProjectCost(
+  projectCost: number,
+  convention: MoratoriumConvention = "serviced",
+) {
+  const s = structure({ marginCapital: projectCost * 0.1, neededProjectCost: projectCost });
+  const schedule = amortise({
+    principal: s.sanctionedLoan,
+    annualRatePct: s.scheme.annualRatePct,
+    tenureMonths: s.scheme.tenureMonths,
+    moratoriumMonths: s.moratoriumMonths,
+    restMonths: s.scheme.restMonths,
+    convention,
+  });
+  return { structure: s, schedule };
+}
+
+/**
  * The demonstration the problem statement's own example produces.
  *
  * ₹1 lakh of margin, inverted by the specified formula, routes to a ₹9 lakh Term Loan. We
