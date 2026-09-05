@@ -13,6 +13,7 @@ import { useT, type MessageKey } from "@/lib/i18n";
 import { CATALOGUE_NOTE, type ApplicantProfile, type SocialCategory } from "@/lib/schemes/catalogue";
 import { matchSchemes, summarise, type MatchVerdict, type SchemeMatch } from "@/lib/schemes/eligibility";
 import { cn } from "@/lib/utils";
+import { useMarkVisited } from "@/lib/visit";
 
 const CATEGORIES: { id: SocialCategory; key: MessageKey }[] = [
   { id: "sc", key: "elig.cat.sc" },
@@ -42,6 +43,9 @@ const VERDICT_STYLE: Record<MatchVerdict, { tone: string; icon: typeof CheckCirc
  * read from what the user already told onboarding.
  */
 export default function SchemesPage() {
+  // Records the visit so the dashboard checklist can tick it.
+  useMarkVisited("schemes");
+
   const { t } = useT();
   const onboardingInput = useAppStore((s) => s.onboardingInput);
 

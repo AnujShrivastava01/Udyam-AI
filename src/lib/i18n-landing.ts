@@ -18,6 +18,7 @@ const dictionary = {
     // Chrome
     "app.title": "Udyam",
     "app.titleSuffix": "AI",
+    "nav.dashboard": "Dashboard",
     "nav.discover": "Discover",
     "nav.calculator": "Finance",
     "nav.community": "Community",
@@ -97,6 +98,7 @@ const dictionary = {
     // Chrome
     "app.title": "उद्यम",
     "app.titleSuffix": "AI",
+    "nav.dashboard": "डैशबोर्ड",
     "nav.discover": "खोजें",
     "nav.calculator": "वित्त",
     "nav.community": "समुदाय",
@@ -176,6 +178,7 @@ const dictionary = {
     // Chrome
     "app.title": "Udyam",
     "app.titleSuffix": "AI",
+    "nav.dashboard": "Dashboard",
     "nav.discover": "Khojein",
     "nav.calculator": "Finance",
     "nav.community": "Community",

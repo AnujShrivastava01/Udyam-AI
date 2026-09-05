@@ -3,7 +3,7 @@
 import { useAppStore } from "@/lib/store";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
-import { Leaf, Menu, X, User, Settings, IndianRupee } from "lucide-react";
+import { Leaf, Menu, X, User, Settings, IndianRupee, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { VoiceAgent } from "./voice-agent";
 import Link from "next/link";
@@ -13,6 +13,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const BOTTOM_NAV = [
+  // The dashboard is the post-onboarding home, so it leads. Before this it had no entry anywhere
+  // and /dashboard itself 404'd — only its three children were reachable, and only by typing.
+  { href: "/dashboard", icon: LayoutDashboard, key: "nav.dashboard" },
   { href: "/discover", icon: Leaf, key: "nav.discover" },
   { href: "/calculator", icon: IndianRupee, key: "nav.calculator" },
   { href: "/community", icon: User, key: "nav.community" },

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { useT, money, num, type MessageKey } from "@/lib/i18n";
 import { buildOwnProfile } from "@/lib/profile/build";
+import { useMarkVisited } from "@/lib/visit";
 
 /**
  * The one page an SCA officer, a bank or an NGO would actually be handed.
@@ -20,6 +21,9 @@ import { buildOwnProfile } from "@/lib/profile/build";
  * this in a district office.
  */
 export default function SharePage() {
+  // Records the visit so the dashboard checklist can tick it.
+  useMarkVisited("share");
+
   const { t } = useT();
   const onboardingInput = useAppStore((s) => s.onboardingInput);
   const visitedSteps = useAppStore((s) => s.visitedSteps);
