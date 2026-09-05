@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { plan } from "@/lib/finance";
-import { allowedNumbers, extractNumbers, verifyNumericFidelity } from "./narrate";
+import {
+  allowedNumbers,
+  extractNumbers,
+  verifyNoUnsupportedClaims,
+  verifyNumericFidelity,
+} from "./narrate";
 
 const goat = plan({
   marginCapital: 10_000,
@@ -55,5 +60,26 @@ describe("numeric fidelity verifier", () => {
     // Whatever the engine itself says must, by definition, survive its own verifier.
     expect(verifyNumericFidelity(goat.solvency.headline, goat)).toEqual([]);
     expect(verifyNumericFidelity(goat.solvency.detail, goat)).toEqual([]);
+  });
+});
+
+describe("claim guard", () => {
+  it("rejects an approval claim, even when every number is correct", () => {
+    // The failure we actually observed: gemini-2.5-pro wrote "your loan has not been approved".
+    // No number was wrong. The claim was invented, and no such decision exists.
+    expect(verifyNoUnsupportedClaims("Aapka loan approved ho gaya hai.")).toBeTruthy();
+    expect(verifyNoUnsupportedClaims("आपका लोन अभी मंज़ूर नहीं हुआ है")).toBeTruthy();
+    expect(verifyNoUnsupportedClaims("Your application was rejected.")).toBeTruthy();
+    expect(verifyNoUnsupportedClaims("You are eligible for this scheme.")).toBeTruthy();
+  });
+
+  it("passes narration that only explains the calculation", () => {
+    expect(
+      verifyNoUnsupportedClaims(
+        "Aapke income aane se pehle aapko ₹46,467 chukana hoga, 6 payments mein.",
+      ),
+    ).toBeNull();
+    expect(verifyNoUnsupportedClaims(goat.solvency.headline)).toBeNull();
+    expect(verifyNoUnsupportedClaims(goat.solvency.detail)).toBeNull();
   });
 });

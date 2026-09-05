@@ -116,6 +116,40 @@ export function verifyNumericFidelity(text: string, plan: Plan): string[] {
   return rejected;
 }
 
+/**
+ * Claims the model is never allowed to make.
+ *
+ * The numeric firewall checks figures. It cannot catch a SEMANTIC invention — and we watched one
+ * happen: gemini-2.5-pro wrote "आपका लोन अभी मंज़ूर नहीं हुआ है" ("your loan has not been
+ * approved"). Every number in that sentence was correct. The claim was fabricated, and telling
+ * someone their loan was refused when no decision exists is a serious harm.
+ *
+ * This product performs a structuring CALCULATION. It does not approve, sanction, reject or
+ * determine eligibility — an SCA officer does. Any narration that says otherwise is rejected and
+ * the deterministic template is shown instead.
+ */
+const FORBIDDEN_CLAIMS = new RegExp(
+  [
+    // English / Hinglish stems that carry the claim.
+    "approv", "sanction", "reject", "refus", "eligib", "guarantee", "manzoor", "manjoor",
+    // Devanagari, written whole rather than stemmed.
+    "मंज़ूर",   // मंज़ूर
+    "मंजूर",          // मंजूर
+    "स्वीकृत",   // स्वीकृत
+    "अस्वीकृत", // अस्वीकृत
+    "पात्र",          // पात्र
+  ].join("|"),
+  "i",
+);
+
+/** Returns the offending phrase, or null when the narration makes no forbidden claim. */
+export function verifyNoUnsupportedClaims(text: string): string | null {
+  // Normalise first: Devanagari nukta has composed and decomposed encodings, and a guard that
+  // misses because of an invisible codepoint difference is worse than no guard at all.
+  const m = text.normalize("NFC").match(FORBIDDEN_CLAIMS);
+  return m ? m[0] : null;
+}
+
 function deterministicFallback(plan: Plan, locale: Locale): string {
   const h = renderMessage(locale, plan.solvency.headlineMsg.key, plan.solvency.headlineMsg.params);
   const d = renderMessage(locale, plan.solvency.detailMsg.key, plan.solvency.detailMsg.params);
@@ -182,7 +216,12 @@ HARD RULES:
 - Use ONLY the numbers given above. Do NOT calculate, round, convert, estimate or invent any number.
 - Do not add a number that is not in the facts — not even an approximation or a "roughly".
 - Copy rupee amounts EXACTLY as written above, including the ₹ symbol and the commas.
-- Do not give financial advice beyond explaining the verdict.
+- Do NOT say the loan is approved, sanctioned, rejected, or refused. No such decision has been
+  made. This is a structuring calculation, not an application outcome, and telling someone their
+  loan was approved or refused when it was neither is a serious harm.
+- Do NOT add any fact that is not in the list above — no eligibility claims, no next steps, no
+  reassurance about outcomes, no advice about what to do.
+- Describe ONLY what the verdict field means for their cash flow.
 - No preamble, no sign-off, no markdown. Just the sentences.`;
 
   try {
@@ -203,7 +242,7 @@ HARD RULES:
 
     const project = process.env.VERTEX_PROJECT_ID!;
     const location = process.env.VERTEX_LOCATION ?? "global";
-    const modelId = process.env.VERTEX_MODEL ?? "gemini-2.5-flash";
+    const modelId = process.env.VERTEX_MODEL ?? "gemini-2.5-pro";
     const host = location === "global" ? "aiplatform.googleapis.com" : `${location}-aiplatform.googleapis.com`;
 
     const res = await authed.request<{
@@ -216,8 +255,13 @@ HARD RULES:
         generationConfig: {
           temperature: 0.4,
           maxOutputTokens: 800,
-          // Dynamic thinking makes latency swing wildly; a fixed budget keeps narration snappy.
-          thinkingConfig: { thinkingBudget: 0 },
+          // Dynamic thinking swings latency 70-160s, which narration cannot afford. A fixed
+          // budget pins it.
+          //
+          // The budget is model-dependent and getting it wrong is a hard 400, not a degradation:
+          // gemini-2.5-pro REFUSES thinkingBudget 0 ("does not support setting thinking_budget
+          // to 0"), while flash accepts it. Pro gets the smallest budget it will take.
+          thinkingConfig: { thinkingBudget: modelId.includes("pro") ? 128 : 0 },
         },
       },
     });
@@ -232,6 +276,13 @@ HARD RULES:
       // The model invented a figure. Refuse it — the borrower gets the exact template instead.
       console.warn("[ai] narration rejected, invented numbers:", rejected);
       return fallback(rejected);
+    }
+
+    const claim = verifyNoUnsupportedClaims(text);
+    if (claim) {
+      // The numbers were right and the meaning was not. Refuse it just as firmly.
+      console.warn("[ai] narration rejected, unsupported claim:", claim);
+      return fallback([`claim:${claim}`]);
     }
 
     return { text, source: "gemini", rejected: [], latencyMs: Date.now() - started };

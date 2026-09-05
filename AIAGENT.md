@@ -83,7 +83,18 @@ model might write it — bare (`46467`), Indian-grouped (`46,467`), and two-deci
 
 `extractNumbers(text)` pulls every numeric token out of the generated prose.
 
-### 3. Anything unaccounted for is rejected
+### 3. Claims are guarded too, not just numbers
+
+The numeric firewall checks figures. It cannot catch a SEMANTIC invention — and we watched one
+happen. `gemini-2.5-pro` wrote *"आपका लोन अभी मंज़ूर नहीं हुआ है"* — "your loan has not been
+approved". Every number in that sentence was correct. The claim was fabricated.
+
+This product performs a structuring **calculation**. It does not approve, sanction, reject or
+determine eligibility — an SCA officer does. `verifyNoUnsupportedClaims` rejects any narration
+that says otherwise, in English, Hinglish or Devanagari, and the deterministic template is shown
+instead.
+
+### 4. Anything unaccounted for is rejected
 
 ```ts
 const rejected = verifyNumericFidelity(text, plan);
@@ -99,7 +110,14 @@ A hallucinated rupee amount **cannot reach a borrower** — by construction, not
 | Invented total | "You will need about ₹52,000" | ✅ |
 | Model doing its own arithmetic | "₹46,467 across 6 payments, so about ₹7,744 each" | ✅ |
 | Wrong interest rate | "The scheme charges 7.5% per year" | ✅ |
+| **Fabricated approval** | "आपका लोन मंज़ूर नहीं हुआ" — numbers right, claim invented | ✅ |
 | Legitimate narration | "18 months … month 6 … ₹46,467" | ✅ passes |
+
+Two false positives were also fixed once the model started answering: rounding every allowed
+value turned an interest rate of 6.5 into "7", and numbers inside strings we hand the model — the
+activity is literally named "Goat rearing — **20** does + **1** buck" — were treated as
+inventions. The firewall was firing on every well-behaved answer. A guard that cries wolf gets
+switched off, so its false-positive rate matters as much as its recall.
 
 `src/lib/ai/ai.test.ts`. The engine's own rendered sentences are asserted to survive their own
 verifier — a guarantee that must hold by definition.
