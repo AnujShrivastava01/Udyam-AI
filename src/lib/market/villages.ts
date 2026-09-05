@@ -128,6 +128,39 @@ export const VILLAGES: Village[] = [
 
 export const VILLAGE_BY_ID = new Map(VILLAGES.map((v) => [v.id, v]));
 
+/**
+ * The places this product can actually report on.
+ *
+ * Onboarding used to offer a hardcoded list of THREE UP DISTRICTS — Jhansi, Lalitpur, Jalaun —
+ * and three Bundelkhand blocks, while every village in this gazetteer is in Madhya Pradesh
+ * (Gwalior and Sheopur). The two lists did not share a single row. So the app asked the user where
+ * they were, could not match the answer against anything, and silently showed them Ghatigaon
+ * regardless — and the "start from the district the user gave" logic in /discover and /report
+ * could never once have fired.
+ *
+ * The picker is derived from the gazetteer now. Offering a district we hold no data for is a
+ * promise the engine cannot keep; when the WorldPop / SHRUG ingest lands, these lists grow with it
+ * and nothing has to be edited by hand.
+ */
+export const GAZETTEER_DISTRICTS: { district: string; state: string }[] = [
+  ...new Map(VILLAGES.map((v) => [v.district, { district: v.district, state: v.state }])).values(),
+];
+
+/** Blocks we hold villages for, within one district. */
+export function blocksInDistrict(district: string): string[] {
+  return [
+    ...new Set(
+      VILLAGES.filter((v) => v.district.toLowerCase() === district.toLowerCase()).map((v) => v.block),
+    ),
+  ];
+}
+
+/** First village we hold for a district, for screens that need a sensible starting row. */
+export function villageInDistrict(district: string | null | undefined) {
+  if (!district) return null;
+  return VILLAGES.find((v) => v.district.toLowerCase() === district.toLowerCase()) ?? null;
+}
+
 export const GAZETTEER_COVERAGE = {
   villages: VILLAGES.length,
   districts: [...new Set(VILLAGES.map((v) => v.district))],

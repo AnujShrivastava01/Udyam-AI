@@ -4,6 +4,7 @@ import { plan } from "@/lib/finance";
 import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { normaliseLocale } from "@/lib/i18n/render";
 import { activeProvider, speak, verdictAsSpeech } from "@/lib/voice";
+import { callerKey, throttled } from "@/lib/api/throttle";
 
 /**
  * Speak a solvency verdict.
@@ -27,29 +28,6 @@ import { activeProvider, speak, verdictAsSpeech } from "@/lib/voice";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-/**
- * Small in-process throttle.
- *
- * The route is public because the browser calls it, so it cannot carry the shared secret the
- * narrate route uses. This is not real rate limiting — a serverless deployment has many instances
- * and this map is per-instance — but it stops one open tab from looping the endpoint, which is the
- * failure mode a demo actually hits.
- */
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 20;
-const hits = new Map<string, number[]>();
-
-function throttled(key: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
-  recent.push(now);
-  hits.set(key, recent);
-  if (hits.size > 1000) {
-    for (const [k, v] of hits) if (!v.some((t) => now - t < WINDOW_MS)) hits.delete(k);
-  }
-  return recent.length > MAX_PER_WINDOW;
-}
-
 export async function POST(req: NextRequest) {
   if (activeProvider() === "none") {
     return NextResponse.json(
@@ -58,8 +36,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const who = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (throttled(who)) {
+  if (throttled(callerKey(req), 20)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 

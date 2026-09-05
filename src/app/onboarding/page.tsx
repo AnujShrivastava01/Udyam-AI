@@ -25,6 +25,7 @@ import { MapPin, IndianRupee, Briefcase, ArrowRight, Loader2, Sparkles } from "l
 import { motion, AnimatePresence } from "framer-motion";
 import { plan } from "@/lib/finance";
 import { useT, money, type MessageKey } from "@/lib/i18n";
+import { GAZETTEER_DISTRICTS, blocksInDistrict } from "@/lib/market/villages";
 
 /**
  * Each category maps to the activity we actually hold a NABARD unit cost and gestation figure for,
@@ -40,17 +41,17 @@ const CATEGORIES = [
   { id: "services", key: "onb.cat.services", activity: "atta-chakki" },
 ] as const;
 
-const DISTRICTS = ["jhansi", "lalitpur", "jalaun"];
-const BLOCKS = ["babina", "moth", "mauranipur"];
-
-const title = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 export default function OnboardingPage() {
   const router = useRouter();
   const { t } = useT();
   const { onboardingInput, setOnboardingInput } = useAppStore();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Only places the gazetteer actually covers. Offering Jhansi when every village on file is in
+  // Gwalior meant the answer could never be used — see the note in villages.ts.
+  const district = onboardingInput.location?.district ?? "";
+  const blocks = blocksInDistrict(district);
 
   const handleLocationChange = (
     updates: Partial<{ district: string; block: string; village: string }>,
@@ -164,15 +165,19 @@ export default function OnboardingPage() {
                         onValueChange={(val) =>
                           handleLocationChange({ district: val as string, block: "", village: "" })
                         }
-                        value={onboardingInput.location?.district || undefined}
+                        // null, not undefined: Base UI decides controlled-ness on the FIRST
+                        // render, and `undefined` there means uncontrolled — so the component
+                        // flipped mode as soon as a district was chosen, and a rehydrated district
+                        // never appeared in the trigger at all.
+                        value={onboardingInput.location?.district ?? null}
                       >
                         <SelectTrigger id="district">
                           <SelectValue placeholder={t("onb.districtPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {DISTRICTS.map((d) => (
-                            <SelectItem key={d} value={d}>
-                              {title(d)}
+                          {GAZETTEER_DISTRICTS.map((d) => (
+                            <SelectItem key={d.district} value={d.district}>
+                              {d.district} · {d.state}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -180,17 +185,25 @@ export default function OnboardingPage() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="block">{t("onb.block")}</Label>
+                      {/* Blocks are filtered to the chosen district. They used to be a fixed list
+                          shown regardless, so Jhansi + Dabra was a selectable pair that names two
+                          different states. */}
                       <Select
                         onValueChange={(val) => handleLocationChange({ block: val as string })}
-                        value={onboardingInput.location?.block || undefined}
+                        value={onboardingInput.location?.block ?? null}
+                        disabled={!district}
                       >
                         <SelectTrigger id="block">
-                          <SelectValue placeholder={t("onb.blockPlaceholder")} />
+                          <SelectValue
+                            placeholder={
+                              district ? t("onb.blockPlaceholder") : t("onb.blockNeedsDistrict")
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {BLOCKS.map((b) => (
+                          {blocks.map((b) => (
                             <SelectItem key={b} value={b}>
-                              {title(b)}
+                              {b}
                             </SelectItem>
                           ))}
                         </SelectContent>

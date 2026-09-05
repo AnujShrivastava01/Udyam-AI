@@ -24,6 +24,11 @@ const dictionary = {
     "nav.profile": "Profile",
     "nav.language": "Language",
     "nav.menu": "Menu",
+    "theme.label": "Appearance",
+    "theme.system": "System",
+    "theme.light": "Light",
+    "theme.dark": "Dark",
+    "theme.switchTo": "Switch to {mode}",
     "nav.primary": "Main sections",
     "nav.skipToContent": "Skip to content",
     "user.name": "Rajesh Kumar",
@@ -98,6 +103,11 @@ const dictionary = {
     "nav.profile": "प्रोफ़ाइल",
     "nav.language": "भाषा",
     "nav.menu": "मेनू",
+    "theme.label": "\u0926\u093f\u0916\u093e\u0935\u091f",
+    "theme.system": "\u0938\u093f\u0938\u094d\u091f\u092e \u0915\u0947 \u0905\u0928\u0941\u0938\u093e\u0930",
+    "theme.light": "\u0909\u091c\u0932\u093e",
+    "theme.dark": "\u0917\u0939\u0930\u093e",
+    "theme.switchTo": "{mode} \u092a\u0930 \u092c\u0926\u0932\u0947\u0902",
     "nav.primary": "मुख्य अनुभाग",
     "nav.skipToContent": "मुख्य सामग्री पर जाएँ",
     "user.name": "राजेश कुमार",
@@ -172,6 +182,11 @@ const dictionary = {
     "nav.profile": "Profile",
     "nav.language": "Bhasha",
     "nav.menu": "Menu",
+    "theme.label": "Dikhawat",
+    "theme.system": "System ke anusaar",
+    "theme.light": "Ujla",
+    "theme.dark": "Gehra",
+    "theme.switchTo": "{mode} par badlein",
     "nav.primary": "Mukhya sections",
     "nav.skipToContent": "Seedha content par jayein",
     "user.name": "Rajesh Kumar",
@@ -243,9 +258,20 @@ export type DictionaryKeys = keyof typeof dictionary.en;
 export function useTranslation() {
   const { language } = useAppStore();
 
-  const t = (key: DictionaryKeys): string => {
+  /**
+   * `{slot}` substitution, same convention as the engine dictionary in ./i18n.
+   *
+   * Parameters are substituted verbatim and never parsed or re-formatted — the chrome dictionary
+   * carries no rupee figures today, but the moment one arrives it must follow the same rule as
+   * every other number in this product: formatted once, injected as a slot, never translated.
+   */
+  const t = (key: DictionaryKeys, params?: Record<string, string | number>): string => {
     const table = dictionary[language] ?? dictionary.en;
-    return table[key] || dictionary.en[key] || key;
+    const template = table[key] || dictionary.en[key] || key;
+    if (!params) return template;
+    return template.replace(/\{(\w+)\}/g, (whole, slot) =>
+      params[slot] != null ? String(params[slot]) : whole,
+    );
   };
 
   return { t, language };

@@ -25,6 +25,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { AiExplanation } from "@/components/ai-explanation";
 import { CapitalStackCard } from "@/components/capital-stack";
 import { CliffExplorer } from "@/components/cliff-explorer";
 import { SolvencyClock } from "@/components/solvency-clock";
@@ -571,6 +572,13 @@ export default function CalculatorPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* the model, and the firewall that polices it */}
+      <AiExplanation
+        marginCapital={margin}
+        activityId={activityId}
+        annualHouseholdIncome={householdIncome > 0 ? householdIncome : undefined}
+      />
 
       {/* the cheapest structure actually available, against the one the spec routes to */}
       <CapitalStackCard

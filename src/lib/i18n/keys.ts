@@ -390,6 +390,29 @@ export const EN = {
   "voice.stop": "Stop",
   "voice.caption": "Spoken:",
   "voice.unavailable": "Voice is unavailable right now — the figures above are unchanged.",
+  "onb.blockNeedsDistrict": "Choose a district first",
+  "report.change": "Change",
+  // ── AI explanation panel ───────────────────────────────────
+  "ai.title": "Explain this in plain words",
+  "ai.subtitle":
+    "The kernel above computed every figure. The model only puts them into a sentence — and is checked before you see it.",
+  "ai.explain": "Explain",
+  "ai.again": "Explain again",
+  "ai.idle":
+    "Nothing has been sent to a model yet. Press Explain and the figures above — and only those figures — are handed over to be worded.",
+  "ai.failed": "The explanation could not be generated. The figures above are unchanged.",
+  "ai.by.gemini": "Written by Gemini",
+  "ai.by.template": "Written by the deterministic template",
+  "ai.checked": "Every number checked against the kernel",
+  "ai.latency": "{ms} ms",
+  "ai.rejected.title": "The model invented a number, so its answer was thrown away",
+  "ai.rejected.detail":
+    "The sentence above is the deterministic fallback. These figures appeared in the model’s reply and the kernel never produced them, so the reply was rejected rather than shown to you:",
+  "ai.facts.title": "What the model was allowed to see",
+  "ai.facts.detail":
+    "This is the whole of it. The model receives these values already computed and already formatted; it is never asked to add, divide or round anything, and any figure in its reply that is not on this list is treated as an invention.",
+  "ai.facts.gestation": "Gestation",
+  "ai.facts.verdict": "Verdict",
 } as const;
 
 export type MessageKey = keyof typeof EN;

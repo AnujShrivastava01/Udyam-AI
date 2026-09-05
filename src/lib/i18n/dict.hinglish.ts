@@ -300,4 +300,26 @@ export const HINGLISH: Dictionary = {
   "voice.stop": "Rokein",
   "voice.caption": "Jo bola gaya:",
   "voice.unavailable": "Awaaz abhi uplabdh nahi hai — upar ke figures waise hi hain.",
+  "onb.blockNeedsDistrict": "Pehle district chuniye",
+  "report.change": "Badlein",
+  "ai.title": "Ise aasan shabdon mein samjhiye",
+  "ai.subtitle":
+    "Upar ke sabhi figures engine ne gine hain. Model sirf unhein ek vaakya mein daalta hai — aur aap tak pahunchne se pehle uski jaanch hoti hai.",
+  "ai.explain": "Samjhayein",
+  "ai.again": "Phir se samjhayein",
+  "ai.idle":
+    "Abhi tak kisi model ko kuch nahi bheja gaya hai. “Samjhayein” dabaiye aur upar ke figures — aur sirf wahi — shabdon mein dhalne ke liye bheje jayenge.",
+  "ai.failed": "Vyakhya nahi ban saki. Upar ke figures waise hi hain.",
+  "ai.by.gemini": "Gemini ne likha",
+  "ai.by.template": "Nishchit template ne likha",
+  "ai.checked": "Har number engine se milaya gaya",
+  "ai.latency": "{ms} ms",
+  "ai.rejected.title": "Model ne ek number gadh liya, isliye uska jawab hata diya gaya",
+  "ai.rejected.detail":
+    "Upar ka vaakya nishchit template se hai. Ye figures model ke jawab mein aaye the aur engine ne inhein kabhi banaya hi nahi, isliye jawab aapko dikhane ke bajay khaarij kar diya gaya:",
+  "ai.facts.title": "Model ko kya-kya diya gaya",
+  "ai.facts.detail":
+    "Bas itna hi. Model ko ye values pehle se gini aur pehle se format ki hui milti hain; usse kabhi jodne, bhaag dene ya round karne ko nahi kaha jata, aur uske jawab mein aaya koi bhi aisa number jo is list mein nahi hai, gadha hua maana jata hai.",
+  "ai.facts.gestation": "Gestation period",
+  "ai.facts.verdict": "Nateeja",
 };

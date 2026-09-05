@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { VERDICT_META } from "@/lib/finance/solvency";
 import { recommendActivities, type Recommendation } from "@/lib/market/recommend";
-import { VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
+import { VILLAGES, VILLAGE_BY_ID, villageInDistrict } from "@/lib/market/villages";
 import { useT, money, type MessageKey } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 
@@ -52,11 +52,7 @@ export default function DiscoverPage() {
   const [income, setIncome] = useState(86_119);
 
   const villageId =
-    villagePick ??
-    VILLAGES.find(
-      (v) => v.district.toLowerCase() === (onboardingInput.location?.district ?? "").toLowerCase(),
-    )?.id ??
-    VILLAGES[0].id;
+    villagePick ?? villageInDistrict(onboardingInput.location?.district)?.id ?? VILLAGES[0].id;
   const margin = marginPick ?? onboardingInput.marginCapital ?? 100_000;
   const setVillageId = setVillagePick;
   const setMargin = setMarginPick;

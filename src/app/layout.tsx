@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Noto_Sans_Devanagari, Outfit } from "next/font/google";
 import "./globals.css";
 import { LayoutShell } from "@/components/layout-shell";
@@ -74,6 +75,19 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
+        {/*
+          Paint the theme before React runs.
+
+          The store rehydrates in an effect after mount, so a user whose saved theme is dark would
+          otherwise get a full cream page first and a flash to dark a frame later — on the one
+          setting whose entire purpose is not being blinded. This reads the same persisted key and
+          sets the class synchronously, before first paint. It is wrapped in try/catch because
+          localStorage throws outright in some privacy modes, and a theme preference is never worth
+          a blank page.
+        */}
+        <Script id="theme-boot" strategy="beforeInteractive">
+          {`try{var s=JSON.parse(localStorage.getItem('siddhi.session')||'{}');var t=(s.state&&s.state.theme)||'system';var d=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}`}
+        </Script>
         <StoreHydration />
         <SmoothScroll>
           <LayoutShell>{children}</LayoutShell>

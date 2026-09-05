@@ -37,7 +37,12 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ACTIVITIES, ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { buildFeasibilityReport, type Confidence, type Figure } from "@/lib/market/feasibility";
-import { GAZETTEER_COVERAGE, VILLAGES, VILLAGE_BY_ID } from "@/lib/market/villages";
+import {
+  GAZETTEER_COVERAGE,
+  VILLAGES,
+  VILLAGE_BY_ID,
+  villageInDistrict,
+} from "@/lib/market/villages";
 import { useT, money, num, type MessageKey } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 
@@ -77,11 +82,10 @@ export default function FeasibilityReportPage() {
   // Failing the route id, fall back to whatever district onboarding collected before dropping to
   // the first row — the user told us where they are; showing them a different district is rude.
   const defaultVillage =
-    fromRoute.village ??
-    VILLAGES.find((v) => v.district.toLowerCase() === (onboardingDistrict ?? "").toLowerCase())?.id ??
-    VILLAGES[0].id;
+    fromRoute.village ?? villageInDistrict(onboardingDistrict)?.id ?? VILLAGES[0].id;
 
   const [villageId, setVillageId] = useState(defaultVillage);
+  const [picker, setPicker] = useState<"village" | "activity" | null>(null);
   const [activityId, setActivityId] = useState(fromRoute.activity ?? "goat-20-1");
 
   const village = VILLAGE_BY_ID.get(villageId)!;
@@ -107,67 +111,113 @@ export default function FeasibilityReportPage() {
         <p className="text-muted-foreground text-lg">{t("report.subtitle")}</p>
       </header>
 
-      {/* selectors */}
+      {/*
+        Leads with what was chosen, not with a menu.
+
+        This was two columns of chips \u2014 four villages and eleven activities, all shown at once, the
+        selected one distinguishable only by a tint. The user had just answered "where are you" and
+        "what do you want to start" in onboarding, and the report opened by asking again in a wall
+        of options. What they picked now reads as a sentence at the top; the full list is one click
+        away for anyone who wants to compare.
+      */}
       <Card>
-        <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
-          <div>
-            <h2
-              id="village-picker"
-              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+        <CardContent className="pt-6 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectionSummary
+              label={t("report.village")}
+              value={village.name}
+              detail={
+                village.block === village.district
+                  ? village.district
+                  : `${village.block} \u00b7 ${village.district}`
+              }
+              open={picker === "village"}
+              onToggle={() => setPicker(picker === "village" ? null : "village")}
+              changeLabel={t("report.change")}
+              icon={<MapPin className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />}
+            />
+            <SelectionSummary
+              label={t("report.activity")}
+              value={activity ? t(`activity.${activity.id}.name` as MessageKey) : "\u2014"}
+              detail={
+                activity
+                  ? `${t(`activity.${activity.id}.unit` as MessageKey)} \u00b7 ${t("report.gestationMo", {
+                      months: activity.gestationMonths,
+                    })}`
+                  : ""
+              }
+              open={picker === "activity"}
+              onToggle={() => setPicker(picker === "activity" ? null : "activity")}
+              changeLabel={t("report.change")}
+              icon={<Target className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />}
+            />
+          </div>
+
+          {picker === "village" && (
+            <div
+              className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 border-t pt-4"
+              role="group"
+              aria-label={t("report.village")}
             >
-              {t("report.village")}
-            </h2>
-            <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="village-picker">
               {VILLAGES.map((v) => (
                 <button
                   key={v.id}
                   type="button"
-                  onClick={() => setVillageId(v.id)}
+                  onClick={() => {
+                    setVillageId(v.id);
+                    setPicker(null);
+                  }}
                   aria-pressed={villageId === v.id}
-                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                    villageId === v.id ? "border-primary bg-primary/10 font-medium" : "hover:bg-muted/50"
+                  className={`min-w-0 rounded-lg border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                    villageId === v.id
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "hover:bg-muted/50"
                   }`}
                 >
-                  {v.name}
-                  <span className="block text-[10px] text-muted-foreground">
-                    {v.block} · {v.district}
+                  <span className="block truncate">{v.name}</span>
+                  <span className="block truncate text-[10px] text-muted-foreground">
+                    {v.block === v.district ? v.district : `${v.block} \u00b7 ${v.district}`}
                   </span>
                 </button>
               ))}
             </div>
-          </div>
-          <div>
-            <h2
-              id="activity-picker"
-              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+          )}
+
+          {picker === "activity" && (
+            /* a.name / a.unit are the English fields on the record. The calculator renders the
+               same activity through activity.<id>.name, so one session showed "\u092c\u0915\u0930\u0940 \u092a\u093e\u0932\u0928" on one
+               page and "Goat rearing" on the next. Both pages now read the dictionary. */
+            <div
+              className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 border-t pt-4"
+              role="group"
+              aria-label={t("report.activity")}
             >
-              {t("report.activity")}
-            </h2>
-            {/* a.name / a.unit are the English fields on the record. The calculator renders the
-                same activity through activity.<id>.name, so one session showed "बकरी पालन" on one
-                page and "Goat rearing" on the next. Both pages now read the dictionary. */}
-            <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="activity-picker">
               {ACTIVITIES.map((a) => (
                 <button
                   key={a.id}
                   type="button"
-                  onClick={() => setActivityId(a.id)}
+                  onClick={() => {
+                    setActivityId(a.id);
+                    setPicker(null);
+                  }}
                   aria-pressed={activityId === a.id}
-                  className={`rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                    activityId === a.id ? "border-primary bg-primary/10 font-medium" : "hover:bg-muted/50"
+                  className={`min-w-0 rounded-lg border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                    activityId === a.id
+                      ? "border-primary bg-primary/10 font-medium"
+                      : "hover:bg-muted/50"
                   }`}
                 >
-                  <span className="block max-w-[13rem] truncate">
+                  <span className="block truncate">
                     {t(`activity.${a.id}.name` as MessageKey)}
                   </span>
-                  <span className="block text-[10px] text-muted-foreground">
-                    {t(`activity.${a.id}.unit` as MessageKey)} ·{" "}
+                  <span className="block truncate text-[10px] text-muted-foreground">
+                    {t(`activity.${a.id}.unit` as MessageKey)} \u00b7{" "}
                     {t("report.gestationMo", { months: a.gestationMonths })}
                   </span>
                 </button>
               ))}
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -414,6 +464,48 @@ function FigureRow({ figure }: { figure: Figure }) {
           <SourceChip label={figure.provenance.source} provenance={figure.provenance} />
         </div>
       )}
+    </div>
+  );
+}
+
+/** What is currently selected, with the list one click away rather than always on screen. */
+function SelectionSummary({
+  label,
+  value,
+  detail,
+  open,
+  onToggle,
+  changeLabel,
+  icon,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  open: boolean;
+  onToggle: () => void;
+  changeLabel: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-xl border bg-muted/20 p-3">
+      <div className="flex min-w-0 items-start gap-2">
+        {icon}
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {label}
+          </p>
+          <p className="truncate font-semibold leading-tight">{value}</p>
+          {detail && <p className="truncate text-[11px] text-muted-foreground">{detail}</p>}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        {changeLabel}
+      </button>
     </div>
   );
 }

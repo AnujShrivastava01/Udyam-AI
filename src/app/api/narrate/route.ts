@@ -4,6 +4,7 @@ import { plan } from "@/lib/finance";
 import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { normaliseLocale } from "@/lib/i18n/render";
 import { isAiConfigured, narratePlan } from "@/lib/ai/narrate";
+import { callerKey, throttled } from "@/lib/api/throttle";
 
 /**
  * Narration endpoint.
@@ -18,28 +19,21 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
- * This route bills a Gemini call per request, so it is NOT public.
+ * This route bills a Gemini call per request, and the browser calls it — so it cannot carry the
+ * webhook's shared secret, and something else has to stand in its place.
  *
- * Nothing in the app calls it — /calculator imports the kernel and computes client-side — so it
- * exists purely as a demo and diagnostic surface. Left open it would be an unauthenticated,
- * unmetered way for anyone who guessed the path to spend the project's model budget.
+ * Two things do. First, it takes kernel INPUTS and never a prompt: the caller supplies a margin
+ * and an activity id, the route runs plan() itself and builds the model's context from the figures
+ * it computed. There is no string on the request that reaches Gemini, so this cannot be used as a
+ * free model proxy no matter what is posted to it. Second, the throttle below caps how fast one
+ * caller can spend the budget.
  *
- * It shares the webhook's secret. Send it as `x-webhook-secret`.
+ * It used to be gated by the webhook secret and called by nothing at all — which meant the
+ * product's central AI claim was invisible in the product.
  */
-function authorised(req: NextRequest): boolean {
-  const expected = process.env.WHATSAPP_WEBHOOK_SECRET;
-  if (!expected) return false;
-  const provided = req.headers.get("x-webhook-secret") ?? "";
-  if (provided.length !== expected.length) return false;
-  // Constant-time-ish compare: never let response latency reveal how much of the secret matched.
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i);
-  return diff === 0;
-}
-
 export async function POST(req: NextRequest) {
-  if (!authorised(req)) {
-    return NextResponse.json({ error: "unauthorised" }, { status: 401 });
+  if (throttled(callerKey(req), 12)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   let body: {
@@ -94,6 +88,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     aiConfigured: isAiConfigured(),
     narration,
+    activityId: body.activityId ?? null,
     // The figures the narration was allowed to use — so the client can render them as source
     // chips, and so a judge can check the model added nothing.
     facts: {

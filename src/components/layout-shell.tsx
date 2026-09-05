@@ -4,6 +4,7 @@ import { useAppStore } from "@/lib/store";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
 import { Leaf, Menu, X, User, Settings, IndianRupee } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
@@ -28,7 +29,7 @@ const LANGUAGES = [
 const HTML_LANG: Record<string, string> = { hi: "hi", hinglish: "hi-Latn", en: "en" };
 
 export function LayoutShell({ children }: { children: React.ReactNode }) {
-  const { language, setLanguage } = useAppStore();
+  const { language, setLanguage, theme } = useAppStore();
   const { t } = useTranslation();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -49,20 +50,26 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   }, [language]);
 
   /**
-   * Dark mode follows the operating system.
+   * Apply the theme.
    *
    * globals.css carries a complete `.dark` palette and roughly a hundred `dark:` variants are
    * written throughout the components — but nothing ever put the class on <html>, so every one of
-   * them was dead and a user who has told their OS they want a dark interface got a cream one.
-   * There is no in-app toggle by design: the OS preference is already the user's answer.
+   * them was dead. The OS preference is honoured by default and overridden only when the user says
+   * so; the media listener stays attached in 'system' mode so a phone that switches at sunset
+   * still switches the app with it.
    */
   useEffect(() => {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => document.documentElement.classList.toggle("dark", query.matches);
+    const apply = () =>
+      document.documentElement.classList.toggle(
+        "dark",
+        theme === "dark" || (theme === "system" && query.matches),
+      );
     apply();
+    if (theme !== "system") return;
     query.addEventListener("change", apply);
     return () => query.removeEventListener("change", apply);
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -153,6 +160,8 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               ))}
             </div>
 
+            <ThemeToggle className="hidden sm:inline-flex" />
+
             {/* A notification bell used to sit here and opened nothing, with a red dot implying
                 unread news that did not exist. The hamburger beside it was inert too — it now
                 opens the menu below, so it stays. */}
@@ -213,6 +222,13 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
                   {l.long}
                 </button>
               ))}
+            </div>
+
+            <div className="border-t pt-2 mt-1 flex flex-col gap-1">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
+                {t("theme.label")}
+              </span>
+              <ThemeToggle variant="list" />
             </div>
           </div>
         )}
