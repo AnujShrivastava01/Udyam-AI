@@ -1,0 +1,735 @@
+{
+ "seed": 26091,
+ "count": 500,
+ "tolerance": 1,
+ "reports": [
+  {
+   "solverId": "kernel",
+   "label": "Deterministic kernel",
+   "note": "The engine under test is the engine that labels. Scores 100% by construction; included as the ceiling.",
+   "total": 500,
+   "exact": 500,
+   "exactPct": 100,
+   "perField": {
+    "scheme": 500,
+    "sanctionedLoan": 500,
+    "quarterlyInstalment": 500,
+    "moratoriumInterest": 500,
+    "totalInterest": 500
+   },
+   "perFieldPct": {
+    "scheme": 100,
+    "sanctionedLoan": 100,
+    "quarterlyInstalment": 100,
+    "moratoriumInterest": 100,
+    "totalInterest": 100
+   },
+   "perRegion": {
+    "ordinary-micro": {
+     "total": 80,
+     "exact": 80,
+     "pct": 100
+    },
+    "ordinary-term": {
+     "total": 100,
+     "exact": 100,
+     "pct": 100
+    },
+    "tier-boundary": {
+     "total": 70,
+     "exact": 70,
+     "pct": 100
+    },
+    "dead-zone": {
+     "total": 70,
+     "exact": 70,
+     "pct": 100
+    },
+    "cap-binding": {
+     "total": 60,
+     "exact": 60,
+     "pct": 100
+    },
+    "near-ceiling": {
+     "total": 40,
+     "exact": 40,
+     "pct": 100
+    },
+    "plantation-exception": {
+     "total": 40,
+     "exact": 40,
+     "pct": 100
+    },
+    "capitalised": {
+     "total": 40,
+     "exact": 40,
+     "pct": 100
+    }
+   },
+   "sampleFailures": []
+  },
+  {
+   "solverId": "spec-literal",
+   "label": "Specification, implemented literally",
+   "note": "PS formula with no caps and straight-line principal — what a faithful reading of the problem statement produces.",
+   "total": 500,
+   "exact": 0,
+   "exactPct": 0,
+   "perField": {
+    "scheme": 500,
+    "sanctionedLoan": 359,
+    "quarterlyInstalment": 0,
+    "moratoriumInterest": 237,
+    "totalInterest": 0
+   },
+   "perFieldPct": {
+    "scheme": 100,
+    "sanctionedLoan": 71.8,
+    "quarterlyInstalment": 0,
+    "moratoriumInterest": 47.4,
+    "totalInterest": 0
+   },
+   "perRegion": {
+    "ordinary-micro": {
+     "total": 80,
+     "exact": 0,
+     "pct": 0
+    },
+    "ordinary-term": {
+     "total": 100,
+     "exact": 0,
+     "pct": 0
+    },
+    "tier-boundary": {
+     "total": 70,
+     "exact": 0,
+     "pct": 0
+    },
+    "dead-zone": {
+     "total": 70,
+     "exact": 0,
+     "pct": 0
+    },
+    "cap-binding": {
+     "total": 60,
+     "exact": 0,
+     "pct": 0
+    },
+    "near-ceiling": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    },
+    "plantation-exception": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    },
+    "capitalised": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    }
+   },
+   "sampleFailures": [
+    {
+     "case": {
+      "id": "SB-0001",
+      "marginCapital": 10222,
+      "projectCost": 102220,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 91998,
+      "quarterlyInstalment": 9200.79,
+      "moratoriumInterest": 1494.97,
+      "totalInterest": 10705.63
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 91998,
+      "quarterlyInstalment": 9858.42,
+      "moratoriumInterest": 1494.97,
+      "totalInterest": 10464.77
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0002",
+      "marginCapital": 9481,
+      "projectCost": 94810,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 85329,
+      "quarterlyInstalment": 8533.82,
+      "moratoriumInterest": 1386.6,
+      "totalInterest": 9929.56
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 85329,
+      "quarterlyInstalment": 9143.78,
+      "moratoriumInterest": 1386.6,
+      "totalInterest": 9706.17
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0003",
+      "marginCapital": 8099,
+      "projectCost": 80990,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 72891,
+      "quarterlyInstalment": 7289.88,
+      "moratoriumInterest": 1184.48,
+      "totalInterest": 8482.2
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 72891,
+      "quarterlyInstalment": 7810.93,
+      "moratoriumInterest": 1184.48,
+      "totalInterest": 8291.35
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0004",
+      "marginCapital": 5876,
+      "projectCost": 58760,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 52884,
+      "quarterlyInstalment": 5288.97,
+      "moratoriumInterest": 859.37,
+      "totalInterest": 6154.01
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 52884,
+      "quarterlyInstalment": 5667,
+      "moratoriumInterest": 859.37,
+      "totalInterest": 6015.55
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0005",
+      "marginCapital": 11653,
+      "projectCost": 116530,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 104877,
+      "quarterlyInstalment": 10488.83,
+      "moratoriumInterest": 1704.25,
+      "totalInterest": 12204.32
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 104877,
+      "quarterlyInstalment": 11238.52,
+      "moratoriumInterest": 1704.25,
+      "totalInterest": 11929.76
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    }
+   ]
+  },
+  {
+   "solverId": "capped-simple",
+   "label": "Caps applied, simple interest",
+   "note": "Gets the ceilings right, then prices the loan on a flat rate rather than a reducing balance.",
+   "total": 500,
+   "exact": 0,
+   "exactPct": 0,
+   "perField": {
+    "scheme": 500,
+    "sanctionedLoan": 500,
+    "quarterlyInstalment": 0,
+    "moratoriumInterest": 387,
+    "totalInterest": 0
+   },
+   "perFieldPct": {
+    "scheme": 100,
+    "sanctionedLoan": 100,
+    "quarterlyInstalment": 0,
+    "moratoriumInterest": 77.4,
+    "totalInterest": 0
+   },
+   "perRegion": {
+    "ordinary-micro": {
+     "total": 80,
+     "exact": 0,
+     "pct": 0
+    },
+    "ordinary-term": {
+     "total": 100,
+     "exact": 0,
+     "pct": 0
+    },
+    "tier-boundary": {
+     "total": 70,
+     "exact": 0,
+     "pct": 0
+    },
+    "dead-zone": {
+     "total": 70,
+     "exact": 0,
+     "pct": 0
+    },
+    "cap-binding": {
+     "total": 60,
+     "exact": 0,
+     "pct": 0
+    },
+    "near-ceiling": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    },
+    "plantation-exception": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    },
+    "capitalised": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    }
+   },
+   "sampleFailures": [
+    {
+     "case": {
+      "id": "SB-0001",
+      "marginCapital": 10222,
+      "projectCost": 102220,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 91998,
+      "quarterlyInstalment": 9200.79,
+      "moratoriumInterest": 1494.97,
+      "totalInterest": 10705.63
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 91998,
+      "quarterlyInstalment": 9994.33,
+      "moratoriumInterest": 1494.97,
+      "totalInterest": 17939.61
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0002",
+      "marginCapital": 9481,
+      "projectCost": 94810,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 85329,
+      "quarterlyInstalment": 8533.82,
+      "moratoriumInterest": 1386.6,
+      "totalInterest": 9929.56
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 85329,
+      "quarterlyInstalment": 9269.83,
+      "moratoriumInterest": 1386.6,
+      "totalInterest": 16639.16
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0003",
+      "marginCapital": 8099,
+      "projectCost": 80990,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 72891,
+      "quarterlyInstalment": 7289.88,
+      "moratoriumInterest": 1184.48,
+      "totalInterest": 8482.2
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 72891,
+      "quarterlyInstalment": 7918.61,
+      "moratoriumInterest": 1184.48,
+      "totalInterest": 14213.75
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0004",
+      "marginCapital": 5876,
+      "projectCost": 58760,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 52884,
+      "quarterlyInstalment": 5288.97,
+      "moratoriumInterest": 859.37,
+      "totalInterest": 6154.01
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 52884,
+      "quarterlyInstalment": 5745.13,
+      "moratoriumInterest": 859.37,
+      "totalInterest": 10312.38
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0005",
+      "marginCapital": 11653,
+      "projectCost": 116530,
+      "convention": "serviced",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 104877,
+      "quarterlyInstalment": 10488.83,
+      "moratoriumInterest": 1704.25,
+      "totalInterest": 12204.32
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 104877,
+      "quarterlyInstalment": 11393.46,
+      "moratoriumInterest": 1704.25,
+      "totalInterest": 20451.02
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": true,
+      "totalInterest": false
+     },
+     "exact": false
+    }
+   ]
+  },
+  {
+   "solverId": "convention-blind",
+   "label": "Correct, but assumes interest is always serviced",
+   "note": "Right caps, right amortisation, wrong on every case where moratorium interest is capitalised.",
+   "total": 500,
+   "exact": 387,
+   "exactPct": 77.4,
+   "perField": {
+    "scheme": 500,
+    "sanctionedLoan": 500,
+    "quarterlyInstalment": 387,
+    "moratoriumInterest": 387,
+    "totalInterest": 387
+   },
+   "perFieldPct": {
+    "scheme": 100,
+    "sanctionedLoan": 100,
+    "quarterlyInstalment": 77.4,
+    "moratoriumInterest": 77.4,
+    "totalInterest": 77.4
+   },
+   "perRegion": {
+    "ordinary-micro": {
+     "total": 80,
+     "exact": 65,
+     "pct": 81.3
+    },
+    "ordinary-term": {
+     "total": 100,
+     "exact": 90,
+     "pct": 90
+    },
+    "tier-boundary": {
+     "total": 70,
+     "exact": 54,
+     "pct": 77.1
+    },
+    "dead-zone": {
+     "total": 70,
+     "exact": 56,
+     "pct": 80
+    },
+    "cap-binding": {
+     "total": 60,
+     "exact": 51,
+     "pct": 85
+    },
+    "near-ceiling": {
+     "total": 40,
+     "exact": 35,
+     "pct": 87.5
+    },
+    "plantation-exception": {
+     "total": 40,
+     "exact": 36,
+     "pct": 90
+    },
+    "capitalised": {
+     "total": 40,
+     "exact": 0,
+     "pct": 0
+    }
+   },
+   "sampleFailures": [
+    {
+     "case": {
+      "id": "SB-0010",
+      "marginCapital": 12726,
+      "projectCost": 127260,
+      "convention": "capitalised",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 114534,
+      "quarterlyInstalment": 11640.77,
+      "moratoriumInterest": 0,
+      "totalInterest": 13514.43
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 114534,
+      "quarterlyInstalment": 11454.63,
+      "moratoriumInterest": 1861.18,
+      "totalInterest": 13328.09
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": false,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0013",
+      "marginCapital": 5339,
+      "projectCost": 53390,
+      "convention": "capitalised",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 48051,
+      "quarterlyInstalment": 4883.71,
+      "moratoriumInterest": 0,
+      "totalInterest": 5669.77
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 48051,
+      "quarterlyInstalment": 4805.62,
+      "moratoriumInterest": 780.83,
+      "totalInterest": 5591.6
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": false,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0016",
+      "marginCapital": 4844,
+      "projectCost": 48440,
+      "convention": "capitalised",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 43596,
+      "quarterlyInstalment": 4430.92,
+      "moratoriumInterest": 0,
+      "totalInterest": 5144.11
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 43596,
+      "quarterlyInstalment": 4360.07,
+      "moratoriumInterest": 708.44,
+      "totalInterest": 5073.19
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": false,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0021",
+      "marginCapital": 8558,
+      "projectCost": 85580,
+      "convention": "capitalised",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 77022,
+      "quarterlyInstalment": 7828.2,
+      "moratoriumInterest": 0,
+      "totalInterest": 9088.22
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 77022,
+      "quarterlyInstalment": 7703.03,
+      "moratoriumInterest": 1251.61,
+      "totalInterest": 8962.88
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": false,
+      "totalInterest": false
+     },
+     "exact": false
+    },
+    {
+     "case": {
+      "id": "SB-0028",
+      "marginCapital": 7910,
+      "projectCost": 79100,
+      "convention": "capitalised",
+      "region": "ordinary-micro"
+     },
+     "expected": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 71190,
+      "quarterlyInstalment": 7235.46,
+      "moratoriumInterest": 0,
+      "totalInterest": 8400.05
+     },
+     "actual": {
+      "scheme": "nsfdc-micro-finance",
+      "sanctionedLoan": 71190,
+      "quarterlyInstalment": 7119.76,
+      "moratoriumInterest": 1156.84,
+      "totalInterest": 8284.27
+     },
+     "perField": {
+      "scheme": true,
+      "sanctionedLoan": true,
+      "quarterlyInstalment": false,
+      "moratoriumInterest": false,
+      "totalInterest": false
+     },
+     "exact": false
+    }
+   ]
+  }
+ ]
+}

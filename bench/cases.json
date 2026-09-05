@@ -1,0 +1,3542 @@
+[
+ {
+  "id": "SB-0001",
+  "marginCapital": 10222,
+  "projectCost": 102220,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0002",
+  "marginCapital": 9481,
+  "projectCost": 94810,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0003",
+  "marginCapital": 8099,
+  "projectCost": 80990,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0004",
+  "marginCapital": 5876,
+  "projectCost": 58760,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0005",
+  "marginCapital": 11653,
+  "projectCost": 116530,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0006",
+  "marginCapital": 4361,
+  "projectCost": 43610,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0007",
+  "marginCapital": 2040,
+  "projectCost": 20400,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0008",
+  "marginCapital": 9961,
+  "projectCost": 99610,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0009",
+  "marginCapital": 5917,
+  "projectCost": 59170,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0010",
+  "marginCapital": 12726,
+  "projectCost": 127260,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0011",
+  "marginCapital": 2132,
+  "projectCost": 21320,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0012",
+  "marginCapital": 12743,
+  "projectCost": 127430,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0013",
+  "marginCapital": 5339,
+  "projectCost": 53390,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0014",
+  "marginCapital": 8695,
+  "projectCost": 86950,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0015",
+  "marginCapital": 7162,
+  "projectCost": 71620,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0016",
+  "marginCapital": 4844,
+  "projectCost": 48440,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0017",
+  "marginCapital": 5226,
+  "projectCost": 52260,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0018",
+  "marginCapital": 7623,
+  "projectCost": 76230,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0019",
+  "marginCapital": 8241,
+  "projectCost": 82410,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0020",
+  "marginCapital": 11464,
+  "projectCost": 114640,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0021",
+  "marginCapital": 8558,
+  "projectCost": 85580,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0022",
+  "marginCapital": 3665,
+  "projectCost": 36650,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0023",
+  "marginCapital": 8742,
+  "projectCost": 87420,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0024",
+  "marginCapital": 6197,
+  "projectCost": 61970,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0025",
+  "marginCapital": 3823,
+  "projectCost": 38230,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0026",
+  "marginCapital": 7054,
+  "projectCost": 70540,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0027",
+  "marginCapital": 4295,
+  "projectCost": 42950,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0028",
+  "marginCapital": 7910,
+  "projectCost": 79100,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0029",
+  "marginCapital": 5337,
+  "projectCost": 53370,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0030",
+  "marginCapital": 2537,
+  "projectCost": 25370,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0031",
+  "marginCapital": 2177,
+  "projectCost": 21770,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0032",
+  "marginCapital": 2892,
+  "projectCost": 28920,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0033",
+  "marginCapital": 2217,
+  "projectCost": 22170,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0034",
+  "marginCapital": 10989,
+  "projectCost": 109890,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0035",
+  "marginCapital": 8272,
+  "projectCost": 82720,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0036",
+  "marginCapital": 12131,
+  "projectCost": 121310,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0037",
+  "marginCapital": 2953,
+  "projectCost": 29530,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0038",
+  "marginCapital": 6092,
+  "projectCost": 60920,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0039",
+  "marginCapital": 11397,
+  "projectCost": 113970,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0040",
+  "marginCapital": 2803,
+  "projectCost": 28030,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0041",
+  "marginCapital": 3584,
+  "projectCost": 35840,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0042",
+  "marginCapital": 2687,
+  "projectCost": 26870,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0043",
+  "marginCapital": 5490,
+  "projectCost": 54900,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0044",
+  "marginCapital": 3104,
+  "projectCost": 31040,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0045",
+  "marginCapital": 4601,
+  "projectCost": 46010,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0046",
+  "marginCapital": 5754,
+  "projectCost": 57540,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0047",
+  "marginCapital": 12541,
+  "projectCost": 125410,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0048",
+  "marginCapital": 10851,
+  "projectCost": 108510,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0049",
+  "marginCapital": 6398,
+  "projectCost": 63980,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0050",
+  "marginCapital": 8832,
+  "projectCost": 88320,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0051",
+  "marginCapital": 7041,
+  "projectCost": 70410,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0052",
+  "marginCapital": 5259,
+  "projectCost": 52590,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0053",
+  "marginCapital": 4491,
+  "projectCost": 44910,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0054",
+  "marginCapital": 12587,
+  "projectCost": 125870,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0055",
+  "marginCapital": 11009,
+  "projectCost": 110090,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0056",
+  "marginCapital": 2853,
+  "projectCost": 28530,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0057",
+  "marginCapital": 9133,
+  "projectCost": 91330,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0058",
+  "marginCapital": 9830,
+  "projectCost": 98300,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0059",
+  "marginCapital": 10078,
+  "projectCost": 100780,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0060",
+  "marginCapital": 12455,
+  "projectCost": 124550,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0061",
+  "marginCapital": 3817,
+  "projectCost": 38170,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0062",
+  "marginCapital": 9641,
+  "projectCost": 96410,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0063",
+  "marginCapital": 10873,
+  "projectCost": 108730,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0064",
+  "marginCapital": 3541,
+  "projectCost": 35410,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0065",
+  "marginCapital": 6131,
+  "projectCost": 61310,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0066",
+  "marginCapital": 11021,
+  "projectCost": 110210,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0067",
+  "marginCapital": 8458,
+  "projectCost": 84580,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0068",
+  "marginCapital": 12488,
+  "projectCost": 124880,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0069",
+  "marginCapital": 11863,
+  "projectCost": 118630,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0070",
+  "marginCapital": 12631,
+  "projectCost": 126310,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0071",
+  "marginCapital": 2657,
+  "projectCost": 26570,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0072",
+  "marginCapital": 9773,
+  "projectCost": 97730,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0073",
+  "marginCapital": 10980,
+  "projectCost": 109800,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0074",
+  "marginCapital": 4141,
+  "projectCost": 41410,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0075",
+  "marginCapital": 7707,
+  "projectCost": 77070,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0076",
+  "marginCapital": 9696,
+  "projectCost": 96960,
+  "convention": "capitalised",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0077",
+  "marginCapital": 10790,
+  "projectCost": 107900,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0078",
+  "marginCapital": 4719,
+  "projectCost": 47190,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0079",
+  "marginCapital": 2665,
+  "projectCost": 26650,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0080",
+  "marginCapital": 5020,
+  "projectCost": 50200,
+  "convention": "serviced",
+  "region": "ordinary-micro"
+ },
+ {
+  "id": "SB-0081",
+  "marginCapital": 95837,
+  "projectCost": 958370,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0082",
+  "marginCapital": 115300,
+  "projectCost": 1153000,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0083",
+  "marginCapital": 136983,
+  "projectCost": 1369830,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0084",
+  "marginCapital": 201979,
+  "projectCost": 2019790,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0085",
+  "marginCapital": 192841,
+  "projectCost": 1928410,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0086",
+  "marginCapital": 89500,
+  "projectCost": 895000,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0087",
+  "marginCapital": 18044,
+  "projectCost": 180440,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0088",
+  "marginCapital": 189139,
+  "projectCost": 1891390,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0089",
+  "marginCapital": 68461,
+  "projectCost": 684610,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0090",
+  "marginCapital": 69330,
+  "projectCost": 693300,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0091",
+  "marginCapital": 45740,
+  "projectCost": 457400,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0092",
+  "marginCapital": 154432,
+  "projectCost": 1544320,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0093",
+  "marginCapital": 188413,
+  "projectCost": 1884130,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0094",
+  "marginCapital": 164246,
+  "projectCost": 1642460,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0095",
+  "marginCapital": 62893,
+  "projectCost": 628930,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0096",
+  "marginCapital": 111116,
+  "projectCost": 1111160,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0097",
+  "marginCapital": 70744,
+  "projectCost": 707440,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0098",
+  "marginCapital": 128816,
+  "projectCost": 1288160,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0099",
+  "marginCapital": 133002,
+  "projectCost": 1330020,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0100",
+  "marginCapital": 18645,
+  "projectCost": 186450,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0101",
+  "marginCapital": 33678,
+  "projectCost": 336780,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0102",
+  "marginCapital": 122993,
+  "projectCost": 1229930,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0103",
+  "marginCapital": 99914,
+  "projectCost": 999140,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0104",
+  "marginCapital": 163911,
+  "projectCost": 1639110,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0105",
+  "marginCapital": 55468,
+  "projectCost": 554680,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0106",
+  "marginCapital": 151522,
+  "projectCost": 1515220,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0107",
+  "marginCapital": 173932,
+  "projectCost": 1739320,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0108",
+  "marginCapital": 170750,
+  "projectCost": 1707500,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0109",
+  "marginCapital": 130435,
+  "projectCost": 1304350,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0110",
+  "marginCapital": 204709,
+  "projectCost": 2047090,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0111",
+  "marginCapital": 106155,
+  "projectCost": 1061550,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0112",
+  "marginCapital": 185748,
+  "projectCost": 1857480,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0113",
+  "marginCapital": 108376,
+  "projectCost": 1083760,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0114",
+  "marginCapital": 202661,
+  "projectCost": 2026610,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0115",
+  "marginCapital": 138310,
+  "projectCost": 1383100,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0116",
+  "marginCapital": 22831,
+  "projectCost": 228310,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0117",
+  "marginCapital": 77084,
+  "projectCost": 770840,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0118",
+  "marginCapital": 173249,
+  "projectCost": 1732490,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0119",
+  "marginCapital": 212703,
+  "projectCost": 2127030,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0120",
+  "marginCapital": 125939,
+  "projectCost": 1259390,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0121",
+  "marginCapital": 104729,
+  "projectCost": 1047290,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0122",
+  "marginCapital": 170216,
+  "projectCost": 1702160,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0123",
+  "marginCapital": 204189,
+  "projectCost": 2041890,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0124",
+  "marginCapital": 171568,
+  "projectCost": 1715680,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0125",
+  "marginCapital": 173451,
+  "projectCost": 1734510,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0126",
+  "marginCapital": 201546,
+  "projectCost": 2015460,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0127",
+  "marginCapital": 17254,
+  "projectCost": 172540,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0128",
+  "marginCapital": 93986,
+  "projectCost": 939860,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0129",
+  "marginCapital": 82304,
+  "projectCost": 823040,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0130",
+  "marginCapital": 81047,
+  "projectCost": 810470,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0131",
+  "marginCapital": 177233,
+  "projectCost": 1772330,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0132",
+  "marginCapital": 201643,
+  "projectCost": 2016430,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0133",
+  "marginCapital": 140964,
+  "projectCost": 1409640,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0134",
+  "marginCapital": 180362,
+  "projectCost": 1803620,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0135",
+  "marginCapital": 31930,
+  "projectCost": 319300,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0136",
+  "marginCapital": 167743,
+  "projectCost": 1677430,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0137",
+  "marginCapital": 138224,
+  "projectCost": 1382240,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0138",
+  "marginCapital": 90801,
+  "projectCost": 908010,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0139",
+  "marginCapital": 212677,
+  "projectCost": 2126770,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0140",
+  "marginCapital": 112940,
+  "projectCost": 1129400,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0141",
+  "marginCapital": 86569,
+  "projectCost": 865690,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0142",
+  "marginCapital": 178157,
+  "projectCost": 1781570,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0143",
+  "marginCapital": 118224,
+  "projectCost": 1182240,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0144",
+  "marginCapital": 86635,
+  "projectCost": 866350,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0145",
+  "marginCapital": 176106,
+  "projectCost": 1761060,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0146",
+  "marginCapital": 180643,
+  "projectCost": 1806430,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0147",
+  "marginCapital": 30456,
+  "projectCost": 304560,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0148",
+  "marginCapital": 56694,
+  "projectCost": 566940,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0149",
+  "marginCapital": 197151,
+  "projectCost": 1971510,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0150",
+  "marginCapital": 110451,
+  "projectCost": 1104510,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0151",
+  "marginCapital": 37975,
+  "projectCost": 379750,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0152",
+  "marginCapital": 43081,
+  "projectCost": 430810,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0153",
+  "marginCapital": 193439,
+  "projectCost": 1934390,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0154",
+  "marginCapital": 174488,
+  "projectCost": 1744880,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0155",
+  "marginCapital": 105870,
+  "projectCost": 1058700,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0156",
+  "marginCapital": 193724,
+  "projectCost": 1937240,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0157",
+  "marginCapital": 80737,
+  "projectCost": 807370,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0158",
+  "marginCapital": 80511,
+  "projectCost": 805110,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0159",
+  "marginCapital": 164640,
+  "projectCost": 1646400,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0160",
+  "marginCapital": 67761,
+  "projectCost": 677610,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0161",
+  "marginCapital": 32030,
+  "projectCost": 320300,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0162",
+  "marginCapital": 41750,
+  "projectCost": 417500,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0163",
+  "marginCapital": 24396,
+  "projectCost": 243960,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0164",
+  "marginCapital": 105357,
+  "projectCost": 1053570,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0165",
+  "marginCapital": 16818,
+  "projectCost": 168180,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0166",
+  "marginCapital": 79692,
+  "projectCost": 796920,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0167",
+  "marginCapital": 193548,
+  "projectCost": 1935480,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0168",
+  "marginCapital": 114326,
+  "projectCost": 1143260,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0169",
+  "marginCapital": 45560,
+  "projectCost": 455600,
+  "convention": "capitalised",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0170",
+  "marginCapital": 142962,
+  "projectCost": 1429620,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0171",
+  "marginCapital": 80810,
+  "projectCost": 808100,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0172",
+  "marginCapital": 118019,
+  "projectCost": 1180190,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0173",
+  "marginCapital": 81424,
+  "projectCost": 814240,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0174",
+  "marginCapital": 158227,
+  "projectCost": 1582270,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0175",
+  "marginCapital": 66611,
+  "projectCost": 666110,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0176",
+  "marginCapital": 71495,
+  "projectCost": 714950,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0177",
+  "marginCapital": 79961,
+  "projectCost": 799610,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0178",
+  "marginCapital": 86936,
+  "projectCost": 869360,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0179",
+  "marginCapital": 152443,
+  "projectCost": 1524430,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0180",
+  "marginCapital": 44911,
+  "projectCost": 449110,
+  "convention": "serviced",
+  "region": "ordinary-term"
+ },
+ {
+  "id": "SB-0181",
+  "marginCapital": 14259,
+  "projectCost": 142590,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0182",
+  "marginCapital": 13851,
+  "projectCost": 138510,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0183",
+  "marginCapital": 14127,
+  "projectCost": 141270,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0184",
+  "marginCapital": 14396,
+  "projectCost": 143960,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0185",
+  "marginCapital": 14247,
+  "projectCost": 142470,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0186",
+  "marginCapital": 14097,
+  "projectCost": 140970,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0187",
+  "marginCapital": 14302,
+  "projectCost": 143020,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0188",
+  "marginCapital": 13827,
+  "projectCost": 138270,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0189",
+  "marginCapital": 13917,
+  "projectCost": 139170,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0190",
+  "marginCapital": 14339,
+  "projectCost": 143390,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0191",
+  "marginCapital": 14321,
+  "projectCost": 143210,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0192",
+  "marginCapital": 13855,
+  "projectCost": 138550,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0193",
+  "marginCapital": 13619,
+  "projectCost": 136190,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0194",
+  "marginCapital": 13763,
+  "projectCost": 137630,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0195",
+  "marginCapital": 13806,
+  "projectCost": 138060,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0196",
+  "marginCapital": 13628,
+  "projectCost": 136280,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0197",
+  "marginCapital": 14336,
+  "projectCost": 143360,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0198",
+  "marginCapital": 14111,
+  "projectCost": 141110,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0199",
+  "marginCapital": 13961,
+  "projectCost": 139610,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0200",
+  "marginCapital": 13824,
+  "projectCost": 138240,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0201",
+  "marginCapital": 13941,
+  "projectCost": 139410,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0202",
+  "marginCapital": 14309,
+  "projectCost": 143090,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0203",
+  "marginCapital": 14082,
+  "projectCost": 140820,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0204",
+  "marginCapital": 13949,
+  "projectCost": 139490,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0205",
+  "marginCapital": 13909,
+  "projectCost": 139090,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0206",
+  "marginCapital": 14388,
+  "projectCost": 143880,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0207",
+  "marginCapital": 13896,
+  "projectCost": 138960,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0208",
+  "marginCapital": 13963,
+  "projectCost": 139630,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0209",
+  "marginCapital": 13988,
+  "projectCost": 139880,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0210",
+  "marginCapital": 14232,
+  "projectCost": 142320,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0211",
+  "marginCapital": 13814,
+  "projectCost": 138140,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0212",
+  "marginCapital": 14282,
+  "projectCost": 142820,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0213",
+  "marginCapital": 14173,
+  "projectCost": 141730,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0214",
+  "marginCapital": 13913,
+  "projectCost": 139130,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0215",
+  "marginCapital": 14331,
+  "projectCost": 143310,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0216",
+  "marginCapital": 13661,
+  "projectCost": 136610,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0217",
+  "marginCapital": 14177,
+  "projectCost": 141770,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0218",
+  "marginCapital": 14133,
+  "projectCost": 141330,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0219",
+  "marginCapital": 13823,
+  "projectCost": 138230,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0220",
+  "marginCapital": 14084,
+  "projectCost": 140840,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0221",
+  "marginCapital": 13866,
+  "projectCost": 138660,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0222",
+  "marginCapital": 13865,
+  "projectCost": 138650,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0223",
+  "marginCapital": 14149,
+  "projectCost": 141490,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0224",
+  "marginCapital": 14306,
+  "projectCost": 143060,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0225",
+  "marginCapital": 13734,
+  "projectCost": 137340,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0226",
+  "marginCapital": 14050,
+  "projectCost": 140500,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0227",
+  "marginCapital": 13717,
+  "projectCost": 137170,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0228",
+  "marginCapital": 14323,
+  "projectCost": 143230,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0229",
+  "marginCapital": 13616,
+  "projectCost": 136160,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0230",
+  "marginCapital": 13861,
+  "projectCost": 138610,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0231",
+  "marginCapital": 14014,
+  "projectCost": 140140,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0232",
+  "marginCapital": 14078,
+  "projectCost": 140780,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0233",
+  "marginCapital": 13966,
+  "projectCost": 139660,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0234",
+  "marginCapital": 14362,
+  "projectCost": 143620,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0235",
+  "marginCapital": 14249,
+  "projectCost": 142490,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0236",
+  "marginCapital": 14127,
+  "projectCost": 141270,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0237",
+  "marginCapital": 14094,
+  "projectCost": 140940,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0238",
+  "marginCapital": 13840,
+  "projectCost": 138400,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0239",
+  "marginCapital": 14049,
+  "projectCost": 140490,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0240",
+  "marginCapital": 14235,
+  "projectCost": 142350,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0241",
+  "marginCapital": 13642,
+  "projectCost": 136420,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0242",
+  "marginCapital": 13970,
+  "projectCost": 139700,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0243",
+  "marginCapital": 14137,
+  "projectCost": 141370,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0244",
+  "marginCapital": 14146,
+  "projectCost": 141460,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0245",
+  "marginCapital": 14133,
+  "projectCost": 141330,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0246",
+  "marginCapital": 14177,
+  "projectCost": 141770,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0247",
+  "marginCapital": 14238,
+  "projectCost": 142380,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0248",
+  "marginCapital": 14157,
+  "projectCost": 141570,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0249",
+  "marginCapital": 14063,
+  "projectCost": 140630,
+  "convention": "serviced",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0250",
+  "marginCapital": 14077,
+  "projectCost": 140770,
+  "convention": "capitalised",
+  "region": "tier-boundary"
+ },
+ {
+  "id": "SB-0251",
+  "marginCapital": 13913,
+  "projectCost": 139130,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0252",
+  "marginCapital": 13963,
+  "projectCost": 139630,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0253",
+  "marginCapital": 13929,
+  "projectCost": 139290,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0254",
+  "marginCapital": 13977,
+  "projectCost": 139770,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0255",
+  "marginCapital": 13941,
+  "projectCost": 139410,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0256",
+  "marginCapital": 13902,
+  "projectCost": 139020,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0257",
+  "marginCapital": 13993,
+  "projectCost": 139930,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0258",
+  "marginCapital": 13953,
+  "projectCost": 139530,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0259",
+  "marginCapital": 13997,
+  "projectCost": 139970,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0260",
+  "marginCapital": 13910,
+  "projectCost": 139100,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0261",
+  "marginCapital": 13965,
+  "projectCost": 139650,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0262",
+  "marginCapital": 13911,
+  "projectCost": 139110,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0263",
+  "marginCapital": 13956,
+  "projectCost": 139560,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0264",
+  "marginCapital": 13910,
+  "projectCost": 139100,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0265",
+  "marginCapital": 13986,
+  "projectCost": 139860,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0266",
+  "marginCapital": 13899,
+  "projectCost": 138990,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0267",
+  "marginCapital": 13958,
+  "projectCost": 139580,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0268",
+  "marginCapital": 13933,
+  "projectCost": 139330,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0269",
+  "marginCapital": 13939,
+  "projectCost": 139390,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0270",
+  "marginCapital": 13941,
+  "projectCost": 139410,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0271",
+  "marginCapital": 13981,
+  "projectCost": 139810,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0272",
+  "marginCapital": 13975,
+  "projectCost": 139750,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0273",
+  "marginCapital": 13989,
+  "projectCost": 139890,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0274",
+  "marginCapital": 13919,
+  "projectCost": 139190,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0275",
+  "marginCapital": 13922,
+  "projectCost": 139220,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0276",
+  "marginCapital": 13987,
+  "projectCost": 139870,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0277",
+  "marginCapital": 13981,
+  "projectCost": 139810,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0278",
+  "marginCapital": 13947,
+  "projectCost": 139470,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0279",
+  "marginCapital": 13896,
+  "projectCost": 138960,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0280",
+  "marginCapital": 13902,
+  "projectCost": 139020,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0281",
+  "marginCapital": 13972,
+  "projectCost": 139720,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0282",
+  "marginCapital": 13932,
+  "projectCost": 139320,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0283",
+  "marginCapital": 13904,
+  "projectCost": 139040,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0284",
+  "marginCapital": 13990,
+  "projectCost": 139900,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0285",
+  "marginCapital": 13902,
+  "projectCost": 139020,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0286",
+  "marginCapital": 13918,
+  "projectCost": 139180,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0287",
+  "marginCapital": 13959,
+  "projectCost": 139590,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0288",
+  "marginCapital": 13895,
+  "projectCost": 138950,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0289",
+  "marginCapital": 13898,
+  "projectCost": 138980,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0290",
+  "marginCapital": 13936,
+  "projectCost": 139360,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0291",
+  "marginCapital": 13928,
+  "projectCost": 139280,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0292",
+  "marginCapital": 13935,
+  "projectCost": 139350,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0293",
+  "marginCapital": 13958,
+  "projectCost": 139580,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0294",
+  "marginCapital": 13965,
+  "projectCost": 139650,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0295",
+  "marginCapital": 13918,
+  "projectCost": 139180,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0296",
+  "marginCapital": 13980,
+  "projectCost": 139800,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0297",
+  "marginCapital": 13917,
+  "projectCost": 139170,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0298",
+  "marginCapital": 13995,
+  "projectCost": 139950,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0299",
+  "marginCapital": 13988,
+  "projectCost": 139880,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0300",
+  "marginCapital": 13953,
+  "projectCost": 139530,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0301",
+  "marginCapital": 13998,
+  "projectCost": 139980,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0302",
+  "marginCapital": 13909,
+  "projectCost": 139090,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0303",
+  "marginCapital": 13920,
+  "projectCost": 139200,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0304",
+  "marginCapital": 13988,
+  "projectCost": 139880,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0305",
+  "marginCapital": 13909,
+  "projectCost": 139090,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0306",
+  "marginCapital": 13956,
+  "projectCost": 139560,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0307",
+  "marginCapital": 13933,
+  "projectCost": 139330,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0308",
+  "marginCapital": 13919,
+  "projectCost": 139190,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0309",
+  "marginCapital": 13975,
+  "projectCost": 139750,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0310",
+  "marginCapital": 13948,
+  "projectCost": 139480,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0311",
+  "marginCapital": 13991,
+  "projectCost": 139910,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0312",
+  "marginCapital": 13945,
+  "projectCost": 139450,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0313",
+  "marginCapital": 13959,
+  "projectCost": 139590,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0314",
+  "marginCapital": 13957,
+  "projectCost": 139570,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0315",
+  "marginCapital": 13936,
+  "projectCost": 139360,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0316",
+  "marginCapital": 13901,
+  "projectCost": 139010,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0317",
+  "marginCapital": 13891,
+  "projectCost": 138910,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0318",
+  "marginCapital": 13989,
+  "projectCost": 139890,
+  "convention": "capitalised",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0319",
+  "marginCapital": 13958,
+  "projectCost": 139580,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0320",
+  "marginCapital": 13934,
+  "projectCost": 139340,
+  "convention": "serviced",
+  "region": "dead-zone"
+ },
+ {
+  "id": "SB-0321",
+  "marginCapital": 500983,
+  "projectCost": 5009830,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0322",
+  "marginCapital": 503417,
+  "projectCost": 5034170,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0323",
+  "marginCapital": 510717,
+  "projectCost": 5107170,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0324",
+  "marginCapital": 509196,
+  "projectCost": 5091960,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0325",
+  "marginCapital": 504696,
+  "projectCost": 5046960,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0326",
+  "marginCapital": 509350,
+  "projectCost": 5093500,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0327",
+  "marginCapital": 510398,
+  "projectCost": 5103980,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0328",
+  "marginCapital": 507057,
+  "projectCost": 5070570,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0329",
+  "marginCapital": 503430,
+  "projectCost": 5034300,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0330",
+  "marginCapital": 511540,
+  "projectCost": 5115400,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0331",
+  "marginCapital": 512999,
+  "projectCost": 5129990,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0332",
+  "marginCapital": 513942,
+  "projectCost": 5139420,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0333",
+  "marginCapital": 508055,
+  "projectCost": 5080550,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0334",
+  "marginCapital": 517222,
+  "projectCost": 5172220,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0335",
+  "marginCapital": 517689,
+  "projectCost": 5176890,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0336",
+  "marginCapital": 501407,
+  "projectCost": 5014070,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0337",
+  "marginCapital": 511395,
+  "projectCost": 5113950,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0338",
+  "marginCapital": 508510,
+  "projectCost": 5085100,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0339",
+  "marginCapital": 504356,
+  "projectCost": 5043560,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0340",
+  "marginCapital": 507854,
+  "projectCost": 5078540,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0341",
+  "marginCapital": 504034,
+  "projectCost": 5040340,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0342",
+  "marginCapital": 511116,
+  "projectCost": 5111160,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0343",
+  "marginCapital": 509074,
+  "projectCost": 5090740,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0344",
+  "marginCapital": 504297,
+  "projectCost": 5042970,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0345",
+  "marginCapital": 504050,
+  "projectCost": 5040500,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0346",
+  "marginCapital": 505779,
+  "projectCost": 5057790,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0347",
+  "marginCapital": 519561,
+  "projectCost": 5195610,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0348",
+  "marginCapital": 500210,
+  "projectCost": 5002100,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0349",
+  "marginCapital": 500643,
+  "projectCost": 5006430,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0350",
+  "marginCapital": 500227,
+  "projectCost": 5002270,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0351",
+  "marginCapital": 500377,
+  "projectCost": 5003770,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0352",
+  "marginCapital": 511673,
+  "projectCost": 5116730,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0353",
+  "marginCapital": 511522,
+  "projectCost": 5115220,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0354",
+  "marginCapital": 515868,
+  "projectCost": 5158680,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0355",
+  "marginCapital": 518153,
+  "projectCost": 5181530,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0356",
+  "marginCapital": 514927,
+  "projectCost": 5149270,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0357",
+  "marginCapital": 507430,
+  "projectCost": 5074300,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0358",
+  "marginCapital": 503636,
+  "projectCost": 5036360,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0359",
+  "marginCapital": 514478,
+  "projectCost": 5144780,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0360",
+  "marginCapital": 512428,
+  "projectCost": 5124280,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0361",
+  "marginCapital": 505681,
+  "projectCost": 5056810,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0362",
+  "marginCapital": 513689,
+  "projectCost": 5136890,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0363",
+  "marginCapital": 508653,
+  "projectCost": 5086530,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0364",
+  "marginCapital": 519552,
+  "projectCost": 5195520,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0365",
+  "marginCapital": 504331,
+  "projectCost": 5043310,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0366",
+  "marginCapital": 502694,
+  "projectCost": 5026940,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0367",
+  "marginCapital": 504449,
+  "projectCost": 5044490,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0368",
+  "marginCapital": 509255,
+  "projectCost": 5092550,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0369",
+  "marginCapital": 513327,
+  "projectCost": 5133270,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0370",
+  "marginCapital": 505545,
+  "projectCost": 5055450,
+  "convention": "capitalised",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0371",
+  "marginCapital": 502050,
+  "projectCost": 5020500,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0372",
+  "marginCapital": 502326,
+  "projectCost": 5023260,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0373",
+  "marginCapital": 500846,
+  "projectCost": 5008460,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0374",
+  "marginCapital": 507271,
+  "projectCost": 5072710,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0375",
+  "marginCapital": 516764,
+  "projectCost": 5167640,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0376",
+  "marginCapital": 512195,
+  "projectCost": 5121950,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0377",
+  "marginCapital": 513748,
+  "projectCost": 5137480,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0378",
+  "marginCapital": 509694,
+  "projectCost": 5096940,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0379",
+  "marginCapital": 509993,
+  "projectCost": 5099930,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0380",
+  "marginCapital": 501625,
+  "projectCost": 5016250,
+  "convention": "serviced",
+  "region": "cap-binding"
+ },
+ {
+  "id": "SB-0381",
+  "marginCapital": 475139,
+  "projectCost": 4751390,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0382",
+  "marginCapital": 482429,
+  "projectCost": 4824290,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0383",
+  "marginCapital": 484004,
+  "projectCost": 4840040,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0384",
+  "marginCapital": 493652,
+  "projectCost": 4936520,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0385",
+  "marginCapital": 496961,
+  "projectCost": 4969610,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0386",
+  "marginCapital": 491852,
+  "projectCost": 4918520,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0387",
+  "marginCapital": 484589,
+  "projectCost": 4845890,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0388",
+  "marginCapital": 473319,
+  "projectCost": 4733190,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0389",
+  "marginCapital": 499893,
+  "projectCost": 4998930,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0390",
+  "marginCapital": 493072,
+  "projectCost": 4930720,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0391",
+  "marginCapital": 482180,
+  "projectCost": 4821800,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0392",
+  "marginCapital": 492012,
+  "projectCost": 4920120,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0393",
+  "marginCapital": 482093,
+  "projectCost": 4820930,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0394",
+  "marginCapital": 485017,
+  "projectCost": 4850170,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0395",
+  "marginCapital": 472247,
+  "projectCost": 4722470,
+  "convention": "capitalised",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0396",
+  "marginCapital": 479048,
+  "projectCost": 4790480,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0397",
+  "marginCapital": 475611,
+  "projectCost": 4756110,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0398",
+  "marginCapital": 473886,
+  "projectCost": 4738860,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0399",
+  "marginCapital": 479913,
+  "projectCost": 4799130,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0400",
+  "marginCapital": 487372,
+  "projectCost": 4873720,
+  "convention": "capitalised",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0401",
+  "marginCapital": 497541,
+  "projectCost": 4975410,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0402",
+  "marginCapital": 484314,
+  "projectCost": 4843140,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0403",
+  "marginCapital": 492687,
+  "projectCost": 4926870,
+  "convention": "capitalised",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0404",
+  "marginCapital": 471349,
+  "projectCost": 4713490,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0405",
+  "marginCapital": 495215,
+  "projectCost": 4952150,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0406",
+  "marginCapital": 484198,
+  "projectCost": 4841980,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0407",
+  "marginCapital": 497213,
+  "projectCost": 4972130,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0408",
+  "marginCapital": 483080,
+  "projectCost": 4830800,
+  "convention": "capitalised",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0409",
+  "marginCapital": 493073,
+  "projectCost": 4930730,
+  "convention": "capitalised",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0410",
+  "marginCapital": 479126,
+  "projectCost": 4791260,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0411",
+  "marginCapital": 472092,
+  "projectCost": 4720920,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0412",
+  "marginCapital": 489742,
+  "projectCost": 4897420,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0413",
+  "marginCapital": 474042,
+  "projectCost": 4740420,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0414",
+  "marginCapital": 495757,
+  "projectCost": 4957570,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0415",
+  "marginCapital": 484236,
+  "projectCost": 4842360,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0416",
+  "marginCapital": 495158,
+  "projectCost": 4951580,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0417",
+  "marginCapital": 473792,
+  "projectCost": 4737920,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0418",
+  "marginCapital": 480895,
+  "projectCost": 4808950,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0419",
+  "marginCapital": 485556,
+  "projectCost": 4855560,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0420",
+  "marginCapital": 475837,
+  "projectCost": 4758370,
+  "convention": "serviced",
+  "region": "near-ceiling"
+ },
+ {
+  "id": "SB-0421",
+  "marginCapital": 103663,
+  "projectCost": 1036630,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0422",
+  "marginCapital": 155749,
+  "projectCost": 1557490,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0423",
+  "marginCapital": 58952,
+  "projectCost": 589520,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0424",
+  "marginCapital": 126326,
+  "projectCost": 1263260,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0425",
+  "marginCapital": 33043,
+  "projectCost": 330430,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0426",
+  "marginCapital": 36958,
+  "projectCost": 369580,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0427",
+  "marginCapital": 149031,
+  "projectCost": 1490310,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0428",
+  "marginCapital": 64110,
+  "projectCost": 641100,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0429",
+  "marginCapital": 65711,
+  "projectCost": 657110,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0430",
+  "marginCapital": 42537,
+  "projectCost": 425370,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0431",
+  "marginCapital": 169167,
+  "projectCost": 1691670,
+  "convention": "capitalised",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0432",
+  "marginCapital": 67573,
+  "projectCost": 675730,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0433",
+  "marginCapital": 41285,
+  "projectCost": 412850,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0434",
+  "marginCapital": 162821,
+  "projectCost": 1628210,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0435",
+  "marginCapital": 136678,
+  "projectCost": 1366780,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0436",
+  "marginCapital": 109731,
+  "projectCost": 1097310,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0437",
+  "marginCapital": 145450,
+  "projectCost": 1454500,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0438",
+  "marginCapital": 158544,
+  "projectCost": 1585440,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0439",
+  "marginCapital": 50989,
+  "projectCost": 509890,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0440",
+  "marginCapital": 87739,
+  "projectCost": 877390,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0441",
+  "marginCapital": 64697,
+  "projectCost": 646970,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0442",
+  "marginCapital": 62637,
+  "projectCost": 626370,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0443",
+  "marginCapital": 73577,
+  "projectCost": 735770,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0444",
+  "marginCapital": 53614,
+  "projectCost": 536140,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0445",
+  "marginCapital": 159130,
+  "projectCost": 1591300,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0446",
+  "marginCapital": 60277,
+  "projectCost": 602770,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0447",
+  "marginCapital": 47866,
+  "projectCost": 478660,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0448",
+  "marginCapital": 145407,
+  "projectCost": 1454070,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0449",
+  "marginCapital": 168857,
+  "projectCost": 1688570,
+  "convention": "capitalised",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0450",
+  "marginCapital": 179823,
+  "projectCost": 1798230,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0451",
+  "marginCapital": 175968,
+  "projectCost": 1759680,
+  "convention": "capitalised",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0452",
+  "marginCapital": 94487,
+  "projectCost": 944870,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0453",
+  "marginCapital": 38828,
+  "projectCost": 388280,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0454",
+  "marginCapital": 173247,
+  "projectCost": 1732470,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0455",
+  "marginCapital": 99020,
+  "projectCost": 990200,
+  "convention": "capitalised",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0456",
+  "marginCapital": 82651,
+  "projectCost": 826510,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0457",
+  "marginCapital": 154558,
+  "projectCost": 1545580,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0458",
+  "marginCapital": 138858,
+  "projectCost": 1388580,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0459",
+  "marginCapital": 41192,
+  "projectCost": 411920,
+  "convention": "serviced",
+  "activityClass": "plantation",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0460",
+  "marginCapital": 85107,
+  "projectCost": 851070,
+  "convention": "serviced",
+  "activityClass": "construction",
+  "region": "plantation-exception"
+ },
+ {
+  "id": "SB-0461",
+  "marginCapital": 42615,
+  "projectCost": 426150,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0462",
+  "marginCapital": 70058,
+  "projectCost": 700580,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0463",
+  "marginCapital": 120853,
+  "projectCost": 1208530,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0464",
+  "marginCapital": 81086,
+  "projectCost": 810860,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0465",
+  "marginCapital": 58446,
+  "projectCost": 584460,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0466",
+  "marginCapital": 104757,
+  "projectCost": 1047570,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0467",
+  "marginCapital": 84598,
+  "projectCost": 845980,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0468",
+  "marginCapital": 77008,
+  "projectCost": 770080,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0469",
+  "marginCapital": 20584,
+  "projectCost": 205840,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0470",
+  "marginCapital": 114964,
+  "projectCost": 1149640,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0471",
+  "marginCapital": 67066,
+  "projectCost": 670660,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0472",
+  "marginCapital": 122975,
+  "projectCost": 1229750,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0473",
+  "marginCapital": 39462,
+  "projectCost": 394620,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0474",
+  "marginCapital": 48883,
+  "projectCost": 488830,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0475",
+  "marginCapital": 37731,
+  "projectCost": 377310,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0476",
+  "marginCapital": 86660,
+  "projectCost": 866600,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0477",
+  "marginCapital": 122399,
+  "projectCost": 1223990,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0478",
+  "marginCapital": 69531,
+  "projectCost": 695310,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0479",
+  "marginCapital": 14261,
+  "projectCost": 142610,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0480",
+  "marginCapital": 91711,
+  "projectCost": 917110,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0481",
+  "marginCapital": 51630,
+  "projectCost": 516300,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0482",
+  "marginCapital": 86086,
+  "projectCost": 860860,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0483",
+  "marginCapital": 28679,
+  "projectCost": 286790,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0484",
+  "marginCapital": 70090,
+  "projectCost": 700900,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0485",
+  "marginCapital": 122967,
+  "projectCost": 1229670,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0486",
+  "marginCapital": 112345,
+  "projectCost": 1123450,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0487",
+  "marginCapital": 40661,
+  "projectCost": 406610,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0488",
+  "marginCapital": 62977,
+  "projectCost": 629770,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0489",
+  "marginCapital": 107213,
+  "projectCost": 1072130,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0490",
+  "marginCapital": 18008,
+  "projectCost": 180080,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0491",
+  "marginCapital": 57932,
+  "projectCost": 579320,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0492",
+  "marginCapital": 67520,
+  "projectCost": 675200,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0493",
+  "marginCapital": 48580,
+  "projectCost": 485800,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0494",
+  "marginCapital": 63661,
+  "projectCost": 636610,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0495",
+  "marginCapital": 107480,
+  "projectCost": 1074800,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0496",
+  "marginCapital": 61908,
+  "projectCost": 619080,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0497",
+  "marginCapital": 16805,
+  "projectCost": 168050,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0498",
+  "marginCapital": 36683,
+  "projectCost": 366830,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0499",
+  "marginCapital": 112495,
+  "projectCost": 1124950,
+  "convention": "capitalised",
+  "region": "capitalised"
+ },
+ {
+  "id": "SB-0500",
+  "marginCapital": 118364,
+  "projectCost": 1183640,
+  "convention": "capitalised",
+  "region": "capitalised"
+ }
+]
