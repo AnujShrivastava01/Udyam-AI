@@ -16,6 +16,8 @@ const at = (dLat: number, dLng: number, km: number, name = "shop"): NearbyPlace 
   rating: null,
   ratingCount: null,
   kind: null,
+  phone: null,
+  website: null,
 });
 
 describe("bearing", () => {

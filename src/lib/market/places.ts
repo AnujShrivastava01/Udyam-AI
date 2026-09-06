@@ -39,6 +39,21 @@ const FIELD_MASK = [
   "places.primaryTypeDisplayName",
 ].join(",");
 
+/**
+ * The above plus contact details, for the B2B counterparty search ONLY.
+ *
+ * A phone number is the entire point of that feature — a wholesaler you cannot ring is not a
+ * counterparty, it is a pin. But these fields sit in a more expensive SKU than the basic mask, so
+ * they are opt-in per call rather than added globally: the competitor scan on the report map runs
+ * dozens of times during a demo and has no use for a phone number.
+ */
+const CONTACT_FIELD_MASK = [
+  FIELD_MASK,
+  "places.nationalPhoneNumber",
+  "places.internationalPhoneNumber",
+  "places.websiteUri",
+].join(",");
+
 export interface NearbyPlace {
   id: string;
   name: string;
@@ -50,6 +65,9 @@ export interface NearbyPlace {
   rating: number | null;
   ratingCount: number | null;
   kind: string | null;
+  /** Present only when the caller asked for contact fields. */
+  phone: string | null;
+  website: string | null;
 }
 
 export type PlacesOutcome =
@@ -141,6 +159,9 @@ interface RawPlace {
   rating?: number;
   userRatingCount?: number;
   primaryTypeDisplayName?: { text?: string };
+  nationalPhoneNumber?: string;
+  internationalPhoneNumber?: string;
+  websiteUri?: string;
 }
 
 /** Normalise Google's shape into ours, dropping anything without an id or a position. */
@@ -164,6 +185,10 @@ export function normalise(
       rating: typeof p.rating === "number" ? p.rating : null,
       ratingCount: typeof p.userRatingCount === "number" ? p.userRatingCount : null,
       kind: p.primaryTypeDisplayName?.text ?? null,
+      // International first: it carries the country code, which wa.me needs and the national
+      // format omits.
+      phone: p.internationalPhoneNumber ?? p.nationalPhoneNumber ?? null,
+      website: p.websiteUri ?? null,
     });
   }
   return out.sort((a, b) => a.distanceKm - b.distanceKm);
@@ -254,12 +279,15 @@ export async function textSearch({
   lng,
   radius = 10_000,
   maxResults = 20,
+  includeContact = false,
 }: {
   query: string;
   lat: number;
   lng: number;
   radius?: number;
   maxResults?: number;
+  /** Ask for phone and website. Costs more; only the B2B counterparty search sets it. */
+  includeContact?: boolean;
 }): Promise<PlacesOutcome> {
   const key = process.env.GOOGLE_MAPS_API_KEY;
   if (!key) return { ok: false, reason: "GOOGLE_MAPS_API_KEY is not set" };
@@ -271,7 +299,7 @@ export async function textSearch({
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": key,
-        "X-Goog-FieldMask": FIELD_MASK,
+        "X-Goog-FieldMask": includeContact ? CONTACT_FIELD_MASK : FIELD_MASK,
       },
       body: JSON.stringify({
         textQuery: query.trim().slice(0, 200),

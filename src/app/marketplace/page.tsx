@@ -45,6 +45,8 @@ import {
   type RequirementSide,
 } from "@/lib/marketplace/requirement";
 import { useAppStore } from "@/lib/store";
+import { CounterpartyFinder } from "@/components/counterparty-finder";
+import { VILLAGES } from "@/lib/market/villages";
 
 /**
  * The marketplace, built from the half we actually own.
@@ -97,6 +99,20 @@ export default function MarketplacePage() {
   const requirements = useAppStore((s) => s.requirements);
   const addRequirement = useAppStore((s) => s.addRequirement);
   const deleteRequirement = useAppStore((s) => s.deleteRequirement);
+
+  /**
+   * Where to search for counterparties.
+   *
+   * The user's own village when the gazetteer holds it, otherwise the first village in their
+   * district, otherwise the first we hold at all. A wholesaler search has to start somewhere real,
+   * and starting at the wrong end of the country returns leads nobody can drive to.
+   */
+  const centre =
+    VILLAGES.find(
+      (v) => v.name.toLowerCase() === location?.village?.trim().toLowerCase(),
+    ) ??
+    VILLAGES.find((v) => v.district.toLowerCase() === location?.district?.toLowerCase()) ??
+    VILLAGES[0];
 
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<RequirementDraft>(() => emptyDraft());
@@ -422,6 +438,9 @@ export default function MarketplacePage() {
                       </Button>
                     </a>
                   </CardFooter>
+                  {/* The other half of the trade. Without this the board is a form: a requirement
+                      with nobody to send it to is a note to yourself. */}
+                  <CounterpartyFinder requirement={r} lat={centre.lat} lng={centre.lng} />
                 </Card>
               );
             })}
