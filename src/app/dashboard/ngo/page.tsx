@@ -20,7 +20,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { StatTile } from "@/components/stat-tile";
 import { Input } from "@/components/ui/input";
 import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import {
@@ -168,36 +168,36 @@ export default function OfficerConsolePage() {
           than in an application, and an officer seeing "14 files sit in the dead zone" is the
           moment the argument lands. */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <SummaryTile
+        <StatTile
           label="In the queue"
           value={String(summary.total)}
           sub={`${summary.clear} clear · ${summary.review} to review · ${summary.block} blocked`}
         />
-        <SummaryTile
+        <StatTile
           label="Gestation-gapped"
           value={String(summary.gestationGapped)}
           sub="repayment starts before income does"
           tone="rose"
         />
-        <SummaryTile
+        <StatTile
           label="Routing mismatches"
           value={String(summary.routingMismatches)}
           sub="filed under the wrong scheme tier"
           tone="amber"
         />
-        <SummaryTile
+        <StatTile
           label="Exposed before income"
           value={`₹${inr(summary.exposedBeforeIncome)}`}
           sub={district === "ALL" ? "across the whole queue" : `across ${district}`}
           tone="rose"
         />
-        <SummaryTile
+        <StatTile
           label="Loan cap binding"
           value={String(summary.capBound)}
           sub="the ceiling, not the percentage, sets the loan"
           tone="amber"
         />
-        <SummaryTile
+        <StatTile
           label="In the dead zone"
           value={String(summary.deadZone)}
           sub="the 10% margin rule does not hold here"
@@ -308,41 +308,6 @@ export default function OfficerConsolePage() {
   );
 }
 
-function SummaryTile({
-  label,
-  value,
-  sub,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  tone?: "neutral" | "rose" | "amber";
-}) {
-  const accent = {
-    neutral: "text-foreground",
-    rose: "text-rose-600 dark:text-rose-400",
-    amber: "text-amber-600 dark:text-amber-400",
-  }[tone];
-
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {label}
-        </p>
-        {/* text-3xl on a two-column phone grid clipped ₹1,04,32,118. Scaled down until there is
-            room for it, and allowed to break. */}
-        <p
-          className={`text-2xl sm:text-3xl font-bold font-heading mt-1 tabular-nums break-words ${accent}`}
-        >
-          {value}
-        </p>
-        <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{sub}</p>
-      </CardContent>
-    </Card>
-  );
-}
 
 function QueueRow({
   row,

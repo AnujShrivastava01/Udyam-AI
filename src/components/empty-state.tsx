@@ -20,6 +20,7 @@ export function EmptyState({
   href,
   cta,
   secondary,
+  children,
 }: {
   icon: LucideIcon;
   title: string;
@@ -27,6 +28,8 @@ export function EmptyState({
   href?: string;
   cta?: string;
   secondary?: { href: string; label: string };
+  /** An extra control beside the primary action — the demo loader, in practice. */
+  children?: React.ReactNode;
 }) {
   return (
     <Card className="border-2 border-dashed">
@@ -34,7 +37,7 @@ export function EmptyState({
         <Icon className="mx-auto h-10 w-10 text-muted-foreground" aria-hidden="true" />
         <p className="text-lg font-medium">{title}</p>
         <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
-        {(href || secondary) && (
+        {(href || secondary || children) && (
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             {href && cta && (
               <Link href={href}>
@@ -50,6 +53,7 @@ export function EmptyState({
                 </Button>
               </Link>
             )}
+            {children}
           </div>
         )}
       </CardContent>

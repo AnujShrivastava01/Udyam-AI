@@ -9,6 +9,7 @@ import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 import { plan } from "@/lib/finance";
 import { optimiseStack } from "@/lib/finance/stack";
 import { money } from "@/lib/i18n/render";
+import GatewayFlow from "@/components/ui/gateway-flow";
 
 export default function LandingPage() {
   const { t } = useTranslation();
@@ -62,6 +63,15 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section ref={heroRef} className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden flex flex-col items-center">
         
+        {/* Converging flow lines, drawn on canvas. Follows the app's own light/dark toggle, holds
+            one static frame under prefers-reduced-motion, and stops the loop once the hero scrolls
+            away. `inset-0` rather than a fixed 800x600 box so it fills the hero on any viewport. */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <GatewayFlow mode="auto" density={0.9} opacity={0.55} speed={0.9} />
+          {/* Fades the lines out behind the copy so the headline keeps its contrast. */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/60 to-background" />
+        </div>
+
         {/* Abstract Background Gradients */}
         <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] opacity-20 pointer-events-none">
           <div className="absolute inset-0 bg-primary rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />

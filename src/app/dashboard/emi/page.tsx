@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import { useT, money, type MessageKey } from "@/lib/i18n";
 import { EmptyState } from "@/components/empty-state";
+import { StatTile } from "@/components/stat-tile";
 import { buildOwnProfile } from "@/lib/profile/build";
 import { parseDate, toInputValue, track } from "@/lib/loan/tracker";
 import { useAppStore } from "@/lib/store";
@@ -338,22 +339,22 @@ export default function LoanTrackerPage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Tile
+              <StatTile compact
                 label={t("emi.tile.sanctioned")}
                 value={money(s.sanctionedLoan)}
                 icon={<Wallet className="w-3.5 h-3.5" aria-hidden="true" />}
               />
-              <Tile
+              <StatTile compact
                 label={t("emi.tile.repaid")}
                 value={money(paidAmount)}
                 icon={<CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />}
               />
-              <Tile
+              <StatTile compact
                 label={t("emi.tile.perQuarter")}
                 value={money(schedule.instalment)}
                 icon={<CalendarCheck className="w-3.5 h-3.5" aria-hidden="true" />}
               />
-              <Tile
+              <StatTile compact
                 label={t("calc.moratorium")}
                 value={`${s.moratoriumMonths} ${t("clock.months")}`}
                 icon={<Clock className="w-3.5 h-3.5" aria-hidden="true" />}
@@ -504,14 +505,3 @@ export default function LoanTrackerPage() {
   );
 }
 
-function Tile({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border bg-muted/20 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
-        {icon}
-        {label}
-      </p>
-      <p className="font-bold text-lg leading-tight tabular-nums">{value}</p>
-    </div>
-  );
-}

@@ -14,6 +14,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DemoBanner, LoadDemoButton } from "@/components/demo-banner";
 import { EmptyState } from "@/components/empty-state";
 import { OwnProfileView } from "@/components/own-profile";
 import { buildOwnProfile } from "@/lib/profile/build";
@@ -77,6 +78,7 @@ function OwnProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 pb-24 md:p-8">
+      <DemoBanner />
       <OwnProfileView profile={profile} />
 
       {profile.complete && (
@@ -164,12 +166,10 @@ function SessionControls() {
       // Nothing to do about it, and nothing worth interrupting the user for.
     }
 
-    useAppStore.setState({
-      onboardingInput: { location: null, marginCapital: null, businessCategory: "" },
-      visitedSteps: [],
-      communityPosts: [],
-      requirements: [],
-    });
+    // The store's own action rather than a second list of fields written out here — the previous
+    // version missed `ledger` and `disbursedOn`, so "start over" left the khata and the
+    // disbursement date behind. One definition of empty, used by both callers.
+    useAppStore.getState().resetSession();
 
     router.push("/onboarding");
   }
@@ -205,6 +205,7 @@ function SessionControls() {
             <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" /> {t("prof.resetTitle")}
           </Button>
         )}
+        <LoadDemoButton className="shrink-0" />
       </CardContent>
     </Card>
   );

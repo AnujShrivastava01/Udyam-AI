@@ -29,6 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DemoBanner, LoadDemoButton } from "@/components/demo-banner";
 import { EmptyState } from "@/components/empty-state";
 import { StatTile } from "@/components/stat-tile";
 import { buildOverview } from "@/lib/dashboard/overview";
@@ -102,6 +103,9 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 pb-24 md:p-8">
+      {/* Says which session is on screen. Renders nothing when the entries are the user's own. */}
+      <DemoBanner />
+
       <header className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div className="min-w-0">
           <Badge variant="outline" className="mb-2 border-primary/30 bg-primary/5 text-primary">
@@ -142,7 +146,11 @@ export default function DashboardPage() {
           href="/onboarding"
           cta={t("dash.emptyCta")}
           secondary={{ href: "/discover", label: t("dash.emptySecondary") }}
-        />
+        >
+          {/* The demo is offered from the empty state rather than shipped as the default, so a
+              first-time visitor still sees an honest empty app and chooses the populated one. */}
+          <LoadDemoButton />
+        </EmptyState>
       ) : (
         <>
           {/* the single most useful next thing */}

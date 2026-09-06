@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
@@ -27,16 +29,36 @@ export function StatTile({
   value,
   sub,
   tone = "neutral",
+  icon,
+  compact = false,
 }: {
   label: string;
   value: string;
   sub?: string;
   tone?: TileTone;
+  /** Small glyph beside the label. The repayment tiles carry one; the others do not. */
+  icon?: ReactNode;
+  /** Denser variant for tiles sitting inside another card rather than on the page grid. */
+  compact?: boolean;
 }) {
+  if (compact) {
+    return (
+      <div className="rounded-lg border bg-muted/20 p-3">
+        <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {icon}
+          {label}
+        </p>
+        <p className={`text-lg font-bold leading-tight tabular-nums ${TONE[tone]}`}>{value}</p>
+        {sub && <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{sub}</p>}
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardContent className="p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {icon}
           {label}
         </p>
         {/* Scaled down until there is room, and allowed to break: a two-column phone grid clips a

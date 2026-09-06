@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import type { CommunityPost } from '@/lib/community/posts';
 import type { Requirement } from '@/lib/marketplace/requirement';
 import type { LedgerEntry } from '@/lib/ledger/book';
+import { buildDemoSession } from '@/lib/demo/seed';
 
 export type UserRole = 'entrepreneur' | 'ngo' | 'financial-institution' | 'mentor';
 export type Language = 'hi' | 'en' | 'hinglish';
@@ -74,6 +75,14 @@ interface AppState {
    * whether a business is ACTUALLY covering its instalment rather than whether it should.
    */
   ledger: LedgerEntry[];
+  /**
+   * True while the session holds the loaded demo rather than the visitor's own entries.
+   *
+   * Persisted, because the distinction has to survive a reload: a screen that says "your takings
+   * cover the instalment" over somebody else's ledger is the exact claim this product cannot
+   * afford to get wrong.
+   */
+  demoLoaded: boolean;
   setRole: (role: UserRole) => void;
   setLanguage: (lang: Language) => void;
   setTheme: (theme: ThemeMode) => void;
@@ -86,6 +95,10 @@ interface AppState {
   setDisbursedOn: (iso: string | null) => void;
   addLedgerEntry: (entry: LedgerEntry) => void;
   deleteLedgerEntry: (id: string) => void;
+  /** Load the demo session, replacing whatever is there. */
+  loadDemo: () => void;
+  /** Back to an empty session — used by the demo banner and by "start over". */
+  resetSession: () => void;
 }
 
 /**
@@ -116,6 +129,7 @@ export const useAppStore = create<AppState>()(
       requirements: [],
       disbursedOn: null,
       ledger: [],
+      demoLoaded: false,
       setRole: (role) => set({ userRole: role }),
       setLanguage: (lang) => set({ language: lang }),
       setTheme: (theme) => set({ theme }),
@@ -143,10 +157,22 @@ export const useAppStore = create<AppState>()(
       addLedgerEntry: (entry) => set((state) => ({ ledger: [entry, ...state.ledger] })),
       deleteLedgerEntry: (id) =>
         set((state) => ({ ledger: state.ledger.filter((e) => e.id !== id) })),
+      loadDemo: () => set({ ...buildDemoSession(), demoLoaded: true }),
+      resetSession: () =>
+        set({
+          onboardingInput: { location: null, marginCapital: null, businessCategory: '' },
+          visitedSteps: [],
+          communityPosts: [],
+          requirements: [],
+          ledger: [],
+          disbursedOn: null,
+          demoLoaded: false,
+        }),
     }),
     {
       name: 'siddhi.session',
       /**
+       * 7: demoLoaded added — additive, defaults to false, which is "these entries are yours".
        * 6: ledger added — additive, defaults to an empty book.
        * 5: disbursedOn added — additive, defaults to null, which is "no loan taken".
        * 4: communityPosts and requirements added — purely additive, so nothing is discarded.
@@ -157,7 +183,7 @@ export const useAppStore = create<AppState>()(
        * "State loaded from storage couldn't be migrated" and throw the session away — the outcome
        * was what I wanted, but an error in the console is not how you express an intention.
        */
-      version: 6,
+      version: 7,
       migrate: (persisted, from) => {
         const s = (persisted ?? {}) as Partial<AppState>;
         // v1 stored marginCapital as a plain number defaulting to 100000, and nothing recorded
@@ -175,6 +201,7 @@ export const useAppStore = create<AppState>()(
           requirements: s.requirements ?? [],
           disbursedOn: s.disbursedOn ?? null,
           ledger: s.ledger ?? [],
+          demoLoaded: s.demoLoaded ?? false,
         };
 
         if (from < 3) {
@@ -203,6 +230,7 @@ export const useAppStore = create<AppState>()(
         requirements: s.requirements,
         disbursedOn: s.disbursedOn,
         ledger: s.ledger,
+        demoLoaded: s.demoLoaded,
       }),
     },
   ),

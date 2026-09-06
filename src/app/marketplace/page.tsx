@@ -47,6 +47,7 @@ import {
 import { useAppStore } from "@/lib/store";
 import { CounterpartyFinder } from "@/components/counterparty-finder";
 import { VILLAGES } from "@/lib/market/villages";
+import { DemoBanner } from "@/components/demo-banner";
 
 /**
  * The marketplace, built from the half we actually own.
@@ -174,6 +175,7 @@ export default function MarketplacePage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 pb-24">
+      <DemoBanner />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold font-heading">B2B Marketplace</h1>

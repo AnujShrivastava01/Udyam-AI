@@ -16,7 +16,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { StatTile } from "@/components/stat-tile";
 import { ACTIVITY_BY_ID } from "@/lib/finance/activities";
 import { downloadCsv } from "@/lib/export/csv";
 import { SAMPLE_QUEUE_NOTE, queueFilename, queueToCsv } from "@/lib/officer/export";
@@ -110,18 +110,18 @@ export default function InvestorConsolePage() {
 
       {/* summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Tile
+        <StatTile
           label="Fundable now"
           value={String(summary.fundable)}
           sub={`${summary.blocked} blocked by the rules`}
         />
-        <Tile
+        <StatTile
           label="Capital to deploy"
           value={`₹${inr(summary.deployable)}`}
           sub="sanctionable across fundable files"
           tone="emerald"
         />
-        <Tile
+        <StatTile
           label="Annual surplus created"
           /* ₹0 and "no figure on record" are different facts and must not render identically —
              a zero here reads as "this portfolio achieves nothing". */
@@ -135,7 +135,7 @@ export default function InvestorConsolePage() {
           }
           tone="emerald"
         />
-        <Tile
+        <StatTile
           label="Median score"
           value={summary.medianScore == null ? "—" : String(summary.medianScore)}
           /* Only files assessed on all four components. Including partial scores put the median at
@@ -274,38 +274,6 @@ export default function InvestorConsolePage() {
   );
 }
 
-function Tile({
-  label,
-  value,
-  sub,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  tone?: "neutral" | "emerald";
-}) {
-  const accent = {
-    neutral: "text-foreground",
-    emerald: "text-emerald-600 dark:text-emerald-400",
-  }[tone];
-
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {label}
-        </p>
-        <p
-          className={`text-2xl sm:text-3xl font-bold font-heading mt-1 tabular-nums break-words ${accent}`}
-        >
-          {value}
-        </p>
-        <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{sub}</p>
-      </CardContent>
-    </Card>
-  );
-}
 
 function OpportunityRow({
   rank,

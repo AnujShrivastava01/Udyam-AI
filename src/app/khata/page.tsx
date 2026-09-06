@@ -34,6 +34,7 @@ import {
 import { buildOwnProfile } from "@/lib/profile/build";
 import { useAppStore } from "@/lib/store";
 import { useMarkVisited } from "@/lib/visit";
+import { DemoBanner } from "@/components/demo-banner";
 
 /**
  * The daily book.
@@ -94,6 +95,7 @@ export default function KhataPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 pb-24 md:p-8">
+      <DemoBanner />
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <Badge variant="outline" className="mb-2 border-primary/30 bg-primary/5 text-primary">

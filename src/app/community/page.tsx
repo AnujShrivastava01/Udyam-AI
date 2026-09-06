@@ -25,6 +25,7 @@ import {
   relativeTime,
   type PostKind,
 } from "@/lib/community/posts";
+import { DemoBanner } from "@/components/demo-banner";
 
 /**
  * WHAT THIS SCREEN CLAIMS, AND WHAT IT DOES NOT.
@@ -126,6 +127,9 @@ export default function CommunityPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
+      <div className="mb-6">
+        <DemoBanner />
+      </div>
       {/* Header Area */}
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 md:p-8 rounded-3xl border shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
