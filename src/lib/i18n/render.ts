@@ -67,6 +67,38 @@ export function renderMessage(
   );
 }
 
+/**
+ * Abbreviated month names per locale.
+ *
+ * Lives here rather than in a component because three screens format dates and they were drifting
+ * — the dashboard had its own table while the khata and the marketplace printed en-US months into
+ * Hindi sentences. Numerals stay Western for the same reason `money` does: a date read aloud from
+ * a phone should look like every other date the reader has seen.
+ */
+export const MONTHS_SHORT: Record<Locale, string[]> = {
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  hinglish: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  hi: [
+    "जन",
+    "फ़र",
+    "मार्च",
+    "अप्रैल",
+    "मई",
+    "जून",
+    "जुल",
+    "अग",
+    "सित",
+    "अक्ट",
+    "नव",
+    "दिस",
+  ],
+};
+
+/** "6 Sep 2026" in the reader's own script. */
+export function shortDate(locale: Locale, d: Date): string {
+  return `${d.getDate()} ${MONTHS_SHORT[locale][d.getMonth()]} ${d.getFullYear()}`;
+}
+
 export function normaliseLocale(value: unknown): Locale {
   return value === "hi" || value === "hinglish" || value === "en" ? value : "en";
 }

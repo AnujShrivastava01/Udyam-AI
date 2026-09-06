@@ -12,6 +12,8 @@
  * an audience.
  */
 
+import type { MessageKey } from "@/lib/i18n/keys";
+
 export type PostKind = "update" | "question" | "requirement";
 
 export interface CommunityPost {
@@ -26,10 +28,17 @@ export interface CommunityPost {
   category: string | null;
 }
 
-export const POST_KINDS: { id: PostKind; label: string }[] = [
-  { id: "update", label: "Update" },
-  { id: "question", label: "Question" },
-  { id: "requirement", label: "Requirement" },
+/**
+ * Message KEYS, not labels.
+ *
+ * This module is imported by the community screen, which is rendered in whichever of the three
+ * languages the user picked. An English string baked in here would make the composer's own chips
+ * the last English thing on an otherwise translated page.
+ */
+export const POST_KINDS: { id: PostKind; labelKey: MessageKey }[] = [
+  { id: "update", labelKey: "comm.kind.update" },
+  { id: "question", labelKey: "comm.kind.question" },
+  { id: "requirement", labelKey: "comm.kind.requirement" },
 ];
 
 /** Longer than a phone keyboard produces by accident, shorter than a wall of text. */

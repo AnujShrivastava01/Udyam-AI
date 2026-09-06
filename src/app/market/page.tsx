@@ -12,6 +12,7 @@ import { buildOwnProfile } from "@/lib/profile/build";
 import { VILLAGES } from "@/lib/market/villages";
 import { useAppStore } from "@/lib/store";
 import { useMarkVisited } from "@/lib/visit";
+import { useT } from "@/lib/i18n";
 
 /**
  * Who else is trading nearby.
@@ -28,6 +29,7 @@ import { useMarkVisited } from "@/lib/visit";
  */
 export default function MarketPage() {
   useMarkVisited("market");
+  const { t } = useT();
 
   const onboardingInput = useAppStore((s) => s.onboardingInput);
   const visitedSteps = useAppStore((s) => s.visitedSteps);
@@ -51,13 +53,10 @@ export default function MarketPage() {
     <div className="mx-auto max-w-4xl space-y-6 p-4 pb-24 md:p-8">
       <header>
         <Badge variant="outline" className="mb-2 border-primary/30 bg-primary/5 text-primary">
-          <Store className="mr-1 h-3 w-3" aria-hidden="true" /> Market scan
+          <Store className="mr-1 h-3 w-3" aria-hidden="true" /> {t("market.badge")}
         </Badge>
-        <h1 className="font-heading text-3xl font-bold md:text-4xl">Who else is nearby</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          A live look at what is already trading around you, to sit alongside the feasibility
-          report&apos;s published figures.
-        </p>
+        <h1 className="font-heading text-3xl font-bold md:text-4xl">{t("market.title")}</h1>
+        <p className="mt-2 max-w-2xl text-muted-foreground">{t("market.subtitle")}</p>
       </header>
 
       {/* Which point to search from. The gazetteer's coordinates are the villages' own, so this is
@@ -66,7 +65,7 @@ export default function MarketPage() {
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <MapPin className="mr-1 inline h-3 w-3" aria-hidden="true" />
-            Search around
+            {t("market.searchAround")}
           </span>
           {candidates.map((v) => (
             <button
@@ -96,19 +95,13 @@ export default function MarketPage() {
       <Card className="bg-muted/20">
         <CardContent className="space-y-3 p-5 text-sm leading-relaxed text-muted-foreground">
           <p>
-            <strong className="text-foreground">How to read this.</strong> Google&apos;s map of a
-            village is not a business register. A shop appears on it because somebody added it —
-            an owner, a customer, or a survey — and in most of rural India nobody has. So a low
-            number here means low coverage at least as often as it means low competition.
+            <strong className="text-foreground">{t("market.howToRead")}</strong>{" "}
+            {t("market.howBody1")}
           </p>
-          <p>
-            It is still worth having, in one direction: if Google already knows about four kirana
-            shops within two kilometres, there are at least four. A floor is evidence. A ceiling
-            this is not.
-          </p>
+          <p>{t("market.howBody2")}</p>
           <Link href={profile.activity ? `/report/${profile.activity.id}` : "/discover"}>
             <Button variant="outline" size="sm" className="rounded-full">
-              The published figures <ArrowRight className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              {t("market.published")} <ArrowRight className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </Link>
         </CardContent>

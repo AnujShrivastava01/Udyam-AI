@@ -34,6 +34,7 @@ import {
 import { buildOwnProfile } from "@/lib/profile/build";
 import { useAppStore } from "@/lib/store";
 import { useMarkVisited } from "@/lib/visit";
+import { MONTHS_SHORT, useT, type MessageKey } from "@/lib/i18n";
 import { DemoBanner } from "@/components/demo-banner";
 
 /**
@@ -52,14 +53,15 @@ import { DemoBanner } from "@/components/demo-banner";
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Math.round(n));
 
-const DAY_LABEL = (iso: string) => {
+/** yyyy-mm-dd, rendered in the reader's own script. */
+const dayLabel = (iso: string, months: string[]) => {
   const [y, m, d] = iso.split("-").map(Number);
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${d} ${months[m - 1]} ${y}`;
 };
 
 export default function KhataPage() {
   useMarkVisited("khata");
+  const { t, money, locale } = useT();
 
   const amountId = useId();
   const dateId = useId();
@@ -99,12 +101,10 @@ export default function KhataPage() {
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <Badge variant="outline" className="mb-2 border-primary/30 bg-primary/5 text-primary">
-            <BookOpen className="mr-1 h-3 w-3" aria-hidden="true" /> Daily book
+            <BookOpen className="mr-1 h-3 w-3" aria-hidden="true" /> {t("khata.badge")}
           </Badge>
-          <h1 className="font-heading text-3xl font-bold md:text-4xl">Khata</h1>
-          <p className="mt-2 max-w-xl text-muted-foreground">
-            Write down what you sold and what you spent. It stays on this phone.
-          </p>
+          <h1 className="font-heading text-3xl font-bold md:text-4xl">{t("khata.title")}</h1>
+          <p className="mt-2 max-w-xl text-muted-foreground">{t("khata.subtitle")}</p>
         </div>
         {ledger.length > 0 && (
           <Button
@@ -114,7 +114,7 @@ export default function KhataPage() {
               downloadCsv(`udyamai-khata-${dayKey(today)}.csv`, ledgerToCsv(ledger))
             }
           >
-            <Download className="mr-2 h-4 w-4" aria-hidden="true" /> Export the whole book
+            <Download className="mr-2 h-4 w-4" aria-hidden="true" /> {t("khata.export")}
           </Button>
         )}
       </header>
@@ -122,26 +122,29 @@ export default function KhataPage() {
       {/* today, the month, and the loan */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
-          label="Today"
-          value={`₹${inr(summary.today.net)}`}
-          sub={`₹${inr(summary.today.sales)} in · ₹${inr(summary.today.expenses)} out`}
+          label={t("khata.today")}
+          value={money(summary.today.net)}
+          sub={t("khata.inOut", {
+            inAmt: money(summary.today.sales),
+            outAmt: money(summary.today.expenses),
+          })}
           tone={summary.today.net > 0 ? "emerald" : summary.today.net < 0 ? "rose" : "neutral"}
         />
         <StatTile
-          label="This month"
-          value={`₹${inr(summary.month.net)}`}
-          sub={`over ${summary.daysRecordedThisMonth} recorded ${summary.daysRecordedThisMonth === 1 ? "day" : "days"}`}
+          label={t("khata.month")}
+          value={money(summary.month.net)}
+          sub={t("khata.overDays", { n: summary.daysRecordedThisMonth })}
           tone={summary.month.net > 0 ? "emerald" : summary.month.net < 0 ? "rose" : "neutral"}
         />
         <StatTile
-          label="Money in, this month"
-          value={`₹${inr(summary.month.sales)}`}
-          sub={`${summary.month.count} ${summary.month.count === 1 ? "entry" : "entries"}`}
+          label={t("khata.moneyIn")}
+          value={money(summary.month.sales)}
+          sub={t("khata.entries", { n: summary.month.count })}
         />
         <StatTile
-          label="Money out, this month"
-          value={`₹${inr(summary.month.expenses)}`}
-          sub="what the trade cost you"
+          label={t("khata.moneyOut")}
+          value={money(summary.month.expenses)}
+          sub={t("khata.costOfTrade")}
         />
       </div>
 
@@ -171,46 +174,36 @@ export default function KhataPage() {
                   aria-hidden="true"
                 />
               )}
-              {cover.verdict === "covers"
-                ? "This month covers the instalment"
-                : cover.verdict === "short"
-                  ? "This month does not cover the instalment"
-                  : cover.verdict === "loss"
-                    ? "This month is running at a loss"
-                    : "Not enough days recorded yet"}
+              {t(`book.${cover.verdict}` as MessageKey)}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm leading-relaxed">
             {/* The instalment is quarterly; the book is monthly. Both sides are put on a monthly
                 footing before they are compared, or a comfortable shop looks insolvent. */}
             <p>
-              Your instalment of{" "}
-              <strong className="tabular-nums">₹{inr(instalment)}</strong> every quarter is{" "}
-              <strong className="tabular-nums">₹{inr(cover.monthlyObligation)}</strong> a month.
-              This month you are{" "}
-              <strong className="tabular-nums">
-                {cover.monthNet >= 0 ? "up" : "down"} ₹{inr(Math.abs(cover.monthNet))}
-              </strong>
-              .
+              {t("khata.instalmentPerMonth", {
+                quarter: money(instalment),
+                month: money(cover.monthlyObligation),
+              })}{" "}
+              {t(cover.monthNet >= 0 ? "khata.monthUp" : "khata.monthDown", {
+                amount: money(Math.abs(cover.monthNet)),
+              })}
             </p>
             {cover.verdict === "unknown" ? (
               <p className="text-muted-foreground">
-                {cover.daysRecorded} of at least {MIN_DAYS_FOR_VERDICT} days recorded. A verdict
-                built on a couple of entries would be noise dressed up as a finding, so there is
-                none yet.
+                {t("khata.tooFewDays", { n: cover.daysRecorded, min: MIN_DAYS_FOR_VERDICT })}
               </p>
             ) : (
               <p className="text-muted-foreground">
                 {cover.headroom >= 0
-                  ? `₹${inr(cover.headroom)} a month left over after the instalment.`
-                  : `₹${inr(Math.abs(cover.headroom))} a month short. This is the gap that sends a sanctioned borrower to a moneylender.`}{" "}
-                Based on {cover.daysRecorded} recorded{" "}
-                {cover.daysRecorded === 1 ? "day" : "days"} this month.
+                  ? t("khata.headroom", { amount: money(cover.headroom) })
+                  : t("khata.shortfall", { amount: money(Math.abs(cover.headroom)) })}{" "}
+                {t("khata.basedOn", { n: cover.daysRecorded })}
               </p>
             )}
             <Link href="/dashboard/emi">
               <Button variant="outline" size="sm" className="rounded-full">
-                The repayment schedule{" "}
+                {t("khata.schedule")}{" "}
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
               </Button>
             </Link>
@@ -221,15 +214,15 @@ export default function KhataPage() {
       {/* the entry form */}
       <Card className="border-2 border-primary/25">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Add an entry</CardTitle>
-          <CardDescription>Money in is a sale. Money out is an expense.</CardDescription>
+          <CardTitle className="text-base">{t("khata.addEntry")}</CardTitle>
+          <CardDescription>{t("khata.addHint")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2" role="group" aria-label="Money in or money out">
+          <div className="flex gap-2" role="group" aria-label={t("khata.inOutGroup")}>
             {(
               [
-                { id: "sale", label: "Money in", Icon: Plus },
-                { id: "expense", label: "Money out", Icon: Minus },
+                { id: "sale", label: t("khata.in"), Icon: Plus },
+                { id: "expense", label: t("khata.out"), Icon: Minus },
               ] as { id: EntryKind; label: string; Icon: typeof Plus }[]
             ).map((k) => (
               <button
@@ -252,7 +245,7 @@ export default function KhataPage() {
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
-              <Label htmlFor={amountId}>Amount (₹)</Label>
+              <Label htmlFor={amountId}>{t("khata.amount")}</Label>
               <Input
                 id={amountId}
                 type="number"
@@ -267,7 +260,7 @@ export default function KhataPage() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor={dateId}>Day</Label>
+              <Label htmlFor={dateId}>{t("khata.day")}</Label>
               {/* Defaults to today but is editable: people write up yesterday evening. */}
               <Input
                 id={dateId}
@@ -278,19 +271,19 @@ export default function KhataPage() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor={noteId}>Note</Label>
+              <Label htmlFor={noteId}>{t("khata.note")}</Label>
               <Input
                 id={noteId}
                 value={note}
                 maxLength={120}
                 onChange={(ev) => setNote(ev.target.value)}
-                placeholder="milk, feed, transport…"
+                placeholder={t("khata.notePlaceholder")}
               />
             </div>
           </div>
 
           <Button className="rounded-full px-8" disabled={!canSave} onClick={save}>
-            Write it down
+            {t("khata.save")}
           </Button>
         </CardContent>
       </Card>
@@ -300,10 +293,9 @@ export default function KhataPage() {
         <Card className="border-2 border-dashed">
           <CardContent className="py-12 text-center">
             <BookOpen className="mx-auto mb-3 h-8 w-8 text-muted-foreground" aria-hidden="true" />
-            <p className="font-medium">The book is empty</p>
+            <p className="font-medium">{t("khata.emptyTitle")}</p>
             <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-              Write down one sale and one expense today. After five days it can tell you whether
-              your trade covers the instalment.
+              {t("dash.bookEmpty")}
             </p>
           </CardContent>
         </Card>
@@ -312,7 +304,9 @@ export default function KhataPage() {
           {summary.days.map((day) => (
             <Card key={day.on}>
               <CardHeader className="flex flex-row items-baseline justify-between gap-3 space-y-0 pb-2">
-                <CardTitle className="text-sm font-semibold">{DAY_LABEL(day.on)}</CardTitle>
+                <CardTitle className="text-sm font-semibold">
+                  {dayLabel(day.on, MONTHS_SHORT[locale])}
+                </CardTitle>
                 <span
                   className={`flex items-center gap-1 text-sm font-bold tabular-nums ${
                     day.totals.net > 0
@@ -350,7 +344,8 @@ export default function KhataPage() {
                           )}
                         </span>
                         <span className="truncate text-sm">
-                          {entry.note || (entry.kind === "sale" ? "Sale" : "Expense")}
+                          {entry.note ||
+                            (entry.kind === "sale" ? t("khata.sale") : t("khata.expense"))}
                         </span>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
@@ -362,7 +357,7 @@ export default function KhataPage() {
                           size="sm"
                           className="h-7 text-muted-foreground hover:text-destructive"
                           onClick={() => deleteLedgerEntry(entry.id)}
-                          aria-label="Delete this entry"
+                          aria-label={t("khata.deleteEntry")}
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         </Button>
@@ -376,10 +371,7 @@ export default function KhataPage() {
         </div>
       )}
 
-      <p className="text-[11px] leading-relaxed text-muted-foreground">
-        Your book is kept in this browser only. Nothing is uploaded, and nobody else can see it —
-        which also means clearing your browser data clears the book, so export it now and then.
-      </p>
+      <p className="text-[11px] leading-relaxed text-muted-foreground">{t("khata.footer")}</p>
     </div>
   );
 }

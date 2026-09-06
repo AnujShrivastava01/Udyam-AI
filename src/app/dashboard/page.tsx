@@ -50,28 +50,8 @@ import { useAppStore } from "@/lib/store";
  * obligation.
  */
 
-/** Month names, per locale, so the projected date is not an en-US string inside a Hindi sentence. */
-const MONTHS: Record<string, string[]> = {
-  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  hinglish: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  hi: [
-    "जनवरी",
-    "फ़रवरी",
-    "मार्च",
-    "अप्रैल",
-    "मई",
-    "जून",
-    "जुलाई",
-    "अगस्त",
-    "सितंबर",
-    "अक्टूबर",
-    "नवंबर",
-    "दिसंबर",
-  ],
-};
-
 export default function DashboardPage() {
-  const { t, locale, money } = useT();
+  const { t, money, date: shortDate } = useT();
   const onboarding = useAppStore((s) => s.onboardingInput);
   const visitedSteps = useAppStore((s) => s.visitedSteps);
   const posts = useAppStore((s) => s.communityPosts);
@@ -100,9 +80,6 @@ export default function DashboardPage() {
     firstInstalment,
     nextStep,
   } = overview;
-
-  const shortDate = (d: Date) =>
-    `${d.getDate()} ${(MONTHS[locale] ?? MONTHS.en)[d.getMonth()]} ${d.getFullYear()}`;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 pb-24 md:p-8">

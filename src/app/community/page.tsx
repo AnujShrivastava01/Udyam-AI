@@ -26,6 +26,7 @@ import {
   type PostKind,
 } from "@/lib/community/posts";
 import { DemoBanner } from "@/components/demo-banner";
+import { useT } from "@/lib/i18n";
 
 /**
  * WHAT THIS SCREEN CLAIMS, AND WHAT IT DOES NOT.
@@ -80,6 +81,7 @@ const EXAMPLE_POSTS = [
 ];
 
 export default function CommunityPage() {
+  const { t } = useT();
   const onboardingInput = useAppStore((s) => s.onboardingInput);
   const posts = useAppStore((s) => s.communityPosts);
   const addCommunityPost = useAppStore((s) => s.addCommunityPost);
@@ -134,22 +136,19 @@ export default function CommunityPage() {
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 md:p-8 rounded-3xl border shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <Badge variant="outline" className="mb-2 bg-background">
-            Community Hub
+            {t("comm.badge")}
           </Badge>
           <h1 className="text-3xl md:text-4xl font-bold font-heading">
             {knowsUser ? (
-              <>
-                <span className="capitalize">{currentCategory}</span> Entrepreneurs —{" "}
-                <span className="capitalize text-primary">{location}</span>
-              </>
+              <span className="capitalize">
+                {t("comm.headingKnown", { category: currentCategory, district: location ?? "" })}
+              </span>
             ) : (
-              "Community Hub"
+              t("comm.badge")
             )}
           </h1>
           <p className="text-muted-foreground mt-2 max-w-xl">
-            {knowsUser
-              ? "Write down what you are working on. Notes are kept on this device."
-              : "Finish onboarding and this becomes your own block’s hub."}
+            {knowsUser ? t("comm.introKnown") : t("comm.introUnknown")}
           </p>
         </div>
         {/* A member count was shown here. It was invented, and an invented traction number on a
@@ -167,7 +166,7 @@ export default function CommunityPage() {
                   this app, so telling a first-time visitor which groups they belong to is an
                   invention about them, not about the data. */}
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                Example groups
+                {t("comm.exampleGroups")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -184,7 +183,7 @@ export default function CommunityPage() {
                 Mudra Loan Seekers
               </div>
               <Button variant="ghost" className="w-full text-xs mt-2 justify-start" disabled>
-                <PlusCircle className="w-4 h-4 mr-2" aria-hidden="true" /> Joining is not built yet
+                <PlusCircle className="w-4 h-4 mr-2" aria-hidden="true" /> {t("comm.joiningLater")}
               </Button>
             </CardContent>
           </Card>
@@ -192,17 +191,16 @@ export default function CommunityPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                Who actually helps
+                {t("comm.whoHelps")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Real institutions in your district — RSETIs, KVKs, District Industries Centres and
-                NABARD offices — with their public listings.
+                {t("comm.whoHelpsBody")}
               </p>
               <Link href="/mentors">
                 <Button variant="outline" size="sm" className="w-full text-xs">
-                  Open the directory
+                  {t("comm.openDirectory")}
                 </Button>
               </Link>
             </CardContent>
@@ -219,7 +217,7 @@ export default function CommunityPage() {
               </Avatar>
               <div className="flex-1 space-y-3">
                 <Textarea
-                  placeholder="Share an update, ask a question, or note a requirement…"
+                  placeholder={t("comm.composerPlaceholder")}
                   className="bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary"
                   value={draft}
                   maxLength={MAX_POST_LENGTH}
@@ -228,13 +226,13 @@ export default function CommunityPage() {
                     // Enter alone inserts a newline — this is a paragraph field, not a chat box.
                     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
                   }}
-                  aria-label="Write a post"
+                  aria-label={t("comm.writePost")}
                 />
                 <div className="flex flex-wrap justify-between items-center gap-2">
                   <div
                     className="flex gap-2"
                     role="group"
-                    aria-label="What kind of post is this?"
+                    aria-label={t("comm.kindGroup")}
                   >
                     {POST_KINDS.map((k) => (
                       <button
@@ -248,7 +246,7 @@ export default function CommunityPage() {
                             : "text-muted-foreground hover:bg-muted"
                         }`}
                       >
-                        {k.label}
+                        {t(k.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -267,7 +265,7 @@ export default function CommunityPage() {
                       disabled={!draft.trim()}
                       onClick={submit}
                     >
-                      Post <Send className="w-3 h-3 ml-2" aria-hidden="true" />
+                      {t("comm.post")} <Send className="w-3 h-3 ml-2" aria-hidden="true" />
                     </Button>
                   </div>
                 </div>
@@ -284,12 +282,12 @@ export default function CommunityPage() {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-sm">You</h3>
+                    <h3 className="font-bold text-sm">{t("comm.you")}</h3>
                     <Badge
                       variant="outline"
                       className="text-[10px] border-primary/40 bg-primary/10 text-primary"
                     >
-                      Saved on this device
+                      {t("comm.savedHere")}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -303,7 +301,7 @@ export default function CommunityPage() {
                   size="sm"
                   className="text-muted-foreground hover:text-destructive shrink-0"
                   onClick={() => deleteCommunityPost(post.id)}
-                  aria-label="Delete this post"
+                  aria-label={t("comm.deletePost")}
                 >
                   <Trash2 className="w-4 h-4" aria-hidden="true" />
                 </Button>
@@ -336,7 +334,7 @@ export default function CommunityPage() {
                       <BadgeCheck className="w-4 h-4 text-primary" aria-hidden="true" />
                     )}
                     <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                      Example
+                      {t("comm.example")}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
@@ -365,11 +363,7 @@ export default function CommunityPage() {
             </Card>
           ))}
 
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Posts you write are kept in this browser only. There is no account and no server behind
-            this screen yet, so nobody else can see them — the three examples above show what a
-            deployed feed would carry.
-          </p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">{t("comm.footer")}</p>
         </div>
 
         {/* Right Sidebar */}
@@ -377,17 +371,16 @@ export default function CommunityPage() {
           <Card className="border-accent/20 bg-accent/5">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-accent">
-                Marketplace
+                {t("comm.marketplace")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Compose a buying or selling requirement precisely enough that a trader can act on
-                it, then send it on WhatsApp or export it.
+                {t("comm.marketplaceBody")}
               </p>
               <Link href="/marketplace">
                 <Button variant="outline" size="sm" className="w-full text-xs">
-                  Write a requirement
+                  {t("mkt.write")}
                 </Button>
               </Link>
             </CardContent>

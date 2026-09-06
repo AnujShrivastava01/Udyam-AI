@@ -3,7 +3,7 @@
 import { FlaskConical, Play, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DEMO_NOTICE } from "@/lib/demo/seed";
+import { useT } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
 
 /**
@@ -20,6 +20,7 @@ import { useAppStore } from "@/lib/store";
  * single worst place to blur that.
  */
 export function DemoBanner() {
+  const { t } = useT();
   const demoLoaded = useAppStore((s) => s.demoLoaded);
   const resetSession = useAppStore((s) => s.resetSession);
 
@@ -32,7 +33,7 @@ export function DemoBanner() {
         aria-hidden="true"
       />
       <p className="min-w-0 flex-1 text-xs leading-relaxed text-amber-900 dark:text-amber-200">
-        {DEMO_NOTICE}
+        {t("demo.notice")}
       </p>
       <Button
         variant="outline"
@@ -40,7 +41,7 @@ export function DemoBanner() {
         className="shrink-0 rounded-full"
         onClick={resetSession}
       >
-        <X className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Clear demo
+        <X className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> {t("demo.clear")}
       </Button>
     </div>
   );
@@ -48,6 +49,7 @@ export function DemoBanner() {
 
 /** The load control, for empty states. Hidden once a demo is already loaded. */
 export function LoadDemoButton({ className }: { className?: string }) {
+  const { t } = useT();
   const demoLoaded = useAppStore((s) => s.demoLoaded);
   const loadDemo = useAppStore((s) => s.loadDemo);
 
@@ -55,7 +57,7 @@ export function LoadDemoButton({ className }: { className?: string }) {
 
   return (
     <Button variant="outline" size="lg" className={`rounded-full ${className ?? ""}`} onClick={loadDemo}>
-      <Play className="mr-2 h-4 w-4" aria-hidden="true" /> Load a demo session
+      <Play className="mr-2 h-4 w-4" aria-hidden="true" /> {t("demo.load")}
     </Button>
   );
 }

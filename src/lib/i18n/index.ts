@@ -3,10 +3,10 @@
 import { useAppStore } from "@/lib/store";
 
 import type { MessageKey } from "./keys";
-import { normaliseLocale, renderMessage, money, num, pct } from "./render";
+import { normaliseLocale, renderMessage, money, num, pct, shortDate } from "./render";
 
 export * from "./keys";
-export { renderMessage, money, num, pct, normaliseLocale } from "./render";
+export { renderMessage, money, num, pct, normaliseLocale, shortDate, MONTHS_SHORT } from "./render";
 
 /** The translator hook. `t("calc.title")` or `t("solvency.gap.headline", { amount })`. */
 export function useT() {
@@ -16,5 +16,5 @@ export function useT() {
   const t = (key: MessageKey, params?: Record<string, string | number>) =>
     renderMessage(locale, key, params);
 
-  return { t, locale, money, num, pct };
+  return { t, locale, money, num, pct, date: (d: Date) => shortDate(locale, d) };
 }

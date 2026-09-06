@@ -10,11 +10,8 @@ import {
   asMessage,
   type Requirement,
 } from "@/lib/marketplace/requirement";
-import {
-  contactLinks,
-  counterpartyHeading,
-  directionsUrl,
-} from "@/lib/marketplace/counterparties";
+import { contactLinks, directionsUrl } from "@/lib/marketplace/counterparties";
+import { useT } from "@/lib/i18n";
 
 /**
  * The other side of the trade — real businesses, from Google Places.
@@ -52,6 +49,9 @@ export function CounterpartyFinder({
   lat: number;
   lng: number;
 }) {
+  const { t } = useT();
+  // The heading is a question asked from the user's side of the trade, so it follows `side`.
+  const heading = t(requirement.side === "selling" ? "cp.buyers" : "cp.suppliers");
   const [result, setResult] = useState<Result | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,17 +74,19 @@ export function CounterpartyFinder({
       const json = await res.json();
       if (!res.ok) {
         setError(
-          res.status === 503
-            ? "Business search is not configured on this deployment."
-            : res.status === 429
-              ? "Too many searches. Wait a minute."
-              : "The lookup failed.",
+          t(
+            res.status === 503
+              ? "cp.notConfigured"
+              : res.status === 429
+                ? "cp.tooMany"
+                : "cp.failed",
+          ),
         );
         return;
       }
       setResult(json as Result);
     } catch {
-      setError("Could not reach the server.");
+      setError(t("cp.unreachable"));
     } finally {
       setBusy(false);
     }
@@ -107,7 +109,7 @@ export function CounterpartyFinder({
           ) : (
             <Users className="mr-2 h-4 w-4" aria-hidden="true" />
           )}
-          {counterpartyHeading(requirement.side)}
+          {heading}
         </Button>
       )}
 
@@ -121,23 +123,27 @@ export function CounterpartyFinder({
         <div className="space-y-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-sm font-semibold">
-              {counterpartyHeading(requirement.side)}
+              {heading}
               <span className="ml-2 font-normal text-muted-foreground tabular-nums">
-                {result.places.length} within {result.radiusKm} km · {result.contactable} with a
-                phone number
+                {t("cp.found", {
+                  n: result.places.length,
+                  km: result.radiusKm,
+                  c: result.contactable,
+                })}
               </span>
             </p>
             <Button variant="ghost" size="sm" className="rounded-full" onClick={find} disabled={busy}>
-              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : "Search again"}
+              {busy ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                t("cp.searchAgain")
+              )}
             </Button>
           </div>
 
           {result.places.length === 0 ? (
             <p className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
-              Nothing matching{" "}
-              <span className="text-foreground">{result.searched.join(", ")}</span> is on
-              Google&apos;s map within {result.radiusKm} km. In a rural block that is as likely to
-              mean nobody has listed them as that nobody is there — ask at the mandi.
+              {t("cp.none", { queries: result.searched.join(", "), km: result.radiusKm })}
             </p>
           ) : (
             <ul className="divide-y rounded-lg border">
@@ -178,7 +184,7 @@ export function CounterpartyFinder({
                         <>
                           <a href={links.tel}>
                             <Button size="sm" variant="outline" className="h-7 rounded-full text-xs">
-                              <Phone className="mr-1.5 h-3 w-3" aria-hidden="true" /> Call
+                              <Phone className="mr-1.5 h-3 w-3" aria-hidden="true" /> {t("cp.call")}
                             </Button>
                           </a>
                           {/* Prefilled, not sent. The user picks send in WhatsApp. */}
@@ -188,14 +194,14 @@ export function CounterpartyFinder({
                             rel="noopener noreferrer"
                           >
                             <Button size="sm" className="h-7 rounded-full text-xs">
-                              <MessageCircle className="mr-1.5 h-3 w-3" aria-hidden="true" /> Send
-                              requirement
+                              <MessageCircle className="mr-1.5 h-3 w-3" aria-hidden="true" />{" "}
+                              {t("cp.send")}
                             </Button>
                           </a>
                         </>
                       ) : (
                         <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                          No phone number listed
+                          {t("cp.noPhone")}
                         </Badge>
                       )}
                       <a
@@ -204,13 +210,14 @@ export function CounterpartyFinder({
                         rel="noopener noreferrer"
                       >
                         <Button size="sm" variant="ghost" className="h-7 rounded-full text-xs">
-                          <Navigation className="mr-1.5 h-3 w-3" aria-hidden="true" /> Directions
+                          <Navigation className="mr-1.5 h-3 w-3" aria-hidden="true" />{" "}
+                          {t("cp.directions")}
                         </Button>
                       </a>
                       {p.website && (
                         <a href={p.website} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" variant="ghost" className="h-7 rounded-full text-xs">
-                            <Globe className="mr-1.5 h-3 w-3" aria-hidden="true" /> Website
+                            <Globe className="mr-1.5 h-3 w-3" aria-hidden="true" /> {t("cp.website")}
                             <ExternalLink className="ml-1 h-2.5 w-2.5" aria-hidden="true" />
                           </Button>
                         </a>
@@ -223,8 +230,10 @@ export function CounterpartyFinder({
           )}
 
           <p className="text-[11px] leading-relaxed text-muted-foreground">
-            {result.attribution}. These are businesses already trading nearby — they are not users
-            of this app and have not seen your requirement. Searched: {result.searched.join(", ")}.
+            {t("cp.footer", {
+              attribution: result.attribution,
+              queries: result.searched.join(", "),
+            })}
           </p>
         </div>
       )}

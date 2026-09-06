@@ -12,6 +12,7 @@
  */
 
 import { toCsv } from "@/lib/export/csv";
+import type { MessageKey } from "@/lib/i18n/keys";
 
 export type RequirementSide = "selling" | "buying";
 
@@ -63,7 +64,13 @@ export function emptyDraft(ctx: { district?: string | null; block?: string | nul
   };
 }
 
-export type FieldErrors = Partial<Record<keyof RequirementDraft, string>>;
+/**
+ * Message KEYS, not sentences.
+ *
+ * The form that renders these is trilingual and this module is imported by it. Returning English
+ * here would leave a Hindi user with Hindi labels and an English complaint about their quantity.
+ */
+export type FieldErrors = Partial<Record<keyof RequirementDraft, MessageKey>>;
 
 /**
  * Validate, returning per-field messages rather than a boolean.
@@ -75,27 +82,27 @@ export function validate(draft: RequirementDraft): FieldErrors {
   const errors: FieldErrors = {};
 
   if (!draft.product.trim()) {
-    errors.product = "Say what the goods are.";
+    errors.product = "req.err.product";
   } else if (draft.product.trim().length < 3) {
-    errors.product = "A little more detail — a buyer has to recognise it.";
+    errors.product = "req.err.productShort";
   }
 
   if (!Number.isFinite(draft.quantity) || draft.quantity <= 0) {
-    errors.quantity = "How much? A quantity of zero is not a requirement.";
+    errors.quantity = "req.err.quantity";
   }
 
   const { budgetMin: min, budgetMax: max } = draft;
-  if (min != null && (!Number.isFinite(min) || min < 0)) errors.budgetMin = "Not a rupee figure.";
-  if (max != null && (!Number.isFinite(max) || max < 0)) errors.budgetMax = "Not a rupee figure.";
+  if (min != null && (!Number.isFinite(min) || min < 0)) errors.budgetMin = "req.err.money";
+  if (max != null && (!Number.isFinite(max) || max < 0)) errors.budgetMax = "req.err.money";
   if (min != null && max != null && Number.isFinite(min) && Number.isFinite(max) && min > max) {
-    errors.budgetMax = "The upper end is below the lower end.";
+    errors.budgetMax = "req.err.range";
   }
 
   if (draft.needBy != null && draft.needBy !== "" && Number.isNaN(Date.parse(draft.needBy))) {
-    errors.needBy = "Not a date.";
+    errors.needBy = "req.err.date";
   }
 
-  if (draft.notes.length > MAX_NOTES) errors.notes = `Keep it under ${MAX_NOTES} characters.`;
+  if (draft.notes.length > MAX_NOTES) errors.notes = "req.err.notes";
 
   return errors;
 }

@@ -49,21 +49,21 @@ const daysBefore = (today: Date, n: number) =>
  * with no bad days teaches the wrong lesson about what a margin has to absorb.
  */
 const DAILY: { back: number; sales: number[]; expenses: { amount: number; note: string }[] }[] = [
-  { back: 13, sales: [980], expenses: [{ amount: 2_400, note: "Pashu aahar — weekly" }] },
+  { back: 13, sales: [980], expenses: [{ amount: 2_400, note: "Pashu aahar — hafte ka" }] },
   { back: 12, sales: [1_010], expenses: [] },
   { back: 11, sales: [960], expenses: [{ amount: 180, note: "Mineral mixture" }] },
   { back: 10, sales: [1_040], expenses: [] },
-  { back: 9, sales: [890], expenses: [{ amount: 600, note: "Vet visit — one cow off feed" }] },
+  { back: 9, sales: [890], expenses: [{ amount: 600, note: "Doctor — ek gaay ne chara nahi khaya" }] },
   { back: 8, sales: [720], expenses: [] },
-  { back: 7, sales: [1_000], expenses: [{ amount: 2_400, note: "Pashu aahar — weekly" }] },
-  { back: 6, sales: [1_020], expenses: [{ amount: 150, note: "Can repair" }] },
+  { back: 7, sales: [1_000], expenses: [{ amount: 2_400, note: "Pashu aahar — hafte ka" }] },
+  { back: 6, sales: [1_020], expenses: [{ amount: 150, note: "Can ki marammat" }] },
   { back: 5, sales: [990], expenses: [] },
   { back: 4, sales: [1_060], expenses: [] },
   // The washout: milk soured before the collection van came.
-  { back: 3, sales: [340], expenses: [{ amount: 120, note: "Ice — van was late" }] },
+  { back: 3, sales: [340], expenses: [{ amount: 120, note: "Baraf — van late thi" }] },
   { back: 2, sales: [1_010], expenses: [] },
-  { back: 1, sales: [1_050], expenses: [{ amount: 2_400, note: "Pashu aahar — weekly" }] },
-  { back: 0, sales: [980], expenses: [{ amount: 200, note: "Diesel — mandi trip" }] },
+  { back: 1, sales: [1_050], expenses: [{ amount: 2_400, note: "Pashu aahar — hafte ka" }] },
+  { back: 0, sales: [980], expenses: [{ amount: 200, note: "Diesel — mandi ka chakkar" }] },
 ];
 
 export function buildDemoSession(today: Date = new Date()): DemoSession {
@@ -74,7 +74,7 @@ export function buildDemoSession(today: Date = new Date()): DemoSession {
     // written up day by day would.
     const at = new Date(daysBefore(today, day.back).getTime() + 8 * 3600_000);
     for (const amount of day.sales) {
-      ledger.push(newEntry({ on, kind: "sale", amount, note: "Milk — morning collection" }, at));
+      ledger.push(newEntry({ on, kind: "sale", amount, note: "Doodh — subah ki bikri" }, at));
     }
     for (const e of day.expenses) {
       ledger.push(newEntry({ on, kind: "expense", amount: e.amount, note: e.note }, at));
@@ -149,6 +149,11 @@ export function buildDemoSession(today: Date = new Date()): DemoSession {
   };
 }
 
-/** One line for every screen that renders demo content, so it is never mistaken for the user's. */
-export const DEMO_NOTICE =
-  "Demo session — Ramkali's two-cow dairy in Ghatigaon. Every figure is computed by the same engine from these entries; clear it whenever you like.";
+/**
+ * The banner text lives in the message dictionary as `demo.notice`, not here.
+ *
+ * Entry NOTES below stay in Roman Hindi rather than being translated: they are DATA, written once
+ * when the demo is loaded and stored like anything the user typed. Retranslating stored entries
+ * when somebody switches language would mean rewriting their book, which is not a thing a ledger
+ * may do — so they are phrased to read naturally in all three.
+ */
