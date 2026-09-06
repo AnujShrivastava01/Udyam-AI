@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, MapPin, BarChart2, IndianRupee, ShieldCheck, Zap, Activity, AlertTriangle } from "lucide-react";
+import { ArrowRight, Sparkles, MapPin, BarChart2, IndianRupee, ShieldCheck, Zap, Activity, AlertTriangle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
@@ -67,7 +67,10 @@ export default function LandingPage() {
             one static frame under prefers-reduced-motion, and stops the loop once the hero scrolls
             away. `inset-0` rather than a fixed 800x600 box so it fills the hero on any viewport. */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <GatewayFlow mode="auto" density={0.9} opacity={0.55} speed={0.9} />
+          {/* Gateway, not converge: the lines now run left edge -> centre -> right edge, so the
+              motion carries the same argument as the columns either side of it. Problems arrive,
+              pass through the engine, and leave as answers. */}
+          <GatewayFlow mode="auto" flow="gateway" density={0.8} opacity={0.5} speed={0.9} />
           {/* Fades the lines out behind the copy so the headline keeps its contrast. */}
           <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/60 to-background" />
         </div>
@@ -78,10 +81,29 @@ export default function LandingPage() {
           <div className="absolute top-20 right-20 w-[400px] h-[400px] bg-accent rounded-full blur-[100px] mix-blend-screen opacity-50" />
         </div>
 
-        <motion.div 
+        {/*
+          Three parts, and the flow lines behind them are the fourth.
+          Left: what somebody arrives with. Middle: the engine. Right: what they leave with.
+          On a phone the columns stack under the headline rather than shrinking into unreadable
+          rails — the middle is the only part that has to be above the fold.
+        */}
+        <motion.div
           style={{ opacity, scale, y }}
-          className="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto space-y-8"
+          className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-6"
         >
+          <HeroColumn
+            side="problem"
+            title={t("hero.problem.title")}
+            items={[
+              t("hero.problem.1"),
+              t("hero.problem.2"),
+              t("hero.problem.3"),
+              t("hero.problem.4"),
+              t("hero.problem.5"),
+            ]}
+          />
+
+          <div className="order-first flex flex-col items-center text-center space-y-8 lg:order-none">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -130,6 +152,19 @@ export default function LandingPage() {
               </Button>
             </Link>
           </motion.div>
+          </div>
+
+          <HeroColumn
+            side="outcome"
+            title={t("hero.outcome.title")}
+            items={[
+              t("hero.outcome.1"),
+              t("hero.outcome.2"),
+              t("hero.outcome.3"),
+              t("hero.outcome.4"),
+              t("hero.outcome.5"),
+            ]}
+          />
         </motion.div>
 
         {/* Live engine panel */}
@@ -381,3 +416,67 @@ export default function LandingPage() {
     </div>
   );
 }
+
+/**
+ * One side of the hero.
+ *
+ * Left is what a borrower arrives with, right is what they leave with, and the two are styled as
+ * a question and an answer rather than as a feature list — amber and unticked on one side, teal
+ * and ticked on the other. Every line on the right is a thing the product actually does; none of
+ * them is a number, because a headline figure with no case behind it is exactly what the rest of
+ * this page refuses to print.
+ */
+function HeroColumn({
+  side,
+  title,
+  items,
+}: {
+  side: "problem" | "outcome";
+  title: string;
+  items: string[];
+}) {
+  const problem = side === "problem";
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: problem ? -24 : 24 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
+      className={`hidden lg:block ${problem ? "lg:text-right" : "lg:text-left"}`}
+    >
+      <p
+        className={`mb-4 text-[11px] font-semibold uppercase tracking-wider ${
+          problem ? "text-amber-600 dark:text-amber-400" : "text-primary"
+        }`}
+      >
+        {title}
+      </p>
+      <ul className="space-y-3">
+        {items.map((item) => (
+          <li
+            key={item}
+            className={`flex items-start gap-2.5 text-sm leading-snug ${
+              problem ? "flex-row-reverse text-muted-foreground" : "text-foreground"
+            }`}
+          >
+            <span
+              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                problem
+                  ? "border border-amber-500/40 bg-amber-500/10"
+                  : "bg-primary/15 text-primary"
+              }`}
+              aria-hidden="true"
+            >
+              {problem ? (
+                <span className="block h-1 w-1 rounded-full bg-amber-600 dark:bg-amber-400" />
+              ) : (
+                <Check className="h-2.5 w-2.5" />
+              )}
+            </span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+}
+

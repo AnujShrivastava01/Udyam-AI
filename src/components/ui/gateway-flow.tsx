@@ -42,6 +42,12 @@ export type GatewayFlowProps = {
   brightness?: number;
   /** Ripple on click. Off by default: over an interactive hero it steals the pointer. */
   interactive?: boolean;
+  /**
+   * "converge" — every path runs from an edge into the centre (the original).
+   * "gateway"  — paths run left edge to centre and centre to right edge, so the motion reads as
+   *              something entering on one side and leaving on the other.
+   */
+  flow?: "converge" | "gateway";
   className?: string;
   style?: CSSProperties;
 };
@@ -108,7 +114,11 @@ interface Particle {
 }
 interface Path {
   fromLeft: boolean;
+  /** Gateway mode: false means the path leaves the centre towards the right edge. */
+  outbound: boolean;
   startY: number;
+  /** Where an outbound path lands on the right edge. */
+  endY: number;
   particles: Particle[];
 }
 interface Ripple {
@@ -129,6 +139,7 @@ export default function GatewayFlow({
   saturation = DEFAULTS.saturation,
   brightness = DEFAULTS.brightness,
   interactive = false,
+  flow = "converge",
   className,
   style,
 }: GatewayFlowProps) {
@@ -138,10 +149,10 @@ export default function GatewayFlow({
   // Read through a ref inside the animation loop so changing a knob adjusts the next frame rather
   // than tearing down the paths and restarting the motion. Written in an effect, not during
   // render — a ref mutated while rendering is torn by concurrent rendering.
-  const knobs = useRef({ speed, size, density, strokeWidth, mode: resolved, interactive });
+  const knobs = useRef({ speed, size, density, strokeWidth, mode: resolved, interactive, flow });
   useEffect(() => {
-    knobs.current = { speed, size, density, strokeWidth, mode: resolved, interactive };
-  }, [speed, size, density, strokeWidth, resolved, interactive]);
+    knobs.current = { speed, size, density, strokeWidth, mode: resolved, interactive, flow };
+  }, [speed, size, density, strokeWidth, resolved, interactive, flow]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -160,9 +171,14 @@ export default function GatewayFlow({
 
     function build() {
       const count = Math.max(12, Math.round(80 * clamp(knobs.current.density, 0.25, 2.5)));
+      const gateway = knobs.current.flow === "gateway";
       paths = Array.from({ length: count }, (_, i) => ({
-        fromLeft: i % 2 === 0,
+        // Converge: alternate edges, everything inbound. Gateway: the left half feeds the centre
+        // and the right half leaves it, so the eye reads left -> middle -> right.
+        fromLeft: gateway ? true : i % 2 === 0,
+        outbound: gateway ? i % 2 === 1 : false,
         startY: (i / count) * height * 1.4 - height * 0.2,
+        endY: ((i + 0.5) / count) * height * 1.4 - height * 0.2,
         particles: [{ t: Math.random(), speed: 0.0015 + Math.random() * 0.002 }],
       }));
     }
@@ -221,10 +237,18 @@ export default function GatewayFlow({
       ctx!.strokeStyle = line;
 
       for (const path of paths) {
-        const p0 = new DOMPoint(path.fromLeft ? 0 : width, path.startY);
-        const p1 = new DOMPoint(path.fromLeft ? cx * 0.5 : width - cx * 0.5, path.startY);
-        const p2 = new DOMPoint(path.fromLeft ? cx * 0.8 : width - cx * 0.8, cy);
-        const p3 = new DOMPoint(cx, cy);
+        // An outbound path is the inbound curve mirrored: it starts at the centre and fans out to
+        // the right edge, so a particle appears to pass through the middle and continue.
+        const p0 = path.outbound
+          ? new DOMPoint(cx, cy)
+          : new DOMPoint(path.fromLeft ? 0 : width, path.startY);
+        const p1 = path.outbound
+          ? new DOMPoint(width - cx * 0.8, cy)
+          : new DOMPoint(path.fromLeft ? cx * 0.5 : width - cx * 0.5, path.startY);
+        const p2 = path.outbound
+          ? new DOMPoint(width - cx * 0.5, path.endY)
+          : new DOMPoint(path.fromLeft ? cx * 0.8 : width - cx * 0.8, cy);
+        const p3 = path.outbound ? new DOMPoint(width, path.endY) : new DOMPoint(cx, cy);
 
         ctx!.beginPath();
         ctx!.moveTo(p0.x, p0.y);
@@ -239,8 +263,10 @@ export default function GatewayFlow({
             particle.t += particle.speed * clamp(sp, 0, 3);
             if (particle.t > 1) {
               particle.t = 0;
-              // A small random walk on the origin, so the fan never settles into a fixed pattern.
-              path.startY += (Math.random() - 0.5) * 10;
+              // A small random walk on the endpoints, so the fan never settles into a fixed
+              // pattern. Outbound paths walk the edge they land on rather than the one they left.
+              if (path.outbound) path.endY += (Math.random() - 0.5) * 10;
+              else path.startY += (Math.random() - 0.5) * 10;
             }
           }
           const pos = bezier(particle.t, p0, p1, p2, p3);

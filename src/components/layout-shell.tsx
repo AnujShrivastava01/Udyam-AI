@@ -3,7 +3,7 @@
 import { useAppStore } from "@/lib/store";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
 import { JourneyStepper } from "./journey-stepper";
-import { Leaf, Menu, X, User, Settings, IndianRupee, LayoutDashboard } from "lucide-react";
+import { Leaf, Menu, X, User, Settings, IndianRupee, LayoutDashboard, BookOpen } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { VoiceAgent } from "./voice-agent";
 import Link from "next/link";
@@ -12,11 +12,19 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+/**
+ * Five, because a bottom bar with six is a bar nobody hits accurately on a 360px phone.
+ *
+ * Khata replaced Discover here, and the trade is deliberate: discovering a trade happens once, at
+ * the very start of the journey, and is reachable from onboarding, from the dashboard's first
+ * quick link and from step one of the journey strip. The daily book is opened every evening. A
+ * navigation bar should carry what people do daily, not what they did once.
+ */
 const BOTTOM_NAV = [
   // The dashboard is the post-onboarding home, so it leads. Before this it had no entry anywhere
   // and /dashboard itself 404'd — only its three children were reachable, and only by typing.
   { href: "/dashboard", icon: LayoutDashboard, key: "nav.dashboard" },
-  { href: "/discover", icon: Leaf, key: "nav.discover" },
+  { href: "/khata", icon: BookOpen, key: "nav.khata" },
   { href: "/calculator", icon: IndianRupee, key: "nav.calculator" },
   { href: "/community", icon: User, key: "nav.community" },
   { href: "/profile/me", icon: Settings, key: "nav.profile" },

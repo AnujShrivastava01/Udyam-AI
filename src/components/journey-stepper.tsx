@@ -3,7 +3,16 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Check, Compass, BarChart2, IndianRupee, Users, Settings, TrendingUp } from "lucide-react";
+import {
+  Check,
+  Compass,
+  BarChart2,
+  IndianRupee,
+  Users,
+  TrendingUp,
+  ScrollText,
+  BookOpen,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 import { useTranslation, type DictionaryKeys } from "@/lib/i18n-landing";
@@ -39,8 +48,11 @@ const STEPS: {
       !!e.onboardingInput.businessCategory &&
       (e.onboardingInput.marginCapital ?? 0) > 0,
   },
-  { id: "analyse", icon: BarChart2, href: "/report/goat-20-1", paths: ["/report"] },
+  { id: "analyse", icon: BarChart2, href: "/report/goat-20-1", paths: ["/report", "/market"] },
   { id: "finance", icon: IndianRupee, href: "/calculator", paths: ["/calculator"] },
+  // Scheme eligibility was missing from the strip entirely, though it is the step between
+  // "here is the loan" and "here is who will actually lend it to you".
+  { id: "schemes", icon: ScrollText, href: "/schemes", paths: ["/schemes"] },
   {
     id: "connect",
     icon: Users,
@@ -48,10 +60,13 @@ const STEPS: {
     paths: ["/community", "/mentors", "/marketplace"],
   },
   {
+    // Repointed at the daily book. "Manage" used to mean a repayment schedule for a loan nobody
+    // had; it now means the thing a borrower actually does every evening, with the repayment
+    // screen and the two consoles sitting under the same step.
     id: "manage",
-    icon: Settings,
-    href: "/dashboard/emi",
-    paths: ["/dashboard/emi", "/dashboard/ngo"],
+    icon: BookOpen,
+    href: "/khata",
+    paths: ["/khata", "/dashboard/emi", "/dashboard/ngo", "/dashboard/investor"],
   },
   { id: "grow", icon: TrendingUp, href: "/profile/me", paths: ["/profile"] },
 ];
