@@ -648,6 +648,22 @@ export const EN = {
   "link.khata.body": "What you sold, what you spent, and whether it covers the instalment.",
   "link.market": "Who else is nearby",
   "link.market.body": "Businesses Google has mapped around your village.",
+  "dash.nextDue": "Next instalment due {date}",
+  "dash.dueInDays": "in {n} days",
+  "dash.dueToday": "today",
+  "dash.trackedNote": "You marked this loan as disbursed, so these are real dates from your own schedule.",
+  "dash.bookTitle": "Your daily book",
+  "dash.bookToday": "Today",
+  "dash.bookMonth": "This month",
+  "dash.bookOpen": "Open the book",
+  "dash.bookEmpty": "Write down one sale and one expense today. After five days it can tell you whether your trade covers the instalment.",
+  "book.covers": "This month covers the instalment",
+  "book.short": "This month falls short of the instalment",
+  "book.loss": "This month is running at a loss",
+  "book.unknown": "Not enough days recorded yet",
+  "dash.bookDays": "{n} days recorded",
+  "dash.nextInstalmentIs": "The next instalment is {amount}",
+  "dash.inMoratorium": " — interest only, the moratorium is still running",
 } as const;
 
 export type MessageKey = keyof typeof EN;

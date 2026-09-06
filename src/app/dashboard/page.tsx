@@ -76,14 +76,17 @@ export default function DashboardPage() {
   const visitedSteps = useAppStore((s) => s.visitedSteps);
   const posts = useAppStore((s) => s.communityPosts);
   const requirements = useAppStore((s) => s.requirements);
+  const ledger = useAppStore((s) => s.ledger);
+  const disbursedOn = useAppStore((s) => s.disbursedOn);
 
   // Pinned at mount rather than read per render: every date on this page must agree with every
   // other, and the projection must not shift while somebody is reading it.
   const [today] = useState(() => new Date());
 
   const overview = useMemo(
-    () => buildOverview({ onboarding, visitedSteps, posts, requirements, today }),
-    [onboarding, visitedSteps, posts, requirements, today],
+    () =>
+      buildOverview({ onboarding, visitedSteps, posts, requirements, ledger, disbursedOn, today }),
+    [onboarding, visitedSteps, posts, requirements, ledger, disbursedOn, today],
   );
 
   const {
@@ -251,26 +254,58 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm leading-relaxed">
                 <p>
-                  {t("dash.instalmentFalls", {
-                    amount: money(firstInstalment.amount),
-                    month: firstInstalment.month,
-                  })}
-                  {/* Zero gestation is a real and common answer — NABARD records NIL for a cow
-                      already in milk — but "needs 0 months before it earns" reads like a missing
-                      value. It is the good case, so it gets its own sentence. */}
-                  {firstInstalment.gestationMonths === 0
-                    ? t("dash.earnsFromStart")
-                    : firstInstalment.gestationMonths != null
-                      ? t("dash.needsMonths", { n: firstInstalment.gestationMonths })
-                      : "."}
+                  {/* "The FIRST instalment" is false once the loan is being tracked and several
+                      have already fallen due — it is the next one, and it may be a smaller
+                      moratorium payment than the headline figure above. */}
+                  {firstInstalment.tracked
+                    ? t("dash.nextInstalmentIs", { amount: money(firstInstalment.amount) })
+                    : t("dash.instalmentFalls", {
+                        amount: money(firstInstalment.amount),
+                        month: firstInstalment.month,
+                      })}
+                  {firstInstalment.tracked && firstInstalment.inMoratorium
+                    ? t("dash.inMoratorium")
+                    : ""}
+                  {/* The gestation clause is a continuation of "falls in month N" and reads badly
+                      after the moratorium note, so it is dropped once the loan is tracked — the
+                      card heading above already states whether repayment beats the first income.
+                      Zero gestation keeps its own sentence: NABARD records NIL for a cow already
+                      in milk, and "needs 0 months before it earns" reads like a missing value. */}
+                  {firstInstalment.tracked
+                    ? "."
+                    : firstInstalment.gestationMonths === 0
+                      ? t("dash.earnsFromStart")
+                      : firstInstalment.gestationMonths != null
+                        ? t("dash.needsMonths", { n: firstInstalment.gestationMonths })
+                        : "."}
                 </p>
                 {/* Explicitly hypothetical. Nobody here has a loan, and a date that looks like a
                     due date will be read as one. */}
                 <p className="flex items-start gap-2 text-muted-foreground">
                   <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>
-                    {t("dash.projection", { date: shortDate(firstInstalment.wouldFallOn) })}
-                  </span>
+                  {/* Tracked and projected are different facts. Saying "if it were disbursed
+                      today" over a loan the repayment screen is already tracking put two screens
+                      in contradiction about the same money. */}
+                  {firstInstalment.tracked ? (
+                    <span>
+                      <strong className="text-foreground">
+                        {t("dash.nextDue", { date: shortDate(firstInstalment.wouldFallOn) })}
+                      </strong>
+                      {firstInstalment.daysAway != null && (
+                        <>
+                          {" — "}
+                          {firstInstalment.daysAway === 0
+                            ? t("dash.dueToday")
+                            : t("dash.dueInDays", { n: firstInstalment.daysAway })}
+                        </>
+                      )}
+                      . {t("dash.trackedNote")}
+                    </span>
+                  ) : (
+                    <span>
+                      {t("dash.projection", { date: shortDate(firstInstalment.wouldFallOn) })}
+                    </span>
+                  )}
                 </p>
                 <Link href="/calculator">
                   <Button variant="outline" size="sm" className="rounded-full">
@@ -372,6 +407,71 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* the daily book — the only figure that says whether the trade is ACTUALLY paying */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between gap-2 text-base">
+                <span className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {t("dash.bookTitle")}
+                </span>
+                <Link href="/khata">
+                  <Button variant="ghost" size="sm" className="rounded-full">
+                    {t("dash.bookOpen")}
+                  </Button>
+                </Link>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {overview.book ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <StatTile
+                      compact
+                      label={t("dash.bookToday")}
+                      value={money(overview.book.todayNet)}
+                      tone={
+                        overview.book.todayNet > 0
+                          ? "emerald"
+                          : overview.book.todayNet < 0
+                            ? "rose"
+                            : "neutral"
+                      }
+                    />
+                    <StatTile
+                      compact
+                      label={t("dash.bookMonth")}
+                      value={money(overview.book.monthNet)}
+                      sub={t("dash.bookDays", { n: overview.book.daysRecorded })}
+                      tone={
+                        overview.book.monthNet > 0
+                          ? "emerald"
+                          : overview.book.monthNet < 0
+                            ? "rose"
+                            : "neutral"
+                      }
+                    />
+                  </div>
+                  <p
+                    className={`text-sm font-medium ${
+                      overview.book.cover.verdict === "covers"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : overview.book.cover.verdict === "unknown"
+                          ? "text-muted-foreground"
+                          : "text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    {t(`book.${overview.book.cover.verdict}` as MessageKey)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {t("dash.bookEmpty")}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* what the user has made */}
           <div className="grid gap-3 sm:grid-cols-2">

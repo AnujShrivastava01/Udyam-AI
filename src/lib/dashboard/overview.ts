@@ -23,7 +23,10 @@
 import type { Plan } from "@/lib/finance";
 import type { MessageKey } from "@/lib/i18n/keys";
 import type { Activity } from "@/lib/finance/activities";
-import { addMonths } from "@/lib/finance/reminders";
+import { addMonths, nextDue } from "@/lib/finance/reminders";
+import { parseDate } from "@/lib/loan/tracker";
+import { coverCheck, summarise as summariseBook, type CoverCheck } from "@/lib/ledger/book";
+import type { LedgerEntry } from "@/lib/ledger/book";
 import { matchSchemes, summarise as summariseSchemes, type MatchSummary } from "@/lib/schemes/eligibility";
 import type { ApplicantProfile } from "@/lib/schemes/catalogue";
 import { buildOwnProfile, type OwnProfile } from "@/lib/profile/build";
@@ -48,12 +51,29 @@ export interface ReadinessItem {
 }
 
 export interface FirstInstalmentProjection {
+  /**
+   * Whether this is a projection or a real due date.
+   *
+   * The dashboard said "if it were disbursed today" even when a disbursement date existed and
+   * /dashboard/emi was tracking the loan against the calendar — two screens contradicting each
+   * other about the same loan, which is the one failure this product cannot afford.
+   */
+  tracked: boolean;
   /** The instalment amount, in rupees. */
   amount: number;
   /** Month number from disbursement — from the schedule, not assumed. */
   month: number;
-  /** The date it would fall on IF the loan were disbursed on `today`. */
+  /** The date it falls on: real when tracked, hypothetical otherwise. */
   wouldFallOn: Date;
+  /** Days until it is due. Null when this is only a projection. */
+  daysAway: number | null;
+  /**
+   * True when the next payment is moratorium interest rather than a full instalment.
+   *
+   * Worth naming: it is a fraction of the figure the rest of the dashboard quotes, and a borrower
+   * who sees a small number and assumes the loan got cheaper is in for a bad quarter.
+   */
+  inMoratorium: boolean;
   /** Months the activity needs before it earns anything. */
   gestationMonths: number | null;
   /** Positive when repayment starts before the enterprise earns. The Solvency Clock, in one number. */
@@ -74,6 +94,19 @@ export interface DashboardOverview {
   firstInstalment: FirstInstalmentProjection | null;
   posts: number;
   requirements: number;
+  /**
+   * The daily book, summarised, when there is one.
+   *
+   * The dashboard listed notes and requirements but not the khata — the one thing in this product
+   * a user touches every day, and the only figure that says whether the trade is ACTUALLY paying
+   * for the loan rather than whether it should.
+   */
+  book: {
+    todayNet: number;
+    monthNet: number;
+    daysRecorded: number;
+    cover: CoverCheck;
+  } | null;
   /** The single most useful next thing, given where they are. */
   nextStep: { labelKey: MessageKey; detailKey: MessageKey; href: string; ctaKey: MessageKey };
 }
@@ -83,6 +116,9 @@ export interface OverviewInput {
   visitedSteps: string[];
   posts: CommunityPost[];
   requirements: Requirement[];
+  ledger?: LedgerEntry[];
+  /** ISO yyyy-mm-dd, when the user has said the money arrived. */
+  disbursedOn?: string | null;
   /** Passed in so the projection is testable and the render is deterministic. */
   today: Date;
 }
@@ -92,6 +128,8 @@ export function buildOverview({
   visitedSteps,
   posts,
   requirements,
+  ledger = [],
+  disbursedOn = null,
   today,
 }: OverviewInput): DashboardOverview {
   const profile = buildOwnProfile(onboarding, visitedSteps);
@@ -172,9 +210,10 @@ export function buildOverview({
     readinessDone,
     readinessTotal: readiness.length,
     schemes,
-    firstInstalment: projectFirstInstalment(computed, profile.activity, today),
+    firstInstalment: projectFirstInstalment(computed, profile.activity, today, disbursedOn),
     posts: posts.length,
     requirements: requirements.length,
+    book: summariseBookFor(ledger, computed, today),
     nextStep: nextStep(profile, readiness),
   };
 }
@@ -190,20 +229,62 @@ function projectFirstInstalment(
   computed: Plan | null,
   activity: Activity | null,
   today: Date,
+  disbursedOn: string | null,
 ): FirstInstalmentProjection | null {
   if (!computed) return null;
 
   const month = computed.solvency.firstInstalmentMonth;
   if (month == null) return null;
 
+  // A disbursement date turns this from "what would happen" into "what is happening", and the
+  // next instalment is then the next one actually falling due — not the first in the schedule,
+  // which may be months behind.
+  const disbursed = parseDate(disbursedOn);
+  if (disbursed) {
+    const due = nextDue(computed.schedule.schedule, disbursed, today);
+    if (due) {
+      return {
+        tracked: true,
+        amount: due.row.payment,
+        month: due.row.month,
+        wouldFallOn: due.dueOn,
+        daysAway: due.daysAway,
+        inMoratorium: Boolean(due.row.inMoratorium),
+        gestationMonths: activity?.gestationMonths ?? null,
+        gapMonths: computed.solvency.gapMonths,
+      };
+    }
+    // Schedule finished: there is no next instalment, and inventing one would be worse than
+    // showing nothing.
+    return null;
+  }
+
   return {
+    tracked: false,
     amount: computed.schedule.instalment,
     month,
     wouldFallOn: addMonths(today, month),
+    daysAway: null,
+    inMoratorium: false,
     gestationMonths: activity?.gestationMonths ?? null,
     // The kernel's own answer, not a subtraction done here — the moratorium differs by tier and by
     // activity, and every hand-rolled version of this figure in this codebase has been wrong.
     gapMonths: computed.solvency.gapMonths,
+  };
+}
+
+function summariseBookFor(
+  ledger: LedgerEntry[],
+  computed: Plan | null,
+  today: Date,
+): DashboardOverview["book"] {
+  if (ledger.length === 0) return null;
+  const summary = summariseBook(ledger, today);
+  return {
+    todayNet: summary.today.net,
+    monthNet: summary.month.net,
+    daysRecorded: summary.daysRecordedThisMonth,
+    cover: coverCheck(summary, computed?.schedule.instalment ?? null),
   };
 }
 

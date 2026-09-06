@@ -167,3 +167,68 @@ describe("a margin the kernel refuses", () => {
     if (o.plan === null) expect(o.firstInstalment).toBeNull();
   });
 });
+
+describe("a loan the user says was disbursed", () => {
+  const disbursedOn = "2026-06-06"; // three months before TODAY
+
+  it("gives a real next-due date instead of a projection", () => {
+    // The bug: the dashboard said "if it were disbursed today" while /dashboard/emi was tracking
+    // the same loan against the calendar. Two screens contradicting each other about one loan is
+    // the single failure this product cannot afford.
+    const o = overview({ onboarding: answered, disbursedOn });
+    expect(o.firstInstalment!.tracked).toBe(true);
+    expect(o.firstInstalment!.daysAway).not.toBeNull();
+  });
+
+  it("stays a projection when no disbursement date is set", () => {
+    const o = overview({ onboarding: answered });
+    expect(o.firstInstalment!.tracked).toBe(false);
+    expect(o.firstInstalment!.daysAway).toBeNull();
+  });
+
+  it("points at the NEXT instalment, not the first in the schedule", () => {
+    const tracked = overview({ onboarding: answered, disbursedOn }).firstInstalment!;
+    const projected = overview({ onboarding: answered }).firstInstalment!;
+    // Disbursed three months ago, so the due date is close; the projection is a full moratorium out.
+    expect(tracked.wouldFallOn.getTime()).toBeLessThan(projected.wouldFallOn.getTime());
+  });
+
+  it("returns nothing rather than inventing an instalment once the loan is repaid", () => {
+    const o = overview({ onboarding: answered, disbursedOn: "2010-01-01" });
+    expect(o.firstInstalment).toBeNull();
+  });
+});
+
+describe("the daily book on the dashboard", () => {
+  const entry = (on: string, kind: "sale" | "expense", amount: number) => ({
+    id: `${on}-${kind}-${amount}`,
+    on,
+    kind,
+    amount,
+    note: "",
+    createdAt: `${on}T08:00:00.000Z`,
+  });
+
+  it("is null when nothing has been written", () => {
+    expect(overview({ onboarding: answered }).book).toBeNull();
+  });
+
+  it("summarises the book and joins it to the instalment", () => {
+    const o = overview({
+      onboarding: answered,
+      ledger: [
+        entry("2026-09-01", "sale", 1_000),
+        entry("2026-09-02", "sale", 1_000),
+        entry("2026-09-03", "sale", 1_000),
+        entry("2026-09-04", "sale", 1_000),
+        entry("2026-09-05", "sale", 1_000),
+        entry("2026-09-06", "expense", 500),
+      ],
+    });
+    expect(o.book).not.toBeNull();
+    expect(o.book!.monthNet).toBe(4_500);
+    expect(o.book!.daysRecorded).toBe(6);
+    // Enough days and a real instalment, so the verdict is a verdict rather than "unknown".
+    expect(o.book!.cover.verdict).not.toBe("unknown");
+  });
+});
